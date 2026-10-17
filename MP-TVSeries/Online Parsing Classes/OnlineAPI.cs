@@ -15,15 +15,9 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
     {
         private static class apiURIs
         {
-            public const string Mirrors = "mirrors";
             public const string Languages = "languages";
-            public const string GetSeries = @"GetSeries.php?seriesname={0}&language={1}";
             public const string FullSeriesUpdate = @"series/{0}/all/{1}";
             public const string Updates = "updates/updates_{0}";
-            public const string SubmitRating = "User_Rating.php?accountid={0}&itemtype={1}&itemid={2}&rating={3}";
-            public const string GetRatingsForUser = @"GetRatingsForUser.php?apikey={0}&accountid={1}&seriesid={2}";
-            public const string ConfigureFavourites = @"User_Favorites.php?accountid={0}&type={1}&seriesid={2}";
-            public const string GetAllFavourites = @"User_Favorites.php?accountid={0}";
         }
 
         public enum Format
@@ -39,12 +33,6 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
             week = 1,
             month = 2,
             all = 3,
-        }
-
-        public enum RatingType
-        {
-            series = 0,
-            episode = 1,
         }
 
         static Dictionary<int, WebClient> webClientList = new Dictionary<int, WebClient>();
@@ -104,11 +92,6 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
 
         #endregion
 
-        static public XmlNode GetMirrors( String sServer )
-        {
-            return Generic( sServer + apiURIs.Mirrors, false, Format.Xml );
-        }
-
         static public XmlNode GetLanguages()
         {
             return Generic( apiURIs.Languages, Format.Xml );
@@ -116,51 +99,37 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
 
         static public XmlNode GetSeries( String sSeriesName, string aLanguageCode = "en" )
         {
-            string lEncodedSeriesName;
-            try
-            {
-                lEncodedSeriesName = Uri.EscapeDataString(sSeriesName);
-            }
-            catch (UriFormatException ex)
-            {
-                MPTVSeriesLog.Write($"Failed to get encoded series name of '{sSeriesName}'. Error={ex.Message}");
-                lEncodedSeriesName = HttpUtility.UrlEncode(sSeriesName);
-            }
-            
-            return Generic( string.Format( apiURIs.GetSeries, lEncodedSeriesName, aLanguageCode ), true, false, Format.NoExtension );
+            // TVDB v4 migration: search now goes through /search (JSON), not GetSeries.php
+            // (XML). TvdbV4SeriesFetcher.Search returns the v3-shaped <Data><Series>...
+            // document GetSeries.cs already knows how to parse.
+            return V4.TvdbV4SeriesFetcher.Search( sSeriesName, aLanguageCode );
         }
 
-        static public XmlNode GetUserRatings( String sSeriesID, String sAccountID )
+        /// <summary>
+        /// Adds a series to, or (asks to) remove it from, the user's TheTVDB favourites. TheTVDB's current service can add
+        /// favourites but cannot remove them, so a removal only happens here in MP-TVSeries and has to be done on
+        /// thetvdb.com as well - otherwise the next update brings the series back into Online Favourites.
+        /// Returns false when nothing could be changed on TheTVDB.
+        /// </summary>
+        static public bool ConfigureFavourites( bool bAdd, String sSeriesID )
         {
-            string url = String.Format( apiURIs.GetRatingsForUser, DBOnlineMirror.cApiKey, sAccountID, sSeriesID );
-            return Generic( url, true, false, Format.NoExtension );
-        }
-
-        static public XmlNode GetUserFavourites( String sAccountID )
-        {
-            string url = String.Format( apiURIs.GetAllFavourites, sAccountID );
-            return Generic( url, true, false, Format.NoExtension );
-        }
-
-        static public XmlNode ConfigureFavourites( bool bAdd, String sAccountID, String sSeriesID )
-        {
-            if ( sAccountID.Length == 0 )
+            if ( !V4.TvdbV4Favourites.IsAvailable )
             {
-                MPTVSeriesLog.Write( "Cannot submit online favourite, make sure you have your Account identifier is set!" );
-                return null;
+                MPTVSeriesLog.Write( "Cannot change online favourites: they need your TheTVDB subscriber PIN to be set." );
+                return false;
             }
 
-            if ( bAdd )
+            string seriesName = Helper.getCorrespondingSeries( int.Parse( sSeriesID ) ) == null ? sSeriesID : Helper.getCorrespondingSeries( int.Parse( sSeriesID ) ).ToString();
+            if ( !bAdd )
             {
-                MPTVSeriesLog.Write( string.Format( "Adding favourite series \"{0}\" to online database (theTVDB.com)", Helper.getCorrespondingSeries( int.Parse( sSeriesID ) ) ) );
-            }
-            else
-            {
-                MPTVSeriesLog.Write( string.Format( "Removing favourite series \"{0}\" from online database (theTVDB.com)", Helper.getCorrespondingSeries( int.Parse( sSeriesID ) ) ) );
+                MPTVSeriesLog.Write( string.Format( "Removed \"{0}\" from Online Favourites here. TheTVDB can't remove favourites through its service - remove it at thetvdb.com too, or it will come back at the next update.", seriesName ) );
+                return false;
             }
 
-            string url = String.Format( apiURIs.ConfigureFavourites, sAccountID, ( bAdd ? "add" : "remove" ), sSeriesID );
-            return Generic( url, true, false, Format.NoExtension );
+            bool ok = V4.TvdbV4Favourites.AddSeries( sSeriesID );
+            MPTVSeriesLog.Write( ok ? string.Format( "Added \"{0}\" to your TheTVDB favourites", seriesName )
+                                    : string.Format( "Could not add \"{0}\" to your TheTVDB favourites", seriesName ) );
+            return ok;
         }
 
         static public XmlNode UpdateSeries( String sSeriesID )
@@ -199,52 +168,6 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
                 int series = Int32.Parse( sSeriesID );
                 return getFromCache( series, languageID + ".xml", languageID );
             }
-        }
-
-        static public bool SubmitRating( RatingType type, string itemId, int rating )
-        {
-            string account = DBOption.GetOptions( DBOption.cOnlineUserID );
-            if ( String.IsNullOrEmpty( account ) )
-            {
-                string[] lines = new string[] { Translation.TVDB_INFO_ACCOUNTID_1, Translation.TVDB_INFO_ACCOUNTID_2 };
-                //TVSeriesPlugin.ShowDialogOk(Translation.TVDB_INFO_TITLE, lines); //trakt.tv also listens to this, also can store ratings locally.
-                MPTVSeriesLog.Write( "Cannot submit rating to thetvdb.com, this requires your Account Identifier to be set." );
-                return false;
-            }
-
-            if ( itemId == "0" || rating < 0 || rating > 10 )
-            {
-                MPTVSeriesLog.Write( "Cannot submit rating, invalid values...this is most likely a programming error" );
-                return false;
-            }
-
-            if ( !DBOnlineMirror.IsMirrorsAvailable )
-            {
-                // Server maybe available now.
-                DBOnlineMirror.Init();
-                if ( !DBOnlineMirror.IsMirrorsAvailable )
-                {
-                    GUIDialogOK dlgOK = ( GUIDialogOK )GUIWindowManager.GetWindow( ( int )GUIWindow.Window.WINDOW_DIALOG_OK );
-                    dlgOK.SetHeading( Translation.TVDB_ERROR_TITLE );
-                    if ( !TVSeriesPlugin.IsNetworkAvailable )
-                    {
-                        string[] lines = new string[] { Translation.NETWORK_ERROR_UNAVAILABLE_1, Translation.NETWORK_ERROR_UNAVAILABLE_2 };
-                        TVSeriesPlugin.ShowDialogOk( Translation.TVDB_ERROR_TITLE, lines );
-                    }
-                    else
-                    {
-                        string[] lines = new string[] { Translation.TVDB_ERROR_UNAVAILABLE_1, Translation.TVDB_ERROR_UNAVAILABLE_2 };
-                        TVSeriesPlugin.ShowDialogOk( Translation.TVDB_ERROR_TITLE, lines );
-                    }
-
-                    MPTVSeriesLog.Write( "Cannot submit rating, the online database is unavailable" );
-                    return false;
-                }
-            }
-            // ok we're good
-            MPTVSeriesLog.Write( string.Format( "Submitting Rating of {2} for {0} {1}", type.ToString(), itemId, rating ), MPTVSeriesLog.LogLevel.Debug );
-            Generic( string.Format( apiURIs.SubmitRating, account, type.ToString(), itemId, rating ), true, false, Format.NoExtension );
-            return true;
         }
 
         static public XmlNode Updates( UpdateType type, Format format = Format.Zip )
@@ -298,11 +221,44 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
             return getFromCache( seriesID, "actors.xml" );
         }
 
+        // TVDB v4 migration: v4's artwork "image"/"thumbnail" fields are already absolute
+        // URLs (this changed from v3, which used paths relative to a mirror's banner base
+        // URL) - MOST of the time. In practice v4 also still returns plain relative paths
+        // for some fields (confirmed in this project's own logs: "/graphical/xxx.jpg",
+        // "/posters/xxx.jpg", "/seasons/xxx.jpg", "/blank/xxx.jpg", "/banners/episodes/xxx.jpg",
+        // as well as fuller ones like "/v4/series/xxx/banners/xxx.jpg" that already include
+        // their own structure). This is a known, acknowledged inconsistency in TheTVDB's own
+        // API, not something specific to this plugin.
+        //
+        // The old code assumed every non-absolute path should fall back to the v3 mirror
+        // prefix (DBOnlineMirror.Banners) - but that mirror-discovery system was removed
+        // during the v3->v4 migration, so DBOnlineMirror.Banners is now permanently empty.
+        // That turned every relative path into something like "/graphical/xxx.jpg" with no
+        // host at all, which .NET's WebClient then quietly treated as a local file path
+        // instead of a URL - on Windows, a leading "/" resolves against the current drive,
+        // which is exactly the "C:\graphical\xxx.jpg" paths seen failing in the log.
+        //
+        // Fixed by using TheTVDB's real, documented image host directly. A short fragment
+        // (no "/banners/" and not already one of v4's fuller "/v4/..." paths) needs
+        // "/banners" inserted, matching TheTVDB's own documented convention for these -
+        // paths that already carry their own structure (including the episode-thumbnail
+        // paths, which already start with "/banners/episodes/...") are used as-is.
+        public static string ResolveImageURL( string onlineFilename )
+        {
+            if ( onlineFilename.StartsWith( "http://" ) || onlineFilename.StartsWith( "https://" ) )
+                return onlineFilename;
+
+            const string imageHost = "https://artworks.thetvdb.com";
+            string path = onlineFilename.StartsWith( "/" ) ? onlineFilename : "/" + onlineFilename;
+            bool alreadyHasStructure = path.StartsWith( "/banners/" ) || path.StartsWith( "/v4/" );
+            return imageHost + ( alreadyHasStructure ? path : "/banners" + path );
+        }
+
         static public string DownloadBanner( string onlineFilename, Settings.Path localPath, string localFilename )
         {
             WebClient webClient = new WebClient();
             string fullLocalPath = Helper.PathCombine( Settings.GetPath( localPath ), localFilename );
-            string fullURL = ( DBOnlineMirror.Banners.EndsWith( "/" ) ? DBOnlineMirror.Banners : ( DBOnlineMirror.Banners + "/" ) ) + onlineFilename;
+            string fullURL = ResolveImageURL( onlineFilename );
             webClient.Headers.Add( "user-agent", Settings.UserAgent );
 
             // .NET 4.0: Use TLS v1.2. Many download sources no longer support the older and now insecure TLS v1.0/1.1 and SSL v3.
@@ -425,7 +381,33 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
         {
             if ( format == Format.Zip )
             {
-                if ( appendBaseUrl ) sUrl = DBOnlineMirror.ZipInterface + sUrl;
+                // TVDB v4 migration: v4 has no equivalent to the old "series/{id}/all/{lang}.zip"
+                // bundle (or the "updates_{type}.zip" global changes feed). Series/episode/
+                // banner/actor data now comes from TvdbV4SeriesFetcher, which fetches the v4
+                // JSON endpoints and writes the same en.xml/banners.xml/actors.xml cache files
+                // this zip step used to produce - so we intercept here and let the normal
+                // cache re-read below pick up what it wrote.
+                //
+                // seriesIDIfZip is -1 for the global "updates_{type}" feed (day/week/month/all
+                // changes) - that endpoint doesn't exist in v4 in the same shape, so we return
+                // null here. GetUpdates.cs already has a documented, working fallback for a
+                // null Updates() result (it treats all "continuing" series with local files as
+                // needing a refresh), so this is a safe, if less efficient, degradation rather
+                // than a break.
+                if ( seriesIDIfZip <= 0 )
+                {
+                    return null;
+                }
+
+                bool fetched = V4.TvdbV4SeriesFetcher.FetchAndCacheSeries( seriesIDIfZip, aLanguageId );
+                if ( !fetched ) return null;
+
+                // Both callers (getFromCache and GetBannerList) discard/only null-check this
+                // return value and re-read whichever specific file they wanted straight from
+                // the cache directory afterward - so all we need to hand back is "non-null on
+                // success". Return the series XML we just cached for that purpose.
+                string lCacheRoot = Path.Combine( Settings.GetPath( Settings.Path.config ), string.Format( @"Cache\{0}\{1}", seriesIDIfZip, aLanguageId ) );
+                return Helper.LoadXmlCache( Path.Combine( lCacheRoot, aLanguageId + ".xml" ) );
             }
             else
             {

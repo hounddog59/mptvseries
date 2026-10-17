@@ -3106,22 +3106,20 @@ public class Script
     <Author>ltfearme</Author>
     <HomePage>https://github.com/damienhaynes/mptvseries</HomePage>
     <ForumPage>https://forum.team-mediaportal.com/forums/my-tvseries.162/</ForumPage>
-    <UpdateUrl>https://raw.githubusercontent.com/damienhaynes/mptvseries/master/MPEI/update.xml</UpdateUrl>
+    <UpdateUrl />
     <Version>
       <Major>4</Major>
-      <Minor>3</Minor>
-      <Build>6</Build>
+      <Minor>6</Minor>
+      <Build>0</Build>
       <Revision>0</Revision>
     </Version>
     <ExtensionDescription>MP-TVSeries is a popular TV Series plug-in for MediaPortal. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
 
 The MP-TVSeries plugin will scan your hard drive (including network and removable drives) for video files, it then analyzes them by their path structures to determine if they are TV Shows. If the file(s) are recognized then the plugin will go online and retrieve information about them. You can then browse, manage and play your episodes from inside MediaPortal in a nice graphical layout.</ExtensionDescription>
-    <VersionDescription>* Fixed regression when loading recently added view containing episodes that have no online series matched from import;
-* Fixed MediaInfo not scanned during import on clean databases;
-* Escape series names during search using an improved method, this should provide better online matches during import.</VersionDescription>
+    <VersionDescription>Community fork for TheTVDB's current (v4) service. Enter your own free TheTVDB API key and subscriber PIN on the Online Data tab. Shows matched from .tvdb / tvshow.nfo / series.xml ID files, Trakt community ratings for series, seasons and episodes without the Trakt plugin, English titles for foreign-language shows, artwork and import fixes.</VersionDescription>
     <DevelopmentStatus>Stable</DevelopmentStatus>
-    <OnlineLocation>https://github.com/damienhaynes/mptvseries/releases/download/4.3.6/MP-TVSeries-4.3.6.0.mpe1</OnlineLocation>
-    <ReleaseDate>2020-01-22T15:25:06</ReleaseDate>
+    <OnlineLocation />
+    <ReleaseDate>2026-10-17T21:30:00</ReleaseDate>
     <Tags>tvseries,tv,mp-tvseries,videos,thetvdb</Tags>
     <Location>.\Release\[Name]-[Version].mpe1</Location>
     <Params>

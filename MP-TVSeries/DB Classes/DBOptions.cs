@@ -53,6 +53,16 @@ namespace WindowPlugins.GUITVSeries
         public const string cOnlineParseEnabled = "OnlineParseEnabled";
         public const string cFullSeriesRetrieval = "FullSeriesRetrieval";
         public const string cAutoChooseSeries = "AutoChooseSeries";
+        // when on, a tvshow.nfo / series.xml / .txt file in a show's folder that carries a TVDB id is used
+        // directly to identify the series, instead of fuzzy-searching TheTVDB by name
+        public const string cLookForLocalIdFiles = "LookForLocalIdFiles";
+        // Trakt.tv PKCE authorization - the access token lets community ratings and similar actually
+        // work; the refresh token lets a new access token be obtained without the user re-authorizing
+        // from scratch once the current one expires. Neither is a secret the way a client secret is -
+        // they're specific to this one user's own Trakt account authorization, not something that grants
+        // access to anyone else's.
+        public const string cTraktAccessToken = "TraktAccessToken";
+        public const string cTraktRefreshToken = "TraktRefreshToken";
         public const string cAutoChooseOrder = "AutoChooseOrder";
         public const string cImportFolderWatch = "doFolderWatch";
         public const string cImportScanRemoteShare = "scanRemoteShare";
@@ -121,7 +131,6 @@ namespace WindowPlugins.GUITVSeries
 		public const string cPlaylistAutoShuffle = "PlaylistAutoShuffle";
         public const string cPlaylistUnwatchedOnly = "PlaylistUnwatchedOnly";
         public const string cAutoDownloadMissingArtwork = "AutoDownloadMissingArtwork";
-        public const string cAutoUpdateEpisodeRatings = "AutoUpdateEpisodeRatings";
         public const string cAutoUpdateAllFanart = "AutoUpdateAllFanart";
         public const string cAutoDownloadFanart = "AutoDownloadFanart";
         public const string cAutoDownloadFanartCount = "AutoDownloadFanartCount";
@@ -138,7 +147,11 @@ namespace WindowPlugins.GUITVSeries
         public const string cArtworkLoadingDelay = "ArtworkLoadingDelay";
         public const string cRandomFanartInterval = "RandomFanartInterval";
         public const string cParentalControlPinCode = "ParentalControlPinCode";		
-		public const string cMarkRatedEpisodeAsWatched = "MarkRatedEpisodeAsWatched";
+        // the user's own TheTVDB v4 API key (a public release ships without one; a self-built copy may have one built in)
+        public const string cTvdbApiKey = "TvdbV4ApiKey";
+        // optional: the user's own Trakt application client ID, instead of the one MP-TVSeries ships with
+        public const string cTraktOwnClientId = "TraktOwnClientId";
+        public const string cTvdbV4Pin = "TvdbV4Pin"; // subscriber PIN for TheTVDB v4 API login (leave empty if not a TVDB subscriber)
         public const string cSubstituteMissingArtwork = "SubstituteMissingArtwork";
         public const string cSkipSeasonViewOnSingleSeason = "SkipSeasonViewOnSingleSeason";
         public const string cInvokeExtBeforePlayback = "InvokeExtBeforePlayback";
@@ -180,7 +193,13 @@ namespace WindowPlugins.GUITVSeries
         public const string cOverrideLanguage = "OverrideLanguage";
         public const string cCountSpecialEpisodesAsWatched = "CountSpecialEpisodesAsWatched";
         public const string cTraktCommunityRatings = "TraktCommunityRatings";
+        // set once this fork has switched Trakt community ratings on for an existing install (see below)
+        public const string cTraktCommunityRatingsDirectEnabled = "TraktCommunityRatingsDirectEnabled";
         public const string cTraktLastDateUpdated = "TraktLastDateUpdated";
+        // when true, the next import refreshes the text (titles, descriptions, episode names) of EVERY series from TheTVDB
+        public const string cFullTextRefreshPending = "FullTextRefreshPending";
+        // set once the one-time refresh for this fork has been scheduled (see below)
+        public const string cFullTextRefreshScheduled = "FullTextRefreshScheduledV4";
         public const string cParsedNameFromFolder = "ParsedNameFromFolder";
         public const string cCheckShowOnlyEpisodesRequiringManualSelection = "CheckShowOnlyEpisodesRequiringManualSelection";
         public const string cTmdbConfiguration = "TmdbConfiguration";
@@ -216,6 +235,8 @@ namespace WindowPlugins.GUITVSeries
 
             if (GetOptions(cAutoChooseSeries) == null)
                 SetOptions(cAutoChooseSeries, true);
+            if (GetOptions(cLookForLocalIdFiles) == null)
+                SetOptions(cLookForLocalIdFiles, true);
                 
             if (GetOptions(cAutoChooseOrder) == null)
                 SetOptions(cAutoChooseOrder, true);
@@ -390,8 +411,6 @@ namespace WindowPlugins.GUITVSeries
             if (GetOptions(cAutoDownloadMissingArtwork) == null)
                 SetOptions(cAutoDownloadMissingArtwork, true);
 
-            if (GetOptions(cAutoUpdateEpisodeRatings) == null)
-                SetOptions(cAutoUpdateEpisodeRatings, false);
 
             if (GetOptions(cAutoUpdateAllFanart) == null)
                 SetOptions(cAutoUpdateAllFanart, false);
@@ -438,8 +457,13 @@ namespace WindowPlugins.GUITVSeries
             if (GetOptions(cParentalControlPinCode) == null)
                 SetOptions(cParentalControlPinCode, string.Empty);
 
-			if (GetOptions(cMarkRatedEpisodeAsWatched) == null)
-				SetOptions(cMarkRatedEpisodeAsWatched, 0);
+            if (GetOptions(cTvdbApiKey) == null)
+                SetOptions(cTvdbApiKey, "");
+            if (GetOptions(cTraktOwnClientId) == null)
+                SetOptions(cTraktOwnClientId, "");
+            if (GetOptions(cTvdbV4Pin) == null)
+                SetOptions(cTvdbV4Pin, string.Empty);
+
 
             if (GetOptions(cSubstituteMissingArtwork) == null)
                 SetOptions(cSubstituteMissingArtwork, 1);
@@ -578,6 +602,28 @@ namespace WindowPlugins.GUITVSeries
 
             if (GetOptions(cTraktCommunityRatings) == null)
                 SetOptions(cTraktCommunityRatings, true);
+
+            // TheTVDB v4 has no ratings, so Trakt is now the only source of community ratings - and they no longer
+            // need the Trakt plugin or a login (see TraktRatingsClient). Many people turned this option off in the
+            // original plugin because it needed the Trakt plugin, so switch it on once for every install, new or
+            // upgraded. The marker means this happens only once: if the user turns it off afterwards, it stays off.
+            if (GetOptions(cTraktCommunityRatingsDirectEnabled) == null)
+            {
+                SetOptions(cTraktCommunityRatings, true);
+                SetOptions(cTraktCommunityRatingsDirectEnabled, true);
+            }
+
+            // Each series' TheTVDB details are kept in a saved copy (the API cache) that is only replaced when the show
+            // changes on TheTVDB. Copies saved by the old plugin, or by builds of this fork before the language fix, can
+            // hold the wrong language (e.g. "将軍" instead of "Shōgun") and would never be corrected for shows that no
+            // longer change. So once, after installing, the next import refreshes every series' text.
+            if (GetOptions(cFullTextRefreshScheduled) == null)
+            {
+                SetOptions(cFullTextRefreshPending, true);
+                SetOptions(cFullTextRefreshScheduled, true);
+            }
+            if (GetOptions(cFullTextRefreshPending) == null)
+                SetOptions(cFullTextRefreshPending, false);
 
             if (GetOptions(cParsedNameFromFolder) == null)
                 SetOptions(cParsedNameFromFolder, false);

@@ -48,6 +48,16 @@ namespace WindowPlugins.GUITVSeries
         private List<Control> mPaneListSettings = new List<Control>();
         private List<Panel> mPaneListExtra = new List<Panel>();
         private TreeNode mNodeEdited = null;
+        // set only for the lightweight manual-ID-edit refresh (see the Online Series ID case below) so
+        // OnlineParsing_OnCompleted can tell that apart from a full Import completing. A full Import can
+        // touch many series and genuinely needs LoadTree()'s full rebuild; this refresh only ever
+        // touches the one series being edited, so rebuilding (and flashing) the whole tree - all your
+        // series, torn down and recreated, with the same loading splash shown on startup - for a single
+        // node's worth of change was the "looks like it's restarting" behaviour reported after editing
+        // an ID. Always cleared again once used, so it can never accidentally suppress a real Import's
+        // full reload.
+        private TreeNode mNodeEditedForLightweightRefresh = null;
+        private int mNodeEditedForLightweightRefreshSeriesId = 0;
         private OnlineParsing mParser = null;
         private DateTime mTimingStart = new DateTime();
 
@@ -218,6 +228,8 @@ namespace WindowPlugins.GUITVSeries
             dbOptCheckBoxCleanOnlineEpisodes.Enabled = checkBox_FullSeriesRetrieval.Checked;
             dbOptCheckBoxRemoveEpZero.Enabled = checkBox_FullSeriesRetrieval.Checked;
             checkBox_AutoChooseSeries.Checked = DBOption.GetOptions(DBOption.cAutoChooseSeries);
+            checkBox_LookForLocalIdFiles.Checked = DBOption.GetOptions(DBOption.cLookForLocalIdFiles);
+            UpdateTraktAuthStatus();
             checkBox_AutoChooseOrder.Checked = DBOption.GetOptions(DBOption.cAutoChooseOrder);            
             checkBox_Episode_OnlyShowLocalFiles.Checked = !DBOption.GetOptions(DBOption.cOnlyShowLocalFiles);
             checkBox_Episode_HideUnwatchedSummary.Checked = DBOption.GetOptions(DBOption.cHideUnwatchedSummary);
@@ -246,7 +258,9 @@ namespace WindowPlugins.GUITVSeries
             checkBox_RandBanner.Checked = DBOption.GetOptions(DBOption.cRandomBanner);            
             this.chkAllowDeletes.Checked = (bool)DBOption.GetOptions(DBOption.cShowDeleteMenu);
             this.chkUseRegionalDateFormatString.Checked = (bool)DBOption.GetOptions(DBOption.cAltImgLoading);
-            txtUserID.Text = DBOption.GetOptions(DBOption.cOnlineUserID);
+            txtTvdbPin.Text = DBOption.GetOptions(DBOption.cTvdbV4Pin);
+            txtTvdbApiKey.Text = DBOption.GetOptions(DBOption.cTvdbApiKey);
+            txtTraktOwnClientId.Text = DBOption.GetOptions(DBOption.cTraktOwnClientId);
             chkBlankBanners.Checked = DBOption.GetOptions(DBOption.cGetBlankBanners);
             checkDownloadEpisodeSnapshots.Checked = DBOption.GetOptions(DBOption.cGetEpisodeSnapshots);
             checkBox_ShowHidden.Checked = DBOption.GetOptions(DBOption.cShowHiddenItems);            
@@ -261,7 +275,6 @@ namespace WindowPlugins.GUITVSeries
             numericUpDownImportDelay.Value = DBOption.GetOptions(DBOption.cImportDelay);
 
             checkBox_AutoDownloadMissingArtwork.Checked = DBOption.GetOptions(DBOption.cAutoDownloadMissingArtwork);
-            checkBox_AutoUpdateEpisodeRatings.Checked = DBOption.GetOptions(DBOption.cAutoUpdateEpisodeRatings);
             checkBox_AutoUpdateAllFanart.Checked = DBOption.GetOptions(DBOption.cAutoUpdateAllFanart);
 			numericUpDownArtworkDelay.Value = DBOption.GetOptions(DBOption.cArtworkLoadingDelay);
 			numericUpDownBackdropDelay.Value = DBOption.GetOptions(DBOption.cBackdropLoadingDelay);
@@ -683,6 +696,10 @@ namespace WindowPlugins.GUITVSeries
             if (series[DBOnlineSeries.cEpisodeCount] == 0)
             {
                 seriesNode.ForeColor = System.Drawing.SystemColors.GrayText;
+                // tied to the same "zero local episodes" condition as the grey-out itself, so this
+                // persists correctly across any tree rebuild (not just right after an ID edit) and
+                // clears itself automatically once a real import actually links local files in.
+                seriesNode.Text = seriesNode.Text + " (needs import)";
             }
             else
             {
@@ -1495,11 +1512,22 @@ namespace WindowPlugins.GUITVSeries
         private void OnlineParsing_OnCompleted(bool newEpisodes)
         {
             TimeSpan span = DateTime.Now - mTimingStart;
-            MPTVSeriesLog.Write("Online Parsing Completed in " + span);           
+            MPTVSeriesLog.Write("Online Parsing Completed in " + span);
+            this.Cursor = System.Windows.Forms.Cursors.Default; // in case a wait cursor was set (e.g. a manual Online Series ID correction)
             mParser = null;
             ImportWizardParseParams = null;
             DBOption.SetOptions(DBOption.cImportOnlineUpdateScanLastTime, DateTime.Now.ToString());
-            LoadTree();
+
+            if (mNodeEditedForLightweightRefresh != null)
+            {
+                RefreshSingleSeriesNode(mNodeEditedForLightweightRefresh, mNodeEditedForLightweightRefreshSeriesId);
+                mNodeEditedForLightweightRefresh = null;
+                mNodeEditedForLightweightRefreshSeriesId = 0;
+            }
+            else
+            {
+                LoadTree();
+            }
 
             if (ParsingWizardHost != null && tabPage_Import.Contains(ParsingWizardHost))
             {                
@@ -1510,6 +1538,29 @@ namespace WindowPlugins.GUITVSeries
             }
 
             EnableImportButtonState(true);
+        }
+
+        // Replaces just the one series node in place (same tree index) with a freshly-built node, instead
+        // of LoadTree()'s full rebuild of every series in the library. Used after the lightweight manual
+        // Online Series ID refresh, where only this one series' online data actually changed.
+        private void RefreshSingleSeriesNode(TreeNode node, int seriesId)
+        {
+            DBSeries freshSeries = DBSeries.Get(seriesId);
+            if (freshSeries == null) return; // shouldn't happen, but don't leave a stale node showing on the off chance it does
+
+            bool wasSelected = (treeView_Library.SelectedNode == node);
+            int index = node.Index;
+            var seasons = DBSeason.Get(new SQLCondition(new DBSeason(), DBSeason.cSeriesID, seriesId, SQLConditionType.Equal), false);
+
+            treeView_Library.Nodes.Remove(node);
+            CreateSeriesNode(freshSeries, seasons, index);
+
+            if (wasSelected)
+            {
+                TreeNode refreshedNode = treeView_Library.Nodes[index];
+                treeView_Library.SelectedNode = refreshedNode;
+                treeView_Library.Select();
+            }
         }
 
         #region Series Details Tab Handling
@@ -1628,7 +1679,6 @@ namespace WindowPlugins.GUITVSeries
                                     // hide these fields, they are handled internally
                                     break;
                                 
-                                case DBEpisode.cSeasonIndex:
                                 case DBEpisode.cEpisodeIndex2:
                                 case DBEpisode.cSeriesID:
                                 case DBEpisode.cCompositeID:
@@ -1680,12 +1730,19 @@ namespace WindowPlugins.GUITVSeries
                                     }
                                     break;
 
+                                // Season/Episode number - editable so a local file that got misidentified
+                                // (e.g. matched to a wrong or placeholder episode like a special that
+                                // couldn't be told apart by filename alone) can be manually reassigned to
+                                // the correct one. ChangeIndexes() (called on commit) does the actual
+                                // re-linking to the right online episode, same method the import wizard's
+                                // manual-match step already uses.
+                                case DBEpisode.cSeasonIndex:
+                                    AddPropertyBindingSource( DBEpisode.PrettyFieldName( key ), key, episode[key], true );
+                                    break;
+
                                 // Show Aired number if applicable
                                 case DBOnlineEpisode.cEpisodeIndex:
-                                    if ( mSelectedSeries[DBOnlineSeries.cEpisodeSortOrder] == "DVD" )
-                                    {
-                                        AddPropertyBindingSource( DBEpisode.PrettyFieldName( key ), key, $"{episode[DBOnlineEpisode.cSeasonIndex]}x{episode[DBOnlineEpisode.cEpisodeIndex]}", false );
-                                    }
+                                    AddPropertyBindingSource( DBEpisode.PrettyFieldName( key ), key, episode[key], true );
                                     break;
 
                                 // Show Absolute number if applicable
@@ -2030,7 +2087,6 @@ namespace WindowPlugins.GUITVSeries
                                     // possibly add a toggle option to display all fields later
                                     break;
                                 
-                                case DBSeries.cID:
                                 case DBOnlineSeries.cEpisodeCount:
                                 case DBOnlineSeries.cEpisodesUnWatched:
                                 case DBOnlineSeries.cChosenEpisodeOrder:
@@ -2038,6 +2094,21 @@ namespace WindowPlugins.GUITVSeries
                                     // fields that can not be modified - read only
                                     if ( !string.IsNullOrEmpty( series[key] ) )
                                         AddPropertyBindingSource(DBSeries.PrettyFieldName(key), key, series[key], false);
+                                    break;
+
+                                case DBOnlineSeries.cID:
+                                    // Editable on purpose: if the automatic online search doesn't pick up the
+                                    // right (or any) match, this lets you type in the correct TVDB series ID
+                                    // by hand. dataGridView1_CellEndEdit writes it straight back (no _UserEdit
+                                    // shadow field, since UpdateNode/the update pipeline reads this field
+                                    // directly) and immediately triggers the same cache-clear + refresh the
+                                    // "Update" context menu item does, so the rest of the series' data
+                                    // (title, overview, episodes, banners...) gets fetched right away.
+                                    // Caveat: if this series already has locally-matched episodes/seasons
+                                    // under the OLD id, those aren't re-linked to the new id automatically -
+                                    // this is meant for series that failed to match in the first place, not
+                                    // for re-matching an already fully-synced show.
+                                    AddPropertyBindingSource(DBSeries.PrettyFieldName(key), key, series[key], true);
                                     break;
 
                                 case DBOnlineSeries.cOriginalName:
@@ -2344,6 +2415,7 @@ namespace WindowPlugins.GUITVSeries
                     case DBOnlineSeries.cSummary:
                     case DBOnlineSeries.cMyRating:
                     case DBOnlineSeries.cMyRatingAt:
+                    case DBOnlineSeries.cID: // must overwrite directly - UpdateNode and the online pipeline read this field, not a _UserEdit shadow of it
                     case DBSeason.cTitle:
                         editFieldName = origFieldName;
                         bUserEdit = false;
@@ -2356,12 +2428,157 @@ namespace WindowPlugins.GUITVSeries
                 {
                     case DBSeries.cTableName:
                         DBSeries series = (DBSeries)mNodeEdited.Tag;
+                        string oldOnlineId = series[DBOnlineSeries.cID];
+
+                        if ( origFieldName == DBOnlineSeries.cID )
+                        {
+                            // Manually correcting the TVDB series ID needs to rename it everywhere it's
+                            // used as a key - local_series.ID, online_series.ID, and every SeriesID
+                            // foreign key in season/local_episodes/online_episodes - or whatever doesn't
+                            // get renamed becomes orphaned and the series can vanish from the tree
+                            // entirely with no error and no way back short of hand-editing the database.
+                            // (Found out the hard way: the series[cID]=...;series.Commit() path used for
+                            // every other field looks like it should rename the row, but the underlying
+                            // Commit() builds its WHERE clause from the *already-changed* in-memory id,
+                            // finds no existing row to match, and silently INSERTS a new near-empty stray
+                            // row instead of updating the real one - on an already-matched show with real
+                            // episodes, that's genuinely destructive.) So this bypasses that path entirely
+                            // and renames directly with SQL across every table at once.
+                            int lNewSeriesId, lOldSeriesId;
+                            bool lNewOk = int.TryParse(newValue, out lNewSeriesId);
+                            bool lOldOk = int.TryParse(oldOnlineId, out lOldSeriesId);
+
+                            if (!lNewOk || string.IsNullOrEmpty(newValue))
+                            {
+                                MPTVSeriesLog.Write("Manually entered Online Series ID '" + newValue + "' is not a valid number, change not applied");
+                                cell.Value = oldOnlineId;
+                            }
+                            else if (lNewSeriesId == lOldSeriesId)
+                            {
+                                // no actual change - nothing to do
+                            }
+                            else
+                            {
+                                var lConflict = DBTVSeries.Execute("select ID from local_series where ID = " + lNewSeriesId);
+                                if (lConflict != null && lConflict.Rows.Count > 0)
+                                {
+                                    MessageBox.Show(string.Format(
+                                        "Another series in your library is already matched to TVDB id {0}. Can't reassign '{1}' to it without creating a conflict - if these are genuinely meant to be the same show, remove one of the two series first.",
+                                        lNewSeriesId, series[DBOnlineSeries.cPrettyName]),
+                                        "Online Series ID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    cell.Value = oldOnlineId;
+                                }
+                                else
+                                {
+                                    MPTVSeriesLog.Write(string.Format("Manually changed Online Series ID for '{0}' from '{1}' to '{2}', fetching online data. Run a full Import afterward to match local files to the new episode list.",
+                                        series[DBOnlineSeries.cPrettyName], oldOnlineId, newValue));
+
+                                    if (lOldOk)
+                                    {
+                                        // clear any stale leftover online_series row for the new id from a
+                                        // *previous* bad edit made before this fix existed - online data is
+                                        // always safe to refetch, so there's nothing lost by clearing it.
+                                        DBTVSeries.Execute("delete from online_series where ID = " + lNewSeriesId);
+
+                                        DBTVSeries.Execute("update local_series set ID = " + lNewSeriesId + " where ID = " + lOldSeriesId);
+                                        DBTVSeries.Execute("update online_series set ID = " + lNewSeriesId + " where ID = " + lOldSeriesId);
+                                        DBTVSeries.Execute("update season set SeriesID = " + lNewSeriesId + " where SeriesID = " + lOldSeriesId);
+                                        DBTVSeries.Execute("update local_episodes set SeriesID = " + lNewSeriesId + " where SeriesID = " + lOldSeriesId);
+                                        DBTVSeries.Execute("update online_episodes set SeriesID = " + lNewSeriesId + " where SeriesID = " + lOldSeriesId);
+
+                                        // the rename above only touches ID/SeriesID columns, deliberately -
+                                        // but that means BannerFileNames/PosterFileNames still hold whatever
+                                        // the *wrong* previous show had. A normal Import's artwork step skips
+                                        // any series where those are already non-empty (it assumes artwork's
+                                        // already there), so left alone, a corrected series would silently
+                                        // keep the old wrong show's artwork references forever and never get
+                                        // its own real artwork fetched. Clearing them here (series and its
+                                        // seasons) makes a subsequent Import correctly see this as needing
+                                        // fresh artwork.
+                                        // The SELECTED banner/poster/season posters must be cleared as well: the artwork
+                                        // download keeps whatever is selected if its file still exists, so the wrong
+                                        // show's pictures would otherwise keep showing on the Details tab and in MediaPortal.
+                                        DBTVSeries.Execute("update online_series set BannerFileNames = '', PosterFileNames = '', CurrentBannerFileName = '', PosterBannerFileName = '' where ID = " + lNewSeriesId);
+                                        DBTVSeries.Execute("update season set BannerFileNames = '', CurrentBannerFileName = '' where SeriesID = " + lNewSeriesId);
+
+                                        // Same underlying problem, for the actual episode data rather than artwork:
+                                        // a local file is linked to its online episode via a CompositeID string like
+                                        // "<seriesID>_<season>x<episode>" - and the rename above only changed the
+                                        // SeriesID *column*, not this separate stored string, which still has the
+                                        // OLD (wrong) series ID baked into it. Freshly-fetched correct episode data
+                                        // comes in under NEW composite IDs (matching the new series ID), so local
+                                        // files stuck on the old composite ID string could never link up to it - the
+                                        // ID would show correctly, but episodes/artwork/counts would silently never
+                                        // update, no matter how many Imports were run afterward.
+                                        // Fixed the same way a manual "delete from database, then re-import" would:
+                                        // delete the (wrong, inherited-from-the-old-show) online episode rows outright,
+                                        // and clear the composite ID on local episodes so they read as unmatched again.
+                                        // The next Import's normal matching step then relinks everything correctly
+                                        // against the real, freshly-fetched episode list - no separate manual step.
+                                        DBTVSeries.Execute("delete from online_episodes where SeriesID = " + lNewSeriesId);
+                                        DBTVSeries.Execute("update local_episodes set CompositeID = '', CompositeID2 = '' where SeriesID = " + lNewSeriesId);
+                                    }
+
+                                    Helper.DeleteXmlCache(lNewSeriesId);
+                                    var lSeriesIdsToUpdate = new List<DBValue> { lNewSeriesId };
+
+                                    // visible feedback that something is happening: without this, editing
+                                    // the ID just silently kicks off a background fetch with only the log
+                                    // window (which most people aren't watching) as evidence. The wait
+                                    // cursor and the tree node's temporary tag both clear themselves
+                                    // automatically once OnlineParsing_OnCompleted's LoadTree() rebuilds
+                                    // the tree from the now-renamed, now-refreshed database.
+                                    this.Cursor = System.Windows.Forms.Cursors.WaitCursor;
+                                    mNodeEdited.Text = mNodeEdited.Text + " (refreshing online data...)";
+                                    mNodeEditedForLightweightRefresh = mNodeEdited;
+                                    // node.Tag still holds the pre-rename DBSeries object with the OLD id
+                                    // cached in it (the rename above was raw SQL against the DB rows, not
+                                    // the object model) - so remember the actual new id here directly,
+                                    // rather than trying to read it back off the node later.
+                                    mNodeEditedForLightweightRefreshSeriesId = lNewSeriesId;
+
+                                    // Deliberately excludes LocalScan and GetNewBanners/GetNewActors/
+                                    // UpdateEpisodeThumbNails (real image downloads - real work worth
+                                    // deferring to a full Import). LocalScan would re-walk the entire
+                                    // library's filesystem for every show you correct here, which is
+                                    // completely unnecessary - re-matching a series' files only needs the
+                                    // files *this series* already has on record (which the rename above
+                                    // deliberately unlinked, not removed), never a disk scan.
+                                    //
+                                    // IdentifyNewEpisodes IS included, despite an earlier version of this
+                                    // comment claiming it needed LocalScan to have just run - it doesn't:
+                                    // it matches whatever's already on record, which now correctly covers
+                                    // the unlinked files above. That's what actually relinks the local
+                                    // files to the fresh episode list from here, instead of leaving you to
+                                    // run a full Import just to get that one thing done.
+                                    //
+                                    // UpdateEpisodeCounts now safely follows it (it was previously excluded
+                                    // on its own - see below) since matching has genuinely just happened;
+                                    // the "Episodes"/"Episodes UnWatched" counts and the tree's "(needs
+                                    // import)" tag (tied to episode count == 0) are both accurate here now,
+                                    // not a false "looks done" state the way counting before any real
+                                    // matching used to produce.
+                                    Parsing_Start(new CParsingParameters(new List<ParsingAction> {
+                                        ParsingAction.UpdateSeries,
+                                        ParsingAction.UpdateEpisodes,
+                                        ParsingAction.IdentifyNewEpisodes,
+                                        ParsingAction.UpdateEpisodeCounts
+                                    }, lSeriesIdsToUpdate, new List<DBValue>()));
+                                }
+                            }
+                            break;
+                        }
+
+                        bool languageChanged = false;
                         if ( editFieldName == DBOnlineSeries.cLanguage )
                         {
                             Language selectedLang = mOnlineLanguages.Find(x => x.ToString() == newValue);
-                            if (selectedLang != null)
+                            if (selectedLang != null && selectedLang.Abbreviation != (string)series[editFieldName])
                             {
                                 series[editFieldName] = selectedLang.Abbreviation;
+                                // its stored original name came from the old language's copy
+                                series[DBOnlineSeries.cOriginalName] = string.Empty;
+                                languageChanged = true;
                             }
                         }
                         else
@@ -2369,6 +2586,14 @@ namespace WindowPlugins.GUITVSeries
                             series[editFieldName] = newValue;
                         }    
                         series.Commit();
+
+                        // fetch this series' title, description and episode names again in its new language straight
+                        // away, the same as right-click > Update (which also throws away its saved TheTVDB copy)
+                        if (languageChanged)
+                        {
+                            MPTVSeriesLog.Write("Language of '" + series.ToString() + "' changed to " + newValue + ", updating it");
+                            UpdateNode(mNodeEdited);
+                        }
 
                         if (bUserEdit)
                         {
@@ -2408,14 +2633,41 @@ namespace WindowPlugins.GUITVSeries
                     case DBEpisode.cTableName:
                         DBEpisode episode = (DBEpisode)mNodeEdited.Tag;
 
-                        if (episode.onlineEpisode.FieldNames.Contains(origFieldName))
+                        // Season/Episode number edits go through ChangeIndexes() rather than a plain
+                        // field overwrite - that's the method that actually re-links the local file to
+                        // a different online episode (composite ID, online episode reference, etc.),
+                        // same as the import wizard's manual-match step uses. Each row is edited one
+                        // cell at a time, so we pull whichever of the pair *isn't* being edited from the
+                        // episode's current value.
+                        if (origFieldName == DBEpisode.cSeasonIndex || origFieldName == DBOnlineEpisode.cEpisodeIndex)
+                        {
+                            int lNewSeasonIndex = 0, lNewEpisodeIndex = 0;
+                            bool lParsedOk = origFieldName == DBEpisode.cSeasonIndex
+                                ? int.TryParse(newValue, out lNewSeasonIndex) && int.TryParse(episode[DBOnlineEpisode.cEpisodeIndex].ToString(), out lNewEpisodeIndex)
+                                : int.TryParse(episode[DBEpisode.cSeasonIndex].ToString(), out lNewSeasonIndex) && int.TryParse(newValue, out lNewEpisodeIndex);
+
+                            if (lParsedOk)
+                            {
+                                MPTVSeriesLog.Write(string.Format("Manually reassigned local file for '{0}' to season {1} episode {2}",
+                                    episode[DBEpisode.cFilenameWOPath], lNewSeasonIndex, lNewEpisodeIndex));
+                                episode.ChangeIndexes(lNewSeasonIndex, lNewEpisodeIndex);
+                            }
+                            else
+                            {
+                                MPTVSeriesLog.Write("Season/Episode number must be a whole number - reassignment skipped");
+                                cell.Value = episode[origFieldName].ToString();
+                            }
+                        }
+                        else if (episode.onlineEpisode.FieldNames.Contains(origFieldName))
                         {
                             episode.onlineEpisode[editFieldName] = newValue;
+                            episode.Commit();
                         }
                         else
+                        {
                             episode[editFieldName] = newValue;
-
-                        episode.Commit();
+                            episode.Commit();
+                        }
 
                         if (bUserEdit)
                         {
@@ -2453,6 +2705,259 @@ namespace WindowPlugins.GUITVSeries
         private void checkBox_AutoChooseSeries_CheckedChanged(object sender, EventArgs e)
         {
             DBOption.SetOptions(DBOption.cAutoChooseSeries, checkBox_AutoChooseSeries.Checked);
+        }
+
+        private void checkBox_LookForLocalIdFiles_CheckedChanged(object sender, EventArgs e)
+        {
+            DBOption.SetOptions(DBOption.cLookForLocalIdFiles, checkBox_LookForLocalIdFiles.Checked);
+        }
+
+        // The log panel: Ctrl+C copies the selected lines (all lines if none are selected), Ctrl+A selects all,
+        // and right-click offers the same. Click / Shift+click / Ctrl+click select lines as in other Windows lists.
+        private void listBox_Log_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.C)
+            {
+                CopyLogLines(listBox_Log.SelectedItems.Count > 0);
+                e.Handled = e.SuppressKeyPress = true;
+            }
+            else if (e.Control && e.KeyCode == Keys.A)
+            {
+                SelectAllLogLines();
+                e.Handled = e.SuppressKeyPress = true;
+            }
+        }
+
+        private void listBox_Log_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right) return;
+
+            var menu = new ContextMenuStrip();
+            var copySelected = menu.Items.Add("Copy selected lines");
+            copySelected.Enabled = listBox_Log.SelectedItems.Count > 0;
+            copySelected.Click += (s, ev) => CopyLogLines(true);
+            menu.Items.Add("Copy all lines").Click += (s, ev) => CopyLogLines(false);
+            menu.Items.Add("Select all").Click += (s, ev) => SelectAllLogLines();
+            menu.Closed += (s, ev) => BeginInvoke(new MethodInvoker(menu.Dispose));
+            menu.Show(listBox_Log, e.Location);
+        }
+
+        private void SelectAllLogLines()
+        {
+            listBox_Log.BeginUpdate();
+            for (int i = 0; i < listBox_Log.Items.Count; i++)
+                listBox_Log.SetSelected(i, true);
+            listBox_Log.EndUpdate();
+        }
+
+        private void CopyLogLines(bool selectedOnly)
+        {
+            var text = new System.Text.StringBuilder();
+            System.Collections.IEnumerable lines = selectedOnly ? (System.Collections.IEnumerable)listBox_Log.SelectedItems : listBox_Log.Items;
+            foreach (object line in lines)
+                text.AppendLine(line.ToString());
+            if (text.Length == 0) return;
+
+            try
+            {
+                Clipboard.SetText(text.ToString());
+            }
+            catch (System.Runtime.InteropServices.ExternalException)
+            {
+                // another program has the clipboard locked - nothing useful to do but try again
+                MessageBox.Show("The clipboard is in use by another program - please try again.", "Copy log", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void UpdateTraktAuthStatus()
+        {
+            labelTraktAuthStatus.Text = "Trakt.tv: " + TraktPkceAuth.GetStatusText();
+            buttonTraktRemoveAuth.Enabled = TraktPkceAuth.IsAuthorized();
+        }
+
+        private void buttonTraktRemoveAuth_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Remove MP-TVSeries' authorization from your Trakt.tv account?\n\n" +
+                                "Community ratings keep working without it, but may be slower when many people use this " +
+                                "version of the plugin. You can authorize again at any time.",
+                                "Remove Trakt authorization", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            Cursor previousCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                TraktPkceAuth.RemoveAuthorization();
+            }
+            finally
+            {
+                this.Cursor = previousCursor;
+            }
+            UpdateTraktAuthStatus();
+        }
+
+        // Lets the user authorize MP-TVSeries on their own Trakt account (see TraktPkceAuth). Uses Trakt's device
+        // flow, which Trakt recommends for media centers: this window shows a short code, the user enters it at
+        // trakt.tv/activate on any device (that page is opened here for convenience), and we wait for the approval.
+        private void buttonTraktAuthorize_Click(object sender, EventArgs e)
+        {
+            string error;
+            TraktPkceAuth.DeviceCodeInfo info = TraktPkceAuth.RequestDeviceCode(out error);
+            if (info == null)
+            {
+                MessageBox.Show("Could not start Trakt authorization:\n\n" + error, "Authorize with Trakt.tv", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start(info.VerificationUrl);
+            }
+            catch (Exception ex)
+            {
+                // not fatal - the window below tells the user the address to open themselves
+                MPTVSeriesLog.Write("Could not open the browser for Trakt authorization: " + ex.Message);
+            }
+
+            bool authorized = ShowTraktCodeDialog(info);
+            UpdateTraktAuthStatus();
+
+            if (authorized)
+                MessageBox.Show("MP-TVSeries is now authorized on your Trakt.tv account. You only need to do this once.", "Authorize with Trakt.tv", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        // Shows the code and checks with Trakt at the interval it asked for until the user approves it, it
+        // expires, or the user cancels. Returns true if the user approved it.
+        private bool ShowTraktCodeDialog(TraktPkceAuth.DeviceCodeInfo info)
+        {
+            bool authorized = false;
+            bool checking = false;
+            int intervalSeconds = Math.Max(info.IntervalSeconds, 1);
+            DateTime expires = DateTime.UtcNow.AddSeconds(info.ExpiresInSeconds);
+
+            using (var form = new Form())
+            using (var intro = new Label())
+            using (var urlBox = new TextBox())
+            using (var codeBox = new TextBox())
+            using (var copyButton = new Button())
+            using (var status = new Label())
+            using (var cancel = new Button())
+            using (var timer = new System.Windows.Forms.Timer())
+            {
+                form.Text = "Authorize with Trakt.tv";
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.MinimizeBox = false;
+                form.MaximizeBox = false;
+                form.ShowInTaskbar = false;
+                form.ClientSize = new System.Drawing.Size(440, 270);
+
+                intro.AutoSize = false;
+                intro.Text = "Go to this address (it should have opened in your browser), sign in if asked, and enter the code below:";
+                intro.SetBounds(12, 12, 416, 32);
+
+                // read-only text boxes rather than labels, so the address and code can be selected and copied
+                urlBox.ReadOnly = true;
+                urlBox.BackColor = System.Drawing.SystemColors.Window;
+                urlBox.Text = info.VerificationUrl;
+                urlBox.SetBounds(12, 48, 416, 20);
+                urlBox.Click += (s, ev) => urlBox.SelectAll();
+
+                codeBox.ReadOnly = true;
+                codeBox.BackColor = System.Drawing.SystemColors.Window;
+                codeBox.Font = new System.Drawing.Font("Consolas", 26F, System.Drawing.FontStyle.Bold);
+                codeBox.TextAlign = HorizontalAlignment.Center;
+                codeBox.Text = info.UserCode;
+                codeBox.SetBounds(12, 82, 416, 50);
+                codeBox.Click += (s, ev) => codeBox.SelectAll();
+
+                copyButton.Text = "Copy code";
+                copyButton.SetBounds(12, 144, 100, 23);
+                copyButton.Click += (s, ev) =>
+                {
+                    try
+                    {
+                        Clipboard.SetText(info.UserCode);
+                        status.Text = "Code copied to the clipboard.";
+                    }
+                    catch (System.Runtime.InteropServices.ExternalException)
+                    {
+                        // another program has the clipboard locked
+                        status.Text = "Could not copy - select the code and press Ctrl+C instead.";
+                    }
+                };
+
+                status.AutoSize = false;
+                status.Text = "Waiting for you to approve it on Trakt...";
+                status.SetBounds(12, 180, 416, 35);
+
+                cancel.Text = "Cancel";
+                cancel.DialogResult = DialogResult.Cancel;
+                cancel.SetBounds(353, 230, 75, 23);
+
+                form.Controls.AddRange(new Control[] { intro, urlBox, codeBox, copyButton, status, cancel });
+                form.CancelButton = cancel;
+
+                // start with the code already selected, so Ctrl+C works straight away
+                form.Shown += (s, ev) =>
+                {
+                    codeBox.Focus();
+                    codeBox.SelectAll();
+                };
+
+                timer.Interval = intervalSeconds * 1000;
+                timer.Tick += (s, ev) =>
+                {
+                    if (checking) return;
+                    checking = true;
+                    try
+                    {
+                        if (DateTime.UtcNow >= expires)
+                        {
+                            timer.Stop();
+                            status.Text = "This code has expired. Close this window and click the button again for a new one.";
+                            cancel.Text = "Close";
+                            return;
+                        }
+
+                        string pollError;
+                        switch (TraktPkceAuth.PollForToken(info, out pollError))
+                        {
+                            case TraktPkceAuth.PollStatus.Authorized:
+                                authorized = true;
+                                timer.Stop();
+                                form.DialogResult = DialogResult.OK;
+                                break;
+
+                            case TraktPkceAuth.PollStatus.SlowDown:
+                                intervalSeconds += 5;
+                                timer.Interval = intervalSeconds * 1000;
+                                break;
+
+                            case TraktPkceAuth.PollStatus.Failed:
+                                timer.Stop();
+                                status.Text = "Authorization failed: " + pollError;
+                                cancel.Text = "Close";
+                                break;
+
+                            default:
+                                status.Text = string.Format("Waiting for you to approve it on Trakt... ({0} min left)",
+                                    Math.Max(1, (int)Math.Ceiling((expires - DateTime.UtcNow).TotalMinutes)));
+                                break;
+                        }
+                    }
+                    finally
+                    {
+                        checking = false;
+                    }
+                };
+
+                timer.Start();
+                form.ShowDialog(this);
+                timer.Stop();
+            }
+
+            return authorized;
         }
 
         private void comboBox_BannerSelection_SelectedIndexChanged(object sender, EventArgs e)
@@ -2682,6 +3187,155 @@ namespace WindowPlugins.GUITVSeries
                                                                                     ParsingAction.UpdateCommunityRatings
                                                                                   }, seriesIDsUpdates, epIdsUpdates)));
                 }
+            }
+        }
+
+        // The folder holding all the given files (their deepest shared folder). For a whole series, when that turns
+        // out to be a season folder - a show with only one season on disk, e.g. "Bad Monkey\Bad Monkey Season 01" -
+        // it goes up one level to the show's own folder. It never goes up to an import path itself (or above it),
+        // so it can't land on the root of the library share.
+        // the folder part of a file path, splitting on either slash so it doesn't depend on the platform
+        private static string FolderOf(string file)
+        {
+            int i = file.LastIndexOfAny(new[] { '\\', '/' });
+            return i > 0 ? file.Substring(0, i) : file;
+        }
+
+        private static string FolderForFiles(List<string> files, bool wholeSeries)
+        {
+            char[] separators = { '\\', '/' };
+            List<string> common = null;
+            foreach (string file in files)
+            {
+                string[] parts = file.Split(separators);
+                var folderParts = new List<string>(parts);
+                folderParts.RemoveAt(folderParts.Count - 1); // the file name itself
+                if (common == null) { common = folderParts; continue; }
+
+                int n = 0;
+                while (n < common.Count && n < folderParts.Count && string.Equals(common[n], folderParts[n], StringComparison.OrdinalIgnoreCase)) n++;
+                common.RemoveRange(n, common.Count - n);
+            }
+            if (common == null || common.Count == 0)
+                return FolderOf(files[0]);
+
+            string folder = string.Join("\\", common.ToArray());
+
+            if (wholeSeries && common.Count > 1 &&
+                System.Text.RegularExpressions.Regex.IsMatch(common[common.Count - 1],
+                    @"\b(season|series|saison|staffel|temporada|stagione)\s*\d+|^s\d{1,3}$|^specials?$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            {
+                string parent = string.Join("\\", common.GetRange(0, common.Count - 1).ToArray());
+                if (!IsImportPathOrAbove(parent)) folder = parent;
+            }
+
+            // a show spread across several import paths would have nothing in common below the share - fall back to
+            // the first episode's folder rather than opening the share's root
+            if (IsImportPathOrAbove(folder))
+                folder = FolderOf(files[0]);
+
+            return folder;
+        }
+
+        private static bool IsImportPathOrAbove(string folder)
+        {
+            string f = folder.TrimEnd('\\', '/') + "\\";
+            DBImportPath[] importPaths = DBImportPath.GetAll();
+            if (importPaths == null) return false;
+            foreach (DBImportPath ip in importPaths)
+            {
+                string root = ((string)ip[DBImportPath.cPath]).TrimEnd('\\', '/') + "\\";
+                if (root.StartsWith(f, StringComparison.OrdinalIgnoreCase)) return true; // folder is the import path, or above it
+            }
+            return false;
+        }
+
+        private void OpenFileLocation(TreeNode node)
+        {
+            if (node == null) return;
+
+            if (node.Name == DBEpisode.cTableName)
+            {
+                DBEpisode episode = node.Tag as DBEpisode;
+                if (episode == null) return;
+
+                string filename = episode[DBEpisode.cFilename];
+                if (string.IsNullOrEmpty(filename))
+                {
+                    MessageBox.Show("This episode has no local file associated with it.", "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (!System.IO.File.Exists(filename))
+                {
+                    MessageBox.Show("The file could not be found - it may have been moved, renamed, or deleted:\n\n" + filename, "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                try
+                {
+                    // /select, opens Explorer at the file's containing folder with the file itself highlighted
+                    System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + filename + "\"");
+                }
+                catch (Exception ex)
+                {
+                    MPTVSeriesLog.Write("Failed to open file location for '" + filename + "': " + ex.Message);
+                }
+                return;
+            }
+
+            // Series or Season: there's no single file to point at, so find the first matched local
+            // episode under this node and open its containing folder instead - a series/season with
+            // multiple files scattered across different folders will just open the first one found.
+            int seriesId = 0;
+            int seasonIdx = -1;
+            if (node.Name == DBSeries.cTableName)
+            {
+                DBSeries series = node.Tag as DBSeries;
+                if (series == null) return;
+                seriesId = series[DBSeries.cID];
+            }
+            else if (node.Name == DBSeason.cTableName)
+            {
+                DBSeason season = node.Tag as DBSeason;
+                if (season == null) return;
+                seriesId = season[DBSeason.cSeriesID];
+                seasonIdx = season[DBSeason.cIndex];
+            }
+            else
+            {
+                return;
+            }
+
+            List<DBEpisode> episodes = seasonIdx >= 0 ? DBEpisode.Get(seriesId, seasonIdx) : DBEpisode.Get(seriesId);
+            var files = new List<string>();
+            foreach (DBEpisode ep in episodes)
+            {
+                string f = ep[DBEpisode.cFilename];
+                if (!string.IsNullOrEmpty(f)) files.Add(f);
+            }
+
+            if (files.Count == 0)
+            {
+                MessageBox.Show("None of the episodes here have a local file associated with them yet.", "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string folder = FolderForFiles(files, seasonIdx < 0);
+            if (string.IsNullOrEmpty(folder) || !System.IO.Directory.Exists(folder))
+            {
+                MessageBox.Show("The folder could not be found - it may have been moved, renamed, or deleted:\n\n" + folder, "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start("explorer.exe", "\"" + folder + "\"");
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Failed to open folder '" + folder + "': " + ex.Message);
             }
         }
 
@@ -3476,6 +4130,10 @@ namespace WindowPlugins.GUITVSeries
                 case "update":
                     UpdateNode(clickedNode);
                     break;
+
+                case "openfilelocation":
+                    OpenFileLocation(clickedNode);
+                    break;
                 
                 case "mediainfo":
                     RescanMediaInfoNode(clickedNode);
@@ -3631,6 +4289,10 @@ namespace WindowPlugins.GUITVSeries
                     contextMenuStrip_DetailsTree.Items["ignoreOnScanToolStripMenuItem"].Enabled = true;
                     ToolStripMenuItem ignoreOnScanMenuItem = ( ToolStripMenuItem )contextMenuStrip_DetailsTree.Items["ignoreOnScanToolStripMenuItem"];
                     ignoreOnScanMenuItem.Checked = series[DBSeries.cScanIgnore];
+                    // a series itself has no single file, but it's still useful to jump straight to
+                    // wherever its episodes live - OpenFileLocation() finds the first matched episode's
+                    // folder for this case rather than requiring a specific file.
+                    contextMenuStrip_DetailsTree.Items["openFileLocationToolStripMenuItem"].Enabled = true;
 
                     // Create AddToView ContextMenu Item and Submenu
                     // No need to create a Remove Item as we can use the checked state
@@ -3673,6 +4335,7 @@ namespace WindowPlugins.GUITVSeries
                     DBSeason season = ( DBSeason )node.Tag;
                     bHidden = season[DBSeason.cHidden];
                     contextMenuStrip_DetailsTree.Items["ignoreOnScanToolStripMenuItem"].Enabled = false;
+                    contextMenuStrip_DetailsTree.Items["openFileLocationToolStripMenuItem"].Enabled = true;
 
                     if ( contextMenuStrip_DetailsTree.Items.ContainsKey( "addSeriesToView" ) )
                         contextMenuStrip_DetailsTree.Items["addSeriesToView"].Enabled = false;
@@ -3682,6 +4345,7 @@ namespace WindowPlugins.GUITVSeries
                     DBEpisode episode = ( DBEpisode )node.Tag;
                     bHidden = episode[DBOnlineEpisode.cHidden];
                     contextMenuStrip_DetailsTree.Items["ignoreOnScanToolStripMenuItem"].Enabled = false;
+                    contextMenuStrip_DetailsTree.Items["openFileLocationToolStripMenuItem"].Enabled = !string.IsNullOrEmpty( episode[DBEpisode.cFilename] );
 
                     if ( contextMenuStrip_DetailsTree.Items.ContainsKey( "addSeriesToView" ) )
                         contextMenuStrip_DetailsTree.Items["addSeriesToView"].Enabled = false;
@@ -3726,7 +4390,7 @@ namespace WindowPlugins.GUITVSeries
 
             // Add to online database
             if (selectedView == DBView.cTranslateTokenOnlineFavourite) {
-                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(add, DBOption.GetOptions(DBOption.cOnlineUserID), series[DBOnlineSeries.cID]);
+                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(add, series[DBOnlineSeries.cID]);
             }
                       
 		}
@@ -3980,8 +4644,10 @@ namespace WindowPlugins.GUITVSeries
             {
                 DBOption.SetOptions(DBOption.cOnlineLanguage, selectedLanguage.Abbreviation );
                 DBOption.SetOptions(DBOption.cUpdateTimeStamp, 0);
+                // the next import fetches every series' details again in the new language
+                DBOption.SetOptions(DBOption.cFullTextRefreshPending, true);
                 Online_Parsing_Classes.OnlineAPI.SelLanguageAsString = string.Empty; // to overcome caching
-                MPTVSeriesLog.Write("You need to do a manual import everytime the language is changed or your old items will not be updated. New language: " + comboOnlineLang.SelectedItem.ToString());
+                MPTVSeriesLog.Write("Language changed to " + comboOnlineLang.SelectedItem.ToString() + " - run an Import to update every series to it (this takes a while, once)");
             }
         }
 
@@ -4328,10 +4994,24 @@ namespace WindowPlugins.GUITVSeries
             LoadViews();
         }
 
-        private void txtUserID_TextChanged(object sender, EventArgs e)
+        private void txtTvdbApiKey_TextChanged(object sender, EventArgs e)
         {
-            DBOption.SetOptions(DBOption.cOnlineUserID, txtUserID.Text);
-        }        
+            DBOption.SetOptions(DBOption.cTvdbApiKey, txtTvdbApiKey.Text.Trim());
+        }
+
+        private void txtTraktOwnClientId_TextChanged(object sender, EventArgs e)
+        {
+            string newId = txtTraktOwnClientId.Text.Trim();
+            if (newId == ((string)DBOption.GetOptions(DBOption.cTraktOwnClientId) ?? "").Trim()) return;
+            DBOption.SetOptions(DBOption.cTraktOwnClientId, newId);
+            TraktPkceAuth.ClientIdChanged();
+            UpdateTraktAuthStatus();
+        }
+
+        private void txtTvdbPin_TextChanged(object sender, EventArgs e)
+        {
+            DBOption.SetOptions(DBOption.cTvdbV4Pin, txtTvdbPin.Text);
+        }
 
         private void btnLogoDeleteAll_Click(object sender, EventArgs e)
         {
@@ -4391,11 +5071,6 @@ namespace WindowPlugins.GUITVSeries
             DBOption.SetOptions(DBOption.cAskToRate, optionAsk2Rate.Checked);
         }
 
-        private void linkAccountID_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start( @"https://www.thetvdb.com/dashboard/account/editinfo" );
-        }
-
         private void linkExpressionHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start( @"https://forum.team-mediaportal.com/threads/expressions-rules-requests.21978/" );
@@ -4439,11 +5114,6 @@ namespace WindowPlugins.GUITVSeries
             DBOption.SetOptions(DBOption.cAutoDownloadMissingArtwork, checkBox_AutoDownloadMissingArtwork.Checked);
         }
 
-        private void checkBox_AutoUpdateEpisodeRatings_CheckedChanged(object sender, EventArgs e)
-        {
-            DBOption.SetOptions(DBOption.cAutoUpdateEpisodeRatings, checkBox_AutoUpdateEpisodeRatings.Checked);
-        }
-
         private void checkBox_AutoUpdateAllFanart_CheckedChanged(object sender, EventArgs e)
         {
             DBOption.SetOptions(DBOption.cAutoUpdateAllFanart, checkBox_AutoUpdateAllFanart.Checked);
@@ -4483,7 +5153,7 @@ namespace WindowPlugins.GUITVSeries
 
                     // Remove from online database
                     if (mSelectedView.Name == DBView.cTranslateTokenOnlineFavourite)
-                        Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(false, DBOption.GetOptions(DBOption.cOnlineUserID), s[DBOnlineSeries.cID]);                    
+                        Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(false, s[DBOnlineSeries.cID]);                    
                 }
             }
 
@@ -4561,7 +5231,7 @@ namespace WindowPlugins.GUITVSeries
                             
                             // Add from online database
                             if (name == DBView.cTranslateTokenOnlineFavourite) {
-                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(true, DBOption.GetOptions(DBOption.cOnlineUserID), series[DBOnlineSeries.cID]);
+                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(true, series[DBOnlineSeries.cID]);
                             }
                         }
 
@@ -4573,7 +5243,7 @@ namespace WindowPlugins.GUITVSeries
 
                             // Remove from online database
                             if (name == DBView.cTranslateTokenOnlineFavourite) {
-                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(false, DBOption.GetOptions(DBOption.cOnlineUserID), series[DBOnlineSeries.cID]);
+                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(false, series[DBOnlineSeries.cID]);
                             }
                         }
                     }					
@@ -4607,7 +5277,7 @@ namespace WindowPlugins.GUITVSeries
 
                             // Add from online database
                             if (name == DBView.cTranslateTokenOnlineFavourite) {
-                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(true, DBOption.GetOptions(DBOption.cOnlineUserID), series[DBOnlineSeries.cID]);
+                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(true, series[DBOnlineSeries.cID]);
                             }
                         }
 
@@ -4619,7 +5289,7 @@ namespace WindowPlugins.GUITVSeries
 
                             // Remove from online database
                             if (name == DBView.cTranslateTokenOnlineFavourite) {
-                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(false, DBOption.GetOptions(DBOption.cOnlineUserID), series[DBOnlineSeries.cID]);
+                                Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(false, series[DBOnlineSeries.cID]);
                             }
                         }
                     }

@@ -748,12 +748,16 @@ namespace WindowPlugins.GUITVSeries.GUI
         private bool LoadParameters()
         {
             // _loadingParameter can be set by a plugin developer or a skin designer
-            if ( string.IsNullOrEmpty( _loadParameter ) )
+            // _loadParameter (string) is obsolete in favour of _loadParameterObject (object) - this
+            // is only ever used as a string (JSON) here, so cast once and use that from here on.
+            string loadParameter = _loadParameterObject as string;
+
+            if ( string.IsNullOrEmpty( loadParameter ) )
                 return false;
 
-            MPTVSeriesLog.Write( $"Deserialising loading parameter '{_loadParameter}'" );
+            MPTVSeriesLog.Write( $"Deserialising loading parameter '{loadParameter}'" );
 
-            ArtworkParams = _loadParameter.FromJSON<ArtworkLoadingParameters>();
+            ArtworkParams = loadParameter.FromJSON<ArtworkLoadingParameters>();
             if ( ArtworkParams == null ) return false;
 
             SetProperty( "SeriesID", ArtworkParams.SeriesId.ToString(), true );
@@ -906,9 +910,8 @@ namespace WindowPlugins.GUITVSeries.GUI
                 }
 
                 // create full dowload url's
-                string lBaseUrl = DBOnlineMirror.Banners.EndsWith( "/" ) ? DBOnlineMirror.Banners : DBOnlineMirror.Banners + "/";
-                lFanart.ThumbnailUrl = lBaseUrl + lFanart.OnlineThumbPath;
-                lFanart.Url = lBaseUrl + lFanart.OnlinePath;
+                lFanart.ThumbnailUrl = OnlineAPI.ResolveImageURL( lFanart.OnlineThumbPath );
+                lFanart.Url = OnlineAPI.ResolveImageURL( lFanart.OnlinePath );
 
                 lFanart.Type = ArtworkType.SeriesFanart;
                 lFanart.Fanart = lDBFanart;
@@ -1167,9 +1170,8 @@ namespace WindowPlugins.GUITVSeries.GUI
                     lPoster.IsDefault = true;
 
                 // create full dowload url's
-                string lBaseUrl = DBOnlineMirror.Banners.EndsWith( "/" ) ? DBOnlineMirror.Banners : DBOnlineMirror.Banners + "/";
-                lPoster.ThumbnailUrl = lBaseUrl + lPoster.OnlineThumbPath;
-                lPoster.Url = lBaseUrl + lPoster.OnlinePath;
+                lPoster.ThumbnailUrl = OnlineAPI.ResolveImageURL( lPoster.OnlineThumbPath );
+                lPoster.Url = OnlineAPI.ResolveImageURL( lPoster.OnlinePath );
 
                 lPoster.Type = ArtworkType.SeriesPoster;
                 lPoster.Series = ArtworkParams.Series;
@@ -1365,9 +1367,8 @@ namespace WindowPlugins.GUITVSeries.GUI
                     lWideBanner.IsDefault = true;
 
                 // create full dowload url's
-                string lBaseUrl = DBOnlineMirror.Banners.EndsWith( "/" ) ? DBOnlineMirror.Banners : DBOnlineMirror.Banners + "/";
-                lWideBanner.ThumbnailUrl = lBaseUrl + lWideBanner.OnlineThumbPath;
-                lWideBanner.Url = lBaseUrl + lWideBanner.OnlinePath;
+                lWideBanner.ThumbnailUrl = OnlineAPI.ResolveImageURL( lWideBanner.OnlineThumbPath );
+                lWideBanner.Url = OnlineAPI.ResolveImageURL( lWideBanner.OnlinePath );
 
                 lWideBanner.Type = ArtworkType.SeriesBanner;
                 lWideBanner.Series = ArtworkParams.Series;
@@ -1501,9 +1502,8 @@ namespace WindowPlugins.GUITVSeries.GUI
                     lSeasonPoster.IsDefault = true;
 
                 // create full dowload url's
-                string lBaseUrl = DBOnlineMirror.Banners.EndsWith( "/" ) ? DBOnlineMirror.Banners : DBOnlineMirror.Banners + "/";
-                lSeasonPoster.ThumbnailUrl = lBaseUrl + lSeasonPoster.OnlineThumbPath;
-                lSeasonPoster.Url = lBaseUrl + lSeasonPoster.OnlinePath;
+                lSeasonPoster.ThumbnailUrl = OnlineAPI.ResolveImageURL( lSeasonPoster.OnlineThumbPath );
+                lSeasonPoster.Url = OnlineAPI.ResolveImageURL( lSeasonPoster.OnlinePath );
 
                 lSeasonPoster.Type = ArtworkType.SeasonPoster;
                 lSeasonPoster.Series = ArtworkParams.Series;
@@ -1672,9 +1672,8 @@ namespace WindowPlugins.GUITVSeries.GUI
 
             // create full dowload url's
             // tvdb do not store thumbs for episode thumbnails so it's the same
-            string lBaseUrl = DBOnlineMirror.Banners.EndsWith("/") ? DBOnlineMirror.Banners : DBOnlineMirror.Banners + "/";
-            lEpisodeImage.Url = lBaseUrl + lEpisodeImage.OnlinePath;
-            lEpisodeImage.ThumbnailUrl = lBaseUrl + lEpisodeImage.OnlineThumbPath;
+            lEpisodeImage.Url = OnlineAPI.ResolveImageURL( lEpisodeImage.OnlinePath );
+            lEpisodeImage.ThumbnailUrl = OnlineAPI.ResolveImageURL( lEpisodeImage.OnlineThumbPath );
 
             string lEpisodeId = $"{ArtworkParams.Episode[DBOnlineEpisode.cSeasonIndex]}x{ArtworkParams.Episode[DBOnlineEpisode.cEpisodeIndex]}";
 

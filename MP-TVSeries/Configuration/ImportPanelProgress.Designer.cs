@@ -33,7 +33,6 @@
             this.labelRetrievingActorThumbProgress = new WindowPlugins.GUITVSeries.Configuration.ProgressLabel();
             this.labelRetrievingEpisodeCounts = new WindowPlugins.GUITVSeries.Configuration.ProgressLabel();
             this.labelRetrievingFavourites = new WindowPlugins.GUITVSeries.Configuration.ProgressLabel();
-            this.labelRetrievingUserRatings = new WindowPlugins.GUITVSeries.Configuration.ProgressLabel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -64,7 +63,6 @@
             this.panelProgress.Controls.Add(this.labelRetrievingActorThumbProgress);
             this.panelProgress.Controls.Add(this.labelRetrievingEpisodeCounts);
             this.panelProgress.Controls.Add(this.labelRetrievingFavourites);
-            this.panelProgress.Controls.Add(this.labelRetrievingUserRatings);
             this.panelProgress.Controls.Add(this.groupBox4);
             this.panelProgress.Controls.Add(this.label4);
             this.panelProgress.Controls.Add(this.groupBox3);
@@ -90,7 +88,7 @@
             // 
             // labelCleaningEpisodes
             // 
-            this.labelCleaningEpisodes.Location = new System.Drawing.Point(12, 578);
+            this.labelCleaningEpisodes.Location = new System.Drawing.Point(12, 542);
             this.labelCleaningEpisodes.Name = "labelCleaningEpisodes";
             this.labelCleaningEpisodes.Size = new System.Drawing.Size(656, 39);
             this.labelCleaningEpisodes.Status = WindowPlugins.GUITVSeries.Configuration.ProgressLabelStatus.Waiting;
@@ -108,7 +106,7 @@
             // 
             // labelRetrievingEpisodeCounts
             // 
-            this.labelRetrievingEpisodeCounts.Location = new System.Drawing.Point(12, 544);
+            this.labelRetrievingEpisodeCounts.Location = new System.Drawing.Point(12, 508);
             this.labelRetrievingEpisodeCounts.Name = "labelRetrievingEpisodeCounts";
             this.labelRetrievingEpisodeCounts.Size = new System.Drawing.Size(656, 39);
             this.labelRetrievingEpisodeCounts.Status = WindowPlugins.GUITVSeries.Configuration.ProgressLabelStatus.Waiting;
@@ -116,19 +114,13 @@
             // 
             // labelRetrievingFavourites
             // 
-            this.labelRetrievingFavourites.Location = new System.Drawing.Point(12, 510);
+            this.labelRetrievingFavourites.Location = new System.Drawing.Point(12, 474);
             this.labelRetrievingFavourites.Name = "labelRetrievingFavourites";
             this.labelRetrievingFavourites.Size = new System.Drawing.Size(656, 39);
             this.labelRetrievingFavourites.Status = WindowPlugins.GUITVSeries.Configuration.ProgressLabelStatus.Waiting;
             this.labelRetrievingFavourites.TabIndex = 37;
             // 
-            // labelRetrievingUserRatings
             // 
-            this.labelRetrievingUserRatings.Location = new System.Drawing.Point(12, 439);
-            this.labelRetrievingUserRatings.Name = "labelRetrievingUserRatings";
-            this.labelRetrievingUserRatings.Size = new System.Drawing.Size(656, 39);
-            this.labelRetrievingUserRatings.Status = WindowPlugins.GUITVSeries.Configuration.ProgressLabelStatus.Waiting;
-            this.labelRetrievingUserRatings.TabIndex = 36;
             // 
             // groupBox4
             // 
@@ -306,7 +298,7 @@
             // 
             // labelRetrievingCommunityRatings
             // 
-            this.labelRetrievingCommunityRatings.Location = new System.Drawing.Point(12, 475);
+            this.labelRetrievingCommunityRatings.Location = new System.Drawing.Point(12, 439);
             this.labelRetrievingCommunityRatings.Name = "labelRetrievingCommunityRatings";
             this.labelRetrievingCommunityRatings.Size = new System.Drawing.Size(656, 39);
             this.labelRetrievingCommunityRatings.Status = WindowPlugins.GUITVSeries.Configuration.ProgressLabelStatus.Waiting;
@@ -344,7 +336,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label2;
         private ProgressLabel labelRetrievingFavourites;
-        private ProgressLabel labelRetrievingUserRatings;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label4;
         private ProgressLabel labelRetrievingEpisodeCounts;

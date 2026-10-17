@@ -85,6 +85,7 @@ namespace WindowPlugins.GUITVSeries
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reScanMediaInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.watchedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -106,11 +107,14 @@ namespace WindowPlugins.GUITVSeries
             this.buttonStartImport = new System.Windows.Forms.Button();
             this.checkboxAutoDownloadFanartSeriesName = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoDownloadMissingArtwork = new System.Windows.Forms.CheckBox();
-            this.checkBox_AutoUpdateEpisodeRatings = new System.Windows.Forms.CheckBox();
             this.checkBox_ScanOnStartup = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoOnlineDataRefresh = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoChooseOrder = new System.Windows.Forms.CheckBox();
-            this.txtUserID = new System.Windows.Forms.TextBox();
+            this.txtTvdbPin = new System.Windows.Forms.TextBox();
+            this.labelTvdbApiKey = new System.Windows.Forms.Label();
+            this.txtTvdbApiKey = new System.Windows.Forms.TextBox();
+            this.labelTraktOwnClientId = new System.Windows.Forms.Label();
+            this.txtTraktOwnClientId = new System.Windows.Forms.TextBox();
             this.checkDownloadEpisodeSnapshots = new System.Windows.Forms.CheckBox();
             this.chkBlankBanners = new System.Windows.Forms.CheckBox();
             this.txtMainMirror = new System.Windows.Forms.TextBox();
@@ -119,6 +123,10 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_OverrideComboLang = new System.Windows.Forms.CheckBox();
             this.checkBox_OnlineSearch = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoChooseSeries = new System.Windows.Forms.CheckBox();
+            this.checkBox_LookForLocalIdFiles = new System.Windows.Forms.CheckBox();
+            this.buttonTraktAuthorize = new System.Windows.Forms.Button();
+            this.buttonTraktRemoveAuth = new System.Windows.Forms.Button();
+            this.labelTraktAuthStatus = new System.Windows.Forms.Label();
             this.checkBox_FullSeriesRetrieval = new System.Windows.Forms.CheckBox();
             this.nudRecentlyAddedDays = new System.Windows.Forms.NumericUpDown();
             this.nudScanRemoteShareFrequency = new System.Windows.Forms.NumericUpDown();
@@ -177,7 +185,6 @@ namespace WindowPlugins.GUITVSeries
             this.dbOptChkBox_SubCentral_DownloadSubtitlesOnPlay = new WindowPlugins.GUITVSeries.Configuration.DBOptionCheckBox();
             this.checkBox_CountSpecialEpisodesAsWatched = new WindowPlugins.GUITVSeries.Configuration.DBOptionCheckBox();
             this.dbOptChkBoxCountEmptyFutureEps = new WindowPlugins.GUITVSeries.Configuration.DBOptionCheckBox();
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched = new WindowPlugins.GUITVSeries.Configuration.DBOptionCheckBox();
             this.optionAsk2Rate = new WindowPlugins.GUITVSeries.Configuration.DBOptionCheckBox();
             this.dbOptionParsedNameFromFolder = new WindowPlugins.GUITVSeries.Configuration.DBOptionCheckBox();
             this.txtFanartTVClientKey = new System.Windows.Forms.TextBox();
@@ -251,7 +258,6 @@ namespace WindowPlugins.GUITVSeries
             this.label71 = new System.Windows.Forms.Label();
             this.cboFanartResolution = new System.Windows.Forms.ComboBox();
             this.chkAutoDownloadFanart = new System.Windows.Forms.CheckBox();
-            this.linkAccountID = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
             this.numericUpDown_AutoOnlineDataRefresh = new System.Windows.Forms.NumericUpDown();
             this.label54 = new System.Windows.Forms.Label();
@@ -422,6 +428,7 @@ namespace WindowPlugins.GUITVSeries
             this.toolStripSeparator4,
             this.deleteToolStripMenuItem,
             this.updateToolStripMenuItem,
+            this.openFileLocationToolStripMenuItem,
             this.reScanMediaInfoToolStripMenuItem,
             this.toolStripSeparator2,
             this.watchedToolStripMenuItem,
@@ -465,6 +472,13 @@ namespace WindowPlugins.GUITVSeries
             this.updateToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.updateToolStripMenuItem.Tag = "update";
             this.updateToolStripMenuItem.Text = "Update";
+            // 
+            // openFileLocationToolStripMenuItem
+            // 
+            this.openFileLocationToolStripMenuItem.Name = "openFileLocationToolStripMenuItem";
+            this.openFileLocationToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.openFileLocationToolStripMenuItem.Tag = "openfilelocation";
+            this.openFileLocationToolStripMenuItem.Text = "Open File Location";
             // 
             // reScanMediaInfoToolStripMenuItem
             // 
@@ -727,7 +741,7 @@ namespace WindowPlugins.GUITVSeries
             // checkboxAutoDownloadFanartSeriesName
             // 
             this.checkboxAutoDownloadFanartSeriesName.AutoSize = true;
-            this.checkboxAutoDownloadFanartSeriesName.Location = new System.Drawing.Point(448, 549);
+            this.checkboxAutoDownloadFanartSeriesName.Location = new System.Drawing.Point(448, 484);
             this.checkboxAutoDownloadFanartSeriesName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkboxAutoDownloadFanartSeriesName.Name = "checkboxAutoDownloadFanartSeriesName";
             this.checkboxAutoDownloadFanartSeriesName.Size = new System.Drawing.Size(265, 17);
@@ -742,7 +756,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_AutoDownloadMissingArtwork
             // 
             this.checkBox_AutoDownloadMissingArtwork.AutoSize = true;
-            this.checkBox_AutoDownloadMissingArtwork.Location = new System.Drawing.Point(12, 522);
+            this.checkBox_AutoDownloadMissingArtwork.Location = new System.Drawing.Point(12, 460);
             this.checkBox_AutoDownloadMissingArtwork.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_AutoDownloadMissingArtwork.Name = "checkBox_AutoDownloadMissingArtwork";
             this.checkBox_AutoDownloadMissingArtwork.Size = new System.Drawing.Size(337, 17);
@@ -753,24 +767,10 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoDownloadMissingArtwork.UseVisualStyleBackColor = true;
             this.checkBox_AutoDownloadMissingArtwork.CheckedChanged += new System.EventHandler(this.checkBox_AutoDownloadMissingArtwork_CheckedChanged);
             // 
-            // checkBox_AutoUpdateEpisodeRatings
-            // 
-            this.checkBox_AutoUpdateEpisodeRatings.AutoSize = true;
-            this.checkBox_AutoUpdateEpisodeRatings.Location = new System.Drawing.Point(12, 312);
-            this.checkBox_AutoUpdateEpisodeRatings.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.checkBox_AutoUpdateEpisodeRatings.Name = "checkBox_AutoUpdateEpisodeRatings";
-            this.checkBox_AutoUpdateEpisodeRatings.Size = new System.Drawing.Size(440, 17);
-            this.checkBox_AutoUpdateEpisodeRatings.TabIndex = 20;
-            this.checkBox_AutoUpdateEpisodeRatings.Text = "Automatically update user episode ratings from theTVDb.com in addition to series " +
-    "ratings";
-            this.toolTip_Help.SetToolTip(this.checkBox_AutoUpdateEpisodeRatings, resources.GetString("checkBox_AutoUpdateEpisodeRatings.ToolTip"));
-            this.checkBox_AutoUpdateEpisodeRatings.UseVisualStyleBackColor = true;
-            this.checkBox_AutoUpdateEpisodeRatings.CheckedChanged += new System.EventHandler(this.checkBox_AutoUpdateEpisodeRatings_CheckedChanged);
-            // 
             // checkBox_ScanOnStartup
             // 
             this.checkBox_ScanOnStartup.AutoSize = true;
-            this.checkBox_ScanOnStartup.Location = new System.Drawing.Point(12, 154);
+            this.checkBox_ScanOnStartup.Location = new System.Drawing.Point(12, 150);
             this.checkBox_ScanOnStartup.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_ScanOnStartup.Name = "checkBox_ScanOnStartup";
             this.checkBox_ScanOnStartup.Size = new System.Drawing.Size(268, 17);
@@ -783,7 +783,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_AutoOnlineDataRefresh
             // 
             this.checkBox_AutoOnlineDataRefresh.AutoSize = true;
-            this.checkBox_AutoOnlineDataRefresh.Location = new System.Drawing.Point(12, 204);
+            this.checkBox_AutoOnlineDataRefresh.Location = new System.Drawing.Point(12, 196);
             this.checkBox_AutoOnlineDataRefresh.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_AutoOnlineDataRefresh.Name = "checkBox_AutoOnlineDataRefresh";
             this.checkBox_AutoOnlineDataRefresh.Size = new System.Drawing.Size(328, 17);
@@ -797,7 +797,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_AutoChooseOrder
             // 
             this.checkBox_AutoChooseOrder.AutoSize = true;
-            this.checkBox_AutoChooseOrder.Location = new System.Drawing.Point(12, 258);
+            this.checkBox_AutoChooseOrder.Location = new System.Drawing.Point(12, 244);
             this.checkBox_AutoChooseOrder.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_AutoChooseOrder.Name = "checkBox_AutoChooseOrder";
             this.checkBox_AutoChooseOrder.Size = new System.Drawing.Size(331, 17);
@@ -808,20 +808,52 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoChooseOrder.UseVisualStyleBackColor = true;
             this.checkBox_AutoChooseOrder.CheckedChanged += new System.EventHandler(this.checkBox_AutoChooseOrder_CheckedChanged);
             // 
-            // txtUserID
+            // labelTvdbApiKey
             // 
-            this.txtUserID.Location = new System.Drawing.Point(127, 53);
-            this.txtUserID.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.txtUserID.Name = "txtUserID";
-            this.txtUserID.Size = new System.Drawing.Size(180, 20);
-            this.txtUserID.TabIndex = 4;
-            this.toolTip_Help.SetToolTip(this.txtUserID, resources.GetString("txtUserID.ToolTip"));
-            this.txtUserID.TextChanged += new System.EventHandler(this.txtUserID_TextChanged);
+            this.labelTvdbApiKey.Location = new System.Drawing.Point(320, 53);
+            this.labelTvdbApiKey.Name = "labelTvdbApiKey";
+            this.labelTvdbApiKey.Size = new System.Drawing.Size(52, 20);
+            this.labelTvdbApiKey.Text = "API &key:";
+            this.labelTvdbApiKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // txtTvdbApiKey
+            // 
+            this.txtTvdbApiKey.Location = new System.Drawing.Point(375, 53);
+            this.txtTvdbApiKey.Name = "txtTvdbApiKey";
+            this.txtTvdbApiKey.Size = new System.Drawing.Size(240, 20);
+            this.toolTip_Help.SetToolTip(this.txtTvdbApiKey, "Your own TheTVDB API key - create one free in your account at thetvdb.com. Needed together with your PIN.");
+            this.txtTvdbApiKey.TextChanged += new System.EventHandler(this.txtTvdbApiKey_TextChanged);
+            // 
+            // labelTraktOwnClientId
+            // 
+            this.labelTraktOwnClientId.Location = new System.Drawing.Point(467, 150);
+            this.labelTraktOwnClientId.Name = "labelTraktOwnClientId";
+            this.labelTraktOwnClientId.Size = new System.Drawing.Size(150, 20);
+            this.labelTraktOwnClientId.Text = "Own Trakt client ID (optional):";
+            this.labelTraktOwnClientId.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // txtTraktOwnClientId
+            // 
+            this.txtTraktOwnClientId.Location = new System.Drawing.Point(620, 150);
+            this.txtTraktOwnClientId.Name = "txtTraktOwnClientId";
+            this.txtTraktOwnClientId.Size = new System.Drawing.Size(268, 20);
+            this.toolTip_Help.SetToolTip(this.txtTraktOwnClientId, "Leave empty to use MP-TVSeries' own Trakt application. To use your own, register one at trakt.tv/oauth/applications and paste its client ID here.");
+            this.txtTraktOwnClientId.TextChanged += new System.EventHandler(this.txtTraktOwnClientId_TextChanged);
+            // 
+            // txtTvdbPin
+            // 
+            this.txtTvdbPin.Location = new System.Drawing.Point(127, 53);
+            this.txtTvdbPin.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtTvdbPin.Name = "txtTvdbPin";
+            this.txtTvdbPin.Size = new System.Drawing.Size(180, 20);
+            this.txtTvdbPin.TabIndex = 5;
+            this.toolTip_Help.SetToolTip(this.txtTvdbPin, "Your TheTVDB.com subscriber PIN, used to log in to the v4 API. Leave blank if you are not a TVDB subscriber.");
+            this.txtTvdbPin.TextChanged += new System.EventHandler(this.txtTvdbPin_TextChanged);
             // 
             // checkDownloadEpisodeSnapshots
             // 
             this.checkDownloadEpisodeSnapshots.AutoSize = true;
-            this.checkDownloadEpisodeSnapshots.Location = new System.Drawing.Point(12, 443);
+            this.checkDownloadEpisodeSnapshots.Location = new System.Drawing.Point(12, 388);
             this.checkDownloadEpisodeSnapshots.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkDownloadEpisodeSnapshots.Name = "checkDownloadEpisodeSnapshots";
             this.checkDownloadEpisodeSnapshots.Size = new System.Drawing.Size(172, 17);
@@ -834,7 +866,7 @@ namespace WindowPlugins.GUITVSeries
             // chkBlankBanners
             // 
             this.chkBlankBanners.AutoSize = true;
-            this.chkBlankBanners.Location = new System.Drawing.Point(12, 470);
+            this.chkBlankBanners.Location = new System.Drawing.Point(12, 412);
             this.chkBlankBanners.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.chkBlankBanners.Name = "chkBlankBanners";
             this.chkBlankBanners.Size = new System.Drawing.Size(389, 17);
@@ -857,7 +889,7 @@ namespace WindowPlugins.GUITVSeries
             // linkDelUpdateTime
             // 
             this.linkDelUpdateTime.AutoSize = true;
-            this.linkDelUpdateTime.Location = new System.Drawing.Point(489, 204);
+            this.linkDelUpdateTime.Location = new System.Drawing.Point(489, 196);
             this.linkDelUpdateTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkDelUpdateTime.Name = "linkDelUpdateTime";
             this.linkDelUpdateTime.Size = new System.Drawing.Size(123, 13);
@@ -912,7 +944,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_AutoChooseSeries
             // 
             this.checkBox_AutoChooseSeries.AutoSize = true;
-            this.checkBox_AutoChooseSeries.Location = new System.Drawing.Point(12, 231);
+            this.checkBox_AutoChooseSeries.Location = new System.Drawing.Point(12, 220);
             this.checkBox_AutoChooseSeries.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_AutoChooseSeries.Name = "checkBox_AutoChooseSeries";
             this.checkBox_AutoChooseSeries.Size = new System.Drawing.Size(334, 17);
@@ -922,10 +954,51 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoChooseSeries.UseVisualStyleBackColor = true;
             this.checkBox_AutoChooseSeries.CheckedChanged += new System.EventHandler(this.checkBox_AutoChooseSeries_CheckedChanged);
             // 
+            // checkBox_LookForLocalIdFiles
+            // 
+            this.checkBox_LookForLocalIdFiles.AutoSize = true;
+            this.checkBox_LookForLocalIdFiles.Location = new System.Drawing.Point(467, 171);
+            this.checkBox_LookForLocalIdFiles.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.checkBox_LookForLocalIdFiles.Name = "checkBox_LookForLocalIdFiles";
+            this.checkBox_LookForLocalIdFiles.Size = new System.Drawing.Size(420, 17);
+            this.checkBox_LookForLocalIdFiles.TabIndex = 60;
+            this.checkBox_LookForLocalIdFiles.Text = "Look for a TVDB id in .tvdb / .nfo / .xml / .txt files in the show folder before searching online";
+            this.checkBox_LookForLocalIdFiles.UseVisualStyleBackColor = true;
+            this.checkBox_LookForLocalIdFiles.CheckedChanged += new System.EventHandler(this.checkBox_LookForLocalIdFiles_CheckedChanged);
+            // 
+            // buttonTraktAuthorize
+            // 
+            this.buttonTraktAuthorize.Location = new System.Drawing.Point(467, 108);
+            this.buttonTraktAuthorize.Name = "buttonTraktAuthorize";
+            this.buttonTraktAuthorize.Size = new System.Drawing.Size(225, 23);
+            this.buttonTraktAuthorize.TabIndex = 61;
+            this.buttonTraktAuthorize.Text = "Authorize with Trakt.tv (optional)...";
+            this.buttonTraktAuthorize.UseVisualStyleBackColor = true;
+            this.buttonTraktAuthorize.Click += new System.EventHandler(this.buttonTraktAuthorize_Click);
+            // 
+            // buttonTraktRemoveAuth
+            // 
+            this.buttonTraktRemoveAuth.Location = new System.Drawing.Point(698, 108);
+            this.buttonTraktRemoveAuth.Name = "buttonTraktRemoveAuth";
+            this.buttonTraktRemoveAuth.Size = new System.Drawing.Size(190, 23);
+            this.buttonTraktRemoveAuth.TabIndex = 63;
+            this.buttonTraktRemoveAuth.Text = "Remove Trakt authorization";
+            this.buttonTraktRemoveAuth.UseVisualStyleBackColor = true;
+            this.buttonTraktRemoveAuth.Click += new System.EventHandler(this.buttonTraktRemoveAuth_Click);
+            // 
+            // labelTraktAuthStatus
+            // 
+            this.labelTraktAuthStatus.AutoSize = true;
+            this.labelTraktAuthStatus.Location = new System.Drawing.Point(467, 136);
+            this.labelTraktAuthStatus.Name = "labelTraktAuthStatus";
+            this.labelTraktAuthStatus.Size = new System.Drawing.Size(120, 13);
+            this.labelTraktAuthStatus.TabIndex = 62;
+            this.labelTraktAuthStatus.Text = "Trakt.tv: checking...";
+            // 
             // checkBox_FullSeriesRetrieval
             // 
             this.checkBox_FullSeriesRetrieval.AutoSize = true;
-            this.checkBox_FullSeriesRetrieval.Location = new System.Drawing.Point(12, 339);
+            this.checkBox_FullSeriesRetrieval.Location = new System.Drawing.Point(12, 292);
             this.checkBox_FullSeriesRetrieval.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_FullSeriesRetrieval.Name = "checkBox_FullSeriesRetrieval";
             this.checkBox_FullSeriesRetrieval.Size = new System.Drawing.Size(263, 17);
@@ -1329,7 +1402,7 @@ namespace WindowPlugins.GUITVSeries
             0,
             0,
             0});
-            this.numericUpDownImportDelay.Location = new System.Drawing.Point(172, 174);
+            this.numericUpDownImportDelay.Location = new System.Drawing.Point(172, 170);
             this.numericUpDownImportDelay.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numericUpDownImportDelay.Maximum = new decimal(new int[] {
             3600,
@@ -1680,7 +1753,7 @@ namespace WindowPlugins.GUITVSeries
             this.dbCheckBoxTraktCommunityRatings.AutoSize = true;
             this.dbCheckBoxTraktCommunityRatings.Checked = true;
             this.dbCheckBoxTraktCommunityRatings.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.dbCheckBoxTraktCommunityRatings.Location = new System.Drawing.Point(12, 285);
+            this.dbCheckBoxTraktCommunityRatings.Location = new System.Drawing.Point(12, 268);
             this.dbCheckBoxTraktCommunityRatings.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.dbCheckBoxTraktCommunityRatings.Name = "dbCheckBoxTraktCommunityRatings";
             this.dbCheckBoxTraktCommunityRatings.Option = "TraktCommunityRatings";
@@ -1696,7 +1769,7 @@ namespace WindowPlugins.GUITVSeries
             this.dbOptCheckBoxCleanOnlineEpisodes.AutoSize = true;
             this.dbOptCheckBoxCleanOnlineEpisodes.Checked = true;
             this.dbOptCheckBoxCleanOnlineEpisodes.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.dbOptCheckBoxCleanOnlineEpisodes.Location = new System.Drawing.Point(12, 366);
+            this.dbOptCheckBoxCleanOnlineEpisodes.Location = new System.Drawing.Point(12, 316);
             this.dbOptCheckBoxCleanOnlineEpisodes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.dbOptCheckBoxCleanOnlineEpisodes.Name = "dbOptCheckBoxCleanOnlineEpisodes";
             this.dbOptCheckBoxCleanOnlineEpisodes.Option = "CleanOnlineEpisodes";
@@ -1712,7 +1785,7 @@ namespace WindowPlugins.GUITVSeries
             // dbOptionCheckBox4
             // 
             this.dbOptionCheckBox4.AutoSize = true;
-            this.dbOptionCheckBox4.Location = new System.Drawing.Point(12, 588);
+            this.dbOptionCheckBox4.Location = new System.Drawing.Point(12, 484);
             this.dbOptionCheckBox4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.dbOptionCheckBox4.Name = "dbOptionCheckBox4";
             this.dbOptionCheckBox4.Option = "checkArtwork";
@@ -1802,20 +1875,6 @@ namespace WindowPlugins.GUITVSeries
         "ve an airdate or airs at a future date\r\nThis will only count episodes that you c" +
         "an see when browsing GUI.");
             this.dbOptChkBoxCountEmptyFutureEps.UseVisualStyleBackColor = true;
-            // 
-            // dbOptionCheckBoxMarkRatedEpsAsWatched
-            // 
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.AutoSize = true;
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.Location = new System.Drawing.Point(467, 198);
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.Name = "dbOptionCheckBoxMarkRatedEpsAsWatched";
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.Option = "MarkRatedEpisodeAsWatched";
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.Size = new System.Drawing.Size(305, 17);
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.TabIndex = 35;
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.Text = "Mark Episodes as Watched if rated online at theTVDB.com";
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.ToolTip = "";
-            this.toolTip_InfoHelp.SetToolTip(this.dbOptionCheckBoxMarkRatedEpsAsWatched, resources.GetString("dbOptionCheckBoxMarkRatedEpsAsWatched.ToolTip"));
-            this.dbOptionCheckBoxMarkRatedEpsAsWatched.UseVisualStyleBackColor = true;
             // 
             // optionAsk2Rate
             // 
@@ -2658,7 +2717,6 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.checkboxAutoDownloadFanartSeriesName);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoDownloadMissingArtwork);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoUpdateAllFanart);
-            this.panel_OnlineData.Controls.Add(this.checkBox_AutoUpdateEpisodeRatings);
             this.panel_OnlineData.Controls.Add(this.checkBox_ScanOnStartup);
             this.panel_OnlineData.Controls.Add(this.label73);
             this.panel_OnlineData.Controls.Add(this.spinMaxFanarts);
@@ -2666,12 +2724,15 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.label71);
             this.panel_OnlineData.Controls.Add(this.cboFanartResolution);
             this.panel_OnlineData.Controls.Add(this.chkAutoDownloadFanart);
-            this.panel_OnlineData.Controls.Add(this.linkAccountID);
             this.panel_OnlineData.Controls.Add(this.label2);
             this.panel_OnlineData.Controls.Add(this.numericUpDown_AutoOnlineDataRefresh);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoOnlineDataRefresh);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoChooseOrder);
-            this.panel_OnlineData.Controls.Add(this.txtUserID);
+            this.panel_OnlineData.Controls.Add(this.txtTvdbPin);
+            this.panel_OnlineData.Controls.Add(this.labelTvdbApiKey);
+            this.panel_OnlineData.Controls.Add(this.txtTvdbApiKey);
+            this.panel_OnlineData.Controls.Add(this.labelTraktOwnClientId);
+            this.panel_OnlineData.Controls.Add(this.txtTraktOwnClientId);
             this.panel_OnlineData.Controls.Add(this.label54);
             this.panel_OnlineData.Controls.Add(this.checkDownloadEpisodeSnapshots);
             this.panel_OnlineData.Controls.Add(this.chkBlankBanners);
@@ -2682,6 +2743,10 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.comboOnlineLang);
             this.panel_OnlineData.Controls.Add(this.checkBox_OverrideComboLang);
             this.panel_OnlineData.Controls.Add(this.checkBox_OnlineSearch);
+            this.panel_OnlineData.Controls.Add(this.buttonTraktAuthorize);
+            this.panel_OnlineData.Controls.Add(this.buttonTraktRemoveAuth);
+            this.panel_OnlineData.Controls.Add(this.labelTraktAuthStatus);
+            this.panel_OnlineData.Controls.Add(this.checkBox_LookForLocalIdFiles);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoChooseSeries);
             this.panel_OnlineData.Controls.Add(this.checkBox_FullSeriesRetrieval);
             this.panel_OnlineData.Location = new System.Drawing.Point(10, 23);
@@ -2714,7 +2779,7 @@ namespace WindowPlugins.GUITVSeries
             // dbOptCheckBoxRemoveEpZero
             // 
             this.dbOptCheckBoxRemoveEpZero.AutoSize = true;
-            this.dbOptCheckBoxRemoveEpZero.Location = new System.Drawing.Point(39, 393);
+            this.dbOptCheckBoxRemoveEpZero.Location = new System.Drawing.Point(39, 340);
             this.dbOptCheckBoxRemoveEpZero.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.dbOptCheckBoxRemoveEpZero.Name = "dbOptCheckBoxRemoveEpZero";
             this.dbOptCheckBoxRemoveEpZero.Option = "";
@@ -2727,7 +2792,7 @@ namespace WindowPlugins.GUITVSeries
             // dbOptCheckBoxDownloadActors
             // 
             this.dbOptCheckBoxDownloadActors.AutoSize = true;
-            this.dbOptCheckBoxDownloadActors.Location = new System.Drawing.Point(448, 576);
+            this.dbOptCheckBoxDownloadActors.Location = new System.Drawing.Point(448, 508);
             this.dbOptCheckBoxDownloadActors.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.dbOptCheckBoxDownloadActors.Name = "dbOptCheckBoxDownloadActors";
             this.dbOptCheckBoxDownloadActors.Option = "AutoDownloadActors";
@@ -2740,7 +2805,7 @@ namespace WindowPlugins.GUITVSeries
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(213, 618);
+            this.label11.Location = new System.Drawing.Point(213, 510);
             this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(43, 13);
@@ -2749,7 +2814,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // nudConsecFailures
             // 
-            this.nudConsecFailures.Location = new System.Drawing.Point(143, 616);
+            this.nudConsecFailures.Location = new System.Drawing.Point(143, 508);
             this.nudConsecFailures.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.nudConsecFailures.Maximum = new decimal(new int[] {
             10,
@@ -2774,7 +2839,7 @@ namespace WindowPlugins.GUITVSeries
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(9, 618);
+            this.label20.Location = new System.Drawing.Point(9, 510);
             this.label20.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(121, 13);
@@ -2783,7 +2848,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // buttonArtworkDownloadLimits
             // 
-            this.buttonArtworkDownloadLimits.Location = new System.Drawing.Point(39, 548);
+            this.buttonArtworkDownloadLimits.Location = new System.Drawing.Point(39, 534);
             this.buttonArtworkDownloadLimits.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.buttonArtworkDownloadLimits.Name = "buttonArtworkDownloadLimits";
             this.buttonArtworkDownloadLimits.Size = new System.Drawing.Size(225, 30);
@@ -2795,7 +2860,7 @@ namespace WindowPlugins.GUITVSeries
             // dbOptCheckBoxGetTextBanners
             // 
             this.dbOptCheckBoxGetTextBanners.AutoSize = true;
-            this.dbOptCheckBoxGetTextBanners.Location = new System.Drawing.Point(12, 497);
+            this.dbOptCheckBoxGetTextBanners.Location = new System.Drawing.Point(12, 436);
             this.dbOptCheckBoxGetTextBanners.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.dbOptCheckBoxGetTextBanners.Name = "dbOptCheckBoxGetTextBanners";
             this.dbOptCheckBoxGetTextBanners.Option = "GetTextBanners";
@@ -2810,7 +2875,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(9, 418);
+            this.label18.Location = new System.Drawing.Point(9, 366);
             this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(50, 13);
@@ -2820,7 +2885,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // groupBox5
             // 
-            this.groupBox5.Location = new System.Drawing.Point(67, 424);
+            this.groupBox5.Location = new System.Drawing.Point(67, 372);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -2831,7 +2896,7 @@ namespace WindowPlugins.GUITVSeries
             // lblImportDelaySecs
             // 
             this.lblImportDelaySecs.AutoSize = true;
-            this.lblImportDelaySecs.Location = new System.Drawing.Point(253, 177);
+            this.lblImportDelaySecs.Location = new System.Drawing.Point(253, 173);
             this.lblImportDelaySecs.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblImportDelaySecs.Name = "lblImportDelaySecs";
             this.lblImportDelaySecs.Size = new System.Drawing.Size(29, 13);
@@ -2841,7 +2906,7 @@ namespace WindowPlugins.GUITVSeries
             // lblImportDelayCaption
             // 
             this.lblImportDelayCaption.AutoSize = true;
-            this.lblImportDelayCaption.Location = new System.Drawing.Point(45, 176);
+            this.lblImportDelayCaption.Location = new System.Drawing.Point(45, 172);
             this.lblImportDelayCaption.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblImportDelayCaption.Name = "lblImportDelayCaption";
             this.lblImportDelayCaption.Size = new System.Drawing.Size(110, 13);
@@ -2851,7 +2916,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_AutoUpdateAllFanart
             // 
             this.checkBox_AutoUpdateAllFanart.AutoSize = true;
-            this.checkBox_AutoUpdateAllFanart.Location = new System.Drawing.Point(448, 522);
+            this.checkBox_AutoUpdateAllFanart.Location = new System.Drawing.Point(448, 460);
             this.checkBox_AutoUpdateAllFanart.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_AutoUpdateAllFanart.Name = "checkBox_AutoUpdateAllFanart";
             this.checkBox_AutoUpdateAllFanart.Size = new System.Drawing.Size(192, 17);
@@ -2862,7 +2927,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // label73
             // 
-            this.label73.Location = new System.Drawing.Point(629, 494);
+            this.label73.Location = new System.Drawing.Point(629, 433);
             this.label73.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label73.Name = "label73";
             this.label73.Size = new System.Drawing.Size(76, 23);
@@ -2872,7 +2937,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // spinMaxFanarts
             // 
-            this.spinMaxFanarts.Location = new System.Drawing.Point(567, 497);
+            this.spinMaxFanarts.Location = new System.Drawing.Point(567, 436);
             this.spinMaxFanarts.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.spinMaxFanarts.Maximum = new decimal(new int[] {
             99,
@@ -2896,7 +2961,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // label72
             // 
-            this.label72.Location = new System.Drawing.Point(468, 494);
+            this.label72.Location = new System.Drawing.Point(468, 433);
             this.label72.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label72.Name = "label72";
             this.label72.Size = new System.Drawing.Size(70, 21);
@@ -2906,7 +2971,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // label71
             // 
-            this.label71.Location = new System.Drawing.Point(468, 465);
+            this.label71.Location = new System.Drawing.Point(468, 407);
             this.label71.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label71.Name = "label71";
             this.label71.Size = new System.Drawing.Size(77, 22);
@@ -2922,7 +2987,7 @@ namespace WindowPlugins.GUITVSeries
             "Both",
             "1280x720",
             "1920x1080"});
-            this.cboFanartResolution.Location = new System.Drawing.Point(567, 466);
+            this.cboFanartResolution.Location = new System.Drawing.Point(567, 408);
             this.cboFanartResolution.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cboFanartResolution.Name = "cboFanartResolution";
             this.cboFanartResolution.Size = new System.Drawing.Size(103, 21);
@@ -2932,7 +2997,7 @@ namespace WindowPlugins.GUITVSeries
             // chkAutoDownloadFanart
             // 
             this.chkAutoDownloadFanart.AutoSize = true;
-            this.chkAutoDownloadFanart.Location = new System.Drawing.Point(448, 443);
+            this.chkAutoDownloadFanart.Location = new System.Drawing.Point(448, 388);
             this.chkAutoDownloadFanart.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.chkAutoDownloadFanart.Name = "chkAutoDownloadFanart";
             this.chkAutoDownloadFanart.Size = new System.Drawing.Size(202, 17);
@@ -2941,22 +3006,10 @@ namespace WindowPlugins.GUITVSeries
             this.chkAutoDownloadFanart.UseVisualStyleBackColor = true;
             this.chkAutoDownloadFanart.CheckedChanged += new System.EventHandler(this.chkAutoDownloadFanart_CheckedChanged);
             // 
-            // linkAccountID
-            // 
-            this.linkAccountID.AutoSize = true;
-            this.linkAccountID.Location = new System.Drawing.Point(319, 56);
-            this.linkAccountID.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.linkAccountID.Name = "linkAccountID";
-            this.linkAccountID.Size = new System.Drawing.Size(90, 13);
-            this.linkAccountID.TabIndex = 7;
-            this.linkAccountID.TabStop = true;
-            this.linkAccountID.Text = "Account Identifier";
-            this.linkAccountID.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkAccountID_LinkClicked);
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(442, 205);
+            this.label2.Location = new System.Drawing.Point(442, 197);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(39, 13);
@@ -2965,7 +3018,7 @@ namespace WindowPlugins.GUITVSeries
             // 
             // numericUpDown_AutoOnlineDataRefresh
             // 
-            this.numericUpDown_AutoOnlineDataRefresh.Location = new System.Drawing.Point(356, 201);
+            this.numericUpDown_AutoOnlineDataRefresh.Location = new System.Drawing.Point(356, 193);
             this.numericUpDown_AutoOnlineDataRefresh.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numericUpDown_AutoOnlineDataRefresh.Maximum = new decimal(new int[] {
             168,
@@ -2994,7 +3047,7 @@ namespace WindowPlugins.GUITVSeries
             this.label54.Name = "label54";
             this.label54.Size = new System.Drawing.Size(78, 20);
             this.label54.TabIndex = 3;
-            this.label54.Text = "&Account ID:";
+            this.label54.Text = "TVDB &PIN:";
             this.label54.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label29
@@ -3056,7 +3109,6 @@ namespace WindowPlugins.GUITVSeries
             this.groupBox1.Controls.Add(this.dbOptionCheckBoxSubstituteMissingArtwork);
             this.groupBox1.Controls.Add(this.nudScanRemoteShareFrequency);
             this.groupBox1.Controls.Add(this.checkBox_scanRemoteShares);
-            this.groupBox1.Controls.Add(this.dbOptionCheckBoxMarkRatedEpsAsWatched);
             this.groupBox1.Controls.Add(this.checkboxRatingDisplayStars);
             this.groupBox1.Controls.Add(this.label77);
             this.groupBox1.Controls.Add(this.label76);
@@ -3951,7 +4003,9 @@ namespace WindowPlugins.GUITVSeries
             this.listBox_Log.Location = new System.Drawing.Point(15, 15);
             this.listBox_Log.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listBox_Log.Name = "listBox_Log";
-            this.listBox_Log.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
+            this.listBox_Log.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listBox_Log.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox_Log_KeyDown);
+            this.listBox_Log.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listBox_Log_MouseUp);
             this.listBox_Log.Size = new System.Drawing.Size(120, 16);
             this.listBox_Log.TabIndex = 5;
             // 
@@ -4068,6 +4122,7 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.ToolStripMenuItem hideToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openFileLocationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem watchedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem unWatchedToolStripMenuItem;
         //private System.Windows.Forms.ToolStripMenuItem resetUserSelectionsToolStripMenuItem;
@@ -4143,7 +4198,6 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.CheckBox checkboxAutoDownloadFanartSeriesName;
         private System.Windows.Forms.CheckBox checkBox_AutoDownloadMissingArtwork;
         private System.Windows.Forms.CheckBox checkBox_AutoUpdateAllFanart;
-        private System.Windows.Forms.CheckBox checkBox_AutoUpdateEpisodeRatings;
         private System.Windows.Forms.CheckBox checkBox_ScanOnStartup;
         private System.Windows.Forms.Label label73;
         private System.Windows.Forms.NumericUpDown spinMaxFanarts;
@@ -4151,12 +4205,15 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.Label label71;
         private System.Windows.Forms.ComboBox cboFanartResolution;
         private System.Windows.Forms.CheckBox chkAutoDownloadFanart;
-        private System.Windows.Forms.LinkLabel linkAccountID;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numericUpDown_AutoOnlineDataRefresh;
         private System.Windows.Forms.CheckBox checkBox_AutoOnlineDataRefresh;
         private System.Windows.Forms.CheckBox checkBox_AutoChooseOrder;
-        private System.Windows.Forms.TextBox txtUserID;
+        private System.Windows.Forms.TextBox txtTvdbPin;
+        private System.Windows.Forms.Label labelTvdbApiKey;
+        private System.Windows.Forms.TextBox txtTvdbApiKey;
+        private System.Windows.Forms.Label labelTraktOwnClientId;
+        private System.Windows.Forms.TextBox txtTraktOwnClientId;
         private System.Windows.Forms.Label label54;
         private System.Windows.Forms.CheckBox checkDownloadEpisodeSnapshots;
         private System.Windows.Forms.CheckBox chkBlankBanners;
@@ -4168,6 +4225,10 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.CheckBox checkBox_OverrideComboLang;
         private System.Windows.Forms.CheckBox checkBox_OnlineSearch;
         private System.Windows.Forms.CheckBox checkBox_AutoChooseSeries;
+        private System.Windows.Forms.CheckBox checkBox_LookForLocalIdFiles;
+        private System.Windows.Forms.Button buttonTraktAuthorize;
+        private System.Windows.Forms.Button buttonTraktRemoveAuth;
+        private System.Windows.Forms.Label labelTraktAuthStatus;
         private System.Windows.Forms.CheckBox checkBox_FullSeriesRetrieval;
         private System.Windows.Forms.TabPage tabPage_MP_DisplayControl;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -4183,7 +4244,6 @@ namespace WindowPlugins.GUITVSeries
         private Configuration.DBOptionCheckBox dbOptionCheckBoxSubstituteMissingArtwork;
         private System.Windows.Forms.NumericUpDown nudScanRemoteShareFrequency;
         private System.Windows.Forms.CheckBox checkBox_scanRemoteShares;
-        private Configuration.DBOptionCheckBox dbOptionCheckBoxMarkRatedEpsAsWatched;
         private System.Windows.Forms.CheckBox checkboxRatingDisplayStars;
         private System.Windows.Forms.Label label77;
         private System.Windows.Forms.Label label76;

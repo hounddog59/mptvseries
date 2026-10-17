@@ -337,11 +337,36 @@ namespace WindowPlugins.GUITVSeries.Configuration
             if (iThreadCount < 8) iThreadCount = 8;
             System.Threading.ThreadPool.SetMaxThreads(iThreadCount, iThreadCount);            
 
+            // Only for the automatic first search, never a search the user typed themselves: if a show-level
+            // file next to the videos (tvshow.nfo / series.xml / a labelled .txt) already carries a TheTVDB id,
+            // use that instead of fuzzy-matching the folder name (which can't tell same-titled shows apart).
+            // Captured here on the UI thread; the file reads happen in the worker below.
+            List<string> localFiles = null;
+            if (string.IsNullOrEmpty(customString) && DBOption.GetOptions(DBOption.cLookForLocalIdFiles))
+                localFiles = newSeries.Select(pr => pr.full_filename).ToList();
+
             System.Threading.ThreadPool.QueueUserWorkItem((o) =>
                 {
                     // tell user we are now searching
                     SearchProgress(cSearching, null, row);
-                    GetSeries gs = new GetSeries(toSearch);
+
+                    GetSeries gs = null;
+                    if (localFiles != null)
+                    {
+                        string idSource;
+                        int localId = LocalSeriesIdFinder.FindSeriesId(localFiles, out idSource);
+                        if (localId > 0)
+                        {
+                            gs = GetSeries.FromKnownId(localId);
+                            if (gs != null)
+                                MPTVSeriesLog.Write(string.Format("\"{0}\" identified as series {1} from local file '{2}' (name search skipped)", toSearch, localId, idSource));
+                        }
+                    }
+
+                    // no usable local id (or the option is off / the user searched by hand): normal name search
+                    if (gs == null)
+                        gs = new GetSeries(toSearch);
+
                     // and give the results
                     SearchProgress(toSearch, gs, row);
                 });
@@ -387,9 +412,16 @@ namespace WindowPlugins.GUITVSeries.Configuration
 
             var actionCell = row.Cells[ColIndexOf(colAction)] as DataGridViewComboBoxCell;
 
-            // overwrite from the cellchanged event which set it to approved
+            // Setting comboCell.Value just above is relied on to trigger a CellValueChanged handler
+            // elsewhere that sets this to Approve as a side effect, for the normal case - this direct,
+            // explicit set is a deliberate backstop for that, not a duplicate of it: that indirect path
+            // depends on a UI event firing correctly off a background-thread-driven update, which isn't
+            // something to rely on alone. Approve is correct whenever we have a confident match, full
+            // stop, regardless of whether that side effect happened to fire this time.
             if (searchResult.PerfectMatch == null)
                 actionCell.Value = displayedActions[UserInputResults.SeriesAction.Skip];
+            else
+                actionCell.Value = displayedActions[UserInputResults.SeriesAction.Approve];
 
         }
 

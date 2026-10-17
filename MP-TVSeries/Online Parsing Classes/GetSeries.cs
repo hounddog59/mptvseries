@@ -109,6 +109,49 @@ namespace WindowPlugins.GUITVSeries
             return null;
         }
 
+        private GetSeries(DBOnlineSeries knownSeries)
+        {
+            mListSeries = new List<DBOnlineSeries> { knownSeries };
+            PerfectMatch = knownSeries;
+        }
+
+        /// <summary>
+        /// Result set for a series whose TheTVDB id was already known (e.g. read from a local tvshow.nfo),
+        /// so no name search is needed. Returns null if the id can't be fetched, so callers can fall back
+        /// to the normal name search.
+        /// </summary>
+        public static GetSeries FromKnownId(int tvdbId)
+        {
+            try
+            {
+                var fetched = new UpdateSeries(tvdbId.ToString()).Results;
+                DBOnlineSeries series = fetched == null ? null : fetched.FirstOrDefault(s => s != null && (int)s[DBOnlineSeries.cID] == tvdbId);
+                return series == null ? null : new GetSeries(series);
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Could not fetch series " + tvdbId + " from its local id file, falling back to name search: " + ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>Punctuation removed, runs of single letters joined ("R J Decker" / "R.J. Decker" -> "RJ Decker").</summary>
+        static string TidyForSearch( string name )
+        {
+            if ( string.IsNullOrEmpty( name ) ) return name;
+            var words = new List<string>();
+            foreach ( string raw in System.Text.RegularExpressions.Regex.Split( name.Replace( "'", "" ).Replace( "\u2019", "" ), @"[\s\._\-:;,!?""/()\[\]]+" ) )
+            {
+                if ( raw.Length == 0 ) continue;
+                // join consecutive single letters into one word
+                if ( raw.Length == 1 && char.IsLetter( raw[0] ) && words.Count > 0 && words[words.Count - 1].All( char.IsUpper ) && words[words.Count - 1].Length < 6 && char.IsUpper( raw[0] ) )
+                    words[words.Count - 1] += raw;
+                else
+                    words.Add( raw );
+            }
+            return string.Join( " ", words.ToArray() );
+        }
+
         public GetSeries(String aSeriesName)
         {
             string lUserLanguage = DBOption.GetOptions( DBOption.cOnlineLanguage );
@@ -125,6 +168,19 @@ namespace WindowPlugins.GUITVSeries
             {
                 lNode = Online_Parsing_Classes.OnlineAPI.GetSeries( aSeriesName, "en" );
                 if ( lNode == null ) return;
+            }
+
+            // still nothing: try once more with the punctuation tidied away - folder names often spell a title
+            // differently ("R J Decker", "RJ Decker" for "R.J. Decker", "Marvels Agents of SHIELD")
+            if ( lNode.ChildNodes.Count == 0 )
+            {
+                string tidied = TidyForSearch( aSeriesName );
+                if ( !string.IsNullOrEmpty( tidied ) && !string.Equals( tidied, aSeriesName.Trim(), StringComparison.OrdinalIgnoreCase ) )
+                {
+                    MPTVSeriesLog.Write( string.Format( "No results for \"{0}\", searching again as \"{1}\"", aSeriesName, tidied ) );
+                    XmlNode retry = Online_Parsing_Classes.OnlineAPI.GetSeries( tidied, "en" );
+                    if ( retry != null ) lNode = retry;
+                }
             }
 
             foreach ( XmlNode itemNode in lNode.ChildNodes)

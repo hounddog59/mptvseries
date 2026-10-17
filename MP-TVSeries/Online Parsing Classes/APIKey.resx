@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Key" xml:space="preserve">
-    <value>0023593574450A60</value>
-    <comment>Do NOT submitt this file with a working APIKey, developers need to get their own</comment>
+    <value>PUT-YOUR-TVDB-V4-API-KEY-HERE</value>
+    <comment>Do NOT commit a working key. Create a v4 project key from your thetvdb.com account and put it here before building - every developer needs their own. Users of a built copy never see this; they enter their own subscriber PIN in the plugin settings.</comment>
   </data>
 </root>

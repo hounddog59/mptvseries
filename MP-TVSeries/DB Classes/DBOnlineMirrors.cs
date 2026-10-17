@@ -24,49 +24,48 @@
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 
 namespace WindowPlugins.GUITVSeries
 {
     class DBOnlineMirror
     {
-        [Flags]
-        private enum TypeMask
-        {
-            XML = 0x0001,
-            Banners = 0x0002,
-            Zip = 0x0004
-        }
-
         public const String cTableName = "OnlineMirrors";
 
         public const String cID = "ID";
         public const String cInterface = "Interface";
         public const String cBanners = "Banners";
-        public const String cMirrorpath = "mirrorpath";
-        public const String cTypeMask = "Typemask";
         readonly Dictionary<string, DBField> mfields = new Dictionary<string, DBField>();
 
         private static String mCurrentInterface = String.Empty;
         private static String mCurrentBanner = String.Empty;
         private static String mCurrentZip = String.Empty;
-        private static readonly Dictionary<String, String> mOnlineToFieldMap = new Dictionary<String, String>();
-        private static readonly List<DBOnlineMirror> mMemoryMirrors = new List<DBOnlineMirror>();
 
         /// <summary>
         /// if you compile yourself get you're own key or it will have to be disabled!
         /// </summary>
-        public static string cApiKey = string.Empty;
+        // key built into this copy (APIKey.resx) - empty / placeholder in a public release
+        private static string builtInApiKey = string.Empty;
+
+        /// <summary>The TheTVDB API key to use: the one entered in Configuration, otherwise one built into this copy.</summary>
+        public static string cApiKey
+        {
+            get
+            {
+                string own = DBOption.GetOptions(DBOption.cTvdbApiKey);
+                if (!string.IsNullOrEmpty(own) && own.Trim().Length > 0) return own.Trim();
+                if (string.IsNullOrEmpty(builtInApiKey) || builtInApiKey.StartsWith("PUT-YOUR")) return string.Empty;
+                return builtInApiKey;
+            }
+        }
         private static bool mMirrorsAvailable = false;
 
         static DBOnlineMirror()
         {
-            mOnlineToFieldMap.Add("id", cID);
-            mOnlineToFieldMap.Add("interface", cInterface);
-            mOnlineToFieldMap.Add("banners", cBanners);
-            mOnlineToFieldMap.Add("typemask", cTypeMask);
-
-            cApiKey = new System.Resources.ResourceManager("WindowPlugins.GUITVSeries.Online_Parsing_Classes.APIKey", typeof(DBOnlineMirror).Assembly).GetString("Key");
+            try
+            {
+                builtInApiKey = new System.Resources.ResourceManager("WindowPlugins.GUITVSeries.Online_Parsing_Classes.APIKey", typeof(DBOnlineMirror).Assembly).GetString("Key") ?? string.Empty;
+            }
+            catch (Exception) { builtInApiKey = string.Empty; }
         }
 
         private DBOnlineMirror()
@@ -103,20 +102,6 @@ namespace WindowPlugins.GUITVSeries
             }
         }
 
-        private static void CheckMirrorCapable(List<DBOnlineMirror> mirrorList, TypeMask mask)
-        {
-            for (int i = 0; i < mirrorList.Count; i++)
-            {
-                if (mirrorList[i][cTypeMask] == null || !ContainsTypeMask((TypeMask)(int)mirrorList[i][cTypeMask], mask))                              
-                    mirrorList.RemoveAt(i--);
-            }
-        }
-
-        private static bool ContainsTypeMask(TypeMask combined, TypeMask checkagainst)
-        {
-            return ((combined & checkagainst) == checkagainst);
-        }
-
         public static void Init()
         {
             if (!DBOption.GetOptions(DBOption.cNewAPIUpgradeDone)) // upgrade
@@ -127,96 +112,38 @@ namespace WindowPlugins.GUITVSeries
 
             if (String.IsNullOrEmpty(cApiKey))
             {
-                MPTVSeriesLog.Write("No APIKey...if you compile yourself you need to register an APIKey at theTVDB.com and add it to the resourceFile, nothing will be downloaded!");
+                MPTVSeriesLog.Write("No TheTVDB API key: create your own (free) at thetvdb.com and enter it, with your PIN, on the Online Data tab of MP-TVSeries Configuration. Nothing can be downloaded until then.");
+                IsMirrorsAvailable = false;
                 return;
             }
 
-            // no mirrors yet - refresh using "seed"
-            IsMirrorsAvailable = true;
-            string sMirror = DBOption.GetOptions(DBOption.cMainMirror).ToString().Replace("http://", "https://");
-            if (!LoadMirrorList(sMirror))
+            // TVDB v4 migration: v4 has no "mirrors" concept at all - there is a single base
+            // URL (https://api4.thetvdb.com/v4) and no relative-path banner mirrors either
+            // (artwork URLs come back absolute). IsMirrorsAvailable is used throughout the
+            // rest of the plugin purely as an "is TheTVDB reachable and are we configured
+            // correctly" flag, so we repurpose it here: a successful v4 login stands in for
+            // "mirrors available".
+            try
             {
+                string pin = DBOption.GetOptions(DBOption.cTvdbV4Pin);
+                IsMirrorsAvailable = Online_Parsing_Classes.V4.TvdbV4Client.VerifyLogin(cApiKey, pin);
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Error: unable to log in to TheTVDB v4 API: " + ex.Message);
                 IsMirrorsAvailable = false;
-                // Try again using the Hardcoded mirror
-                if (!sMirror.Equals(DBOption.cMainMirrorHardCoded))
-                {
-                    MPTVSeriesLog.Write("Attempting to retrieve Mirrors from default location");
-                    if (LoadMirrorList(DBOption.cMainMirrorHardCoded))
-                    {   
-                        DBOption.SetOptions(DBOption.cMainMirror, DBOption.cMainMirrorHardCoded);
-                        IsMirrorsAvailable = true;
-                    }
-                }
-                if (!IsMirrorsAvailable)
-                {
-                    MPTVSeriesLog.Write("Warning: No mirrors received, nothing will be downloaded!");
-                    return;
-                }
-            }      
-             
-            //This is now handled server-side using mod_rewrite and round-robin DNS,
-            //so the mirrors file is somewhat deprecated.
+            }
 
-            var xmlMirrors = new List<DBOnlineMirror>(mMemoryMirrors);
-            var zipMirrors = new List<DBOnlineMirror>(mMemoryMirrors);
-            var bannerMirrors = new List<DBOnlineMirror>(mMemoryMirrors);
-
-            // seperate them by which one can do what
-            CheckMirrorCapable(xmlMirrors, TypeMask.XML);
-            CheckMirrorCapable(zipMirrors, TypeMask.Zip);
-            CheckMirrorCapable(bannerMirrors, TypeMask.Banners);
-
-            // select a random one for each of them
-            var r = new Random();
-            if(xmlMirrors.Count > 0)
-                mCurrentInterface = xmlMirrors[r.Next(xmlMirrors.Count)][cMirrorpath].ToString().Replace("http://", "https://");
-            if (zipMirrors.Count > 0)
-                mCurrentZip = zipMirrors[r.Next(zipMirrors.Count)][cMirrorpath].ToString().Replace("http://", "https://") + "/";
-            if (bannerMirrors.Count > 0)
-                mCurrentBanner = bannerMirrors[r.Next(bannerMirrors.Count)][cMirrorpath].ToString().Replace("http://", "https://") + "/banners/";
+            if (!IsMirrorsAvailable)
+            {
+                MPTVSeriesLog.Write("Warning: could not log in to TheTVDB v4 API (check your API key and, if you're a TVDB subscriber, your PIN) - nothing will be downloaded!");
+            }
         }
 
         public static bool IsMirrorsAvailable
         {
             get { return mMirrorsAvailable; }
             set { mMirrorsAvailable = value; }
-        }
-          
-        private static bool LoadMirrorList(String sServer)
-        {
-            try
-            {
-                XmlNode node = Online_Parsing_Classes.OnlineAPI.GetMirrors(AppendAPI(sServer, true));
-
-                if (node == null)
-                    return false;
-
-                int count = 0;
-                foreach (XmlNode itemNode in node.ChildNodes)
-                {
-                    // create a new OnlineMirror object
-                    var mirror = new DBOnlineMirror();
-
-                    foreach (XmlNode propertyNode in itemNode.ChildNodes)
-                    {
-                        if (mOnlineToFieldMap.ContainsKey(propertyNode.Name))
-                            mirror[mOnlineToFieldMap[propertyNode.Name]] = propertyNode.InnerText;
-                        else
-                        {
-                            mirror[propertyNode.Name] = propertyNode.InnerText;
-                        }
-                    }
-                    count++;
-                    mMemoryMirrors.Add(mirror);
-                }
-                MPTVSeriesLog.Write("Received " + count.ToString() + " mirror site(s) from " + sServer);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MPTVSeriesLog.Write(string.Format("Error: unable to retrieve list of mirrors online: {0}", ex.Message));
-                return false;
-            }
         }
 
         static string AppendAPI(string path, bool appendKey)

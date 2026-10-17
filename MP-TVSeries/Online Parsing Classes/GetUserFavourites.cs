@@ -47,27 +47,16 @@ namespace WindowPlugins.GUITVSeries
 
         # endregion properties
 
-        public GetUserFavourites(string sAccountID)
-        {
-            doWork(sAccountID);
-        }
+        /// <summary>True when the favourites could be read from TheTVDB (false: unknown, leave local favourites alone).</summary>
+        public bool Retrieved { get; private set; }
 
-        public void doWork(string sAccountID)
+        public GetUserFavourites()
         {
-            XmlNode node = Online_Parsing_Classes.OnlineAPI.GetUserFavourites(sAccountID);          
-
-            if (node != null)
+            var ids = Online_Parsing_Classes.V4.TvdbV4Favourites.GetSeriesIds();
+            if (ids != null)
             {
-                string id = string.Empty;
-                foreach (XmlNode itemNode in node.ChildNodes)
-                {
-                    if (itemNode.Name == "Series")
-                    {
-                        id = string.Empty;
-                        id = itemNode.InnerText;                            
-                        Series.Add(id);
-                    }                
-                }
+                Series = ids;
+                Retrieved = true;
             }
         }
     }

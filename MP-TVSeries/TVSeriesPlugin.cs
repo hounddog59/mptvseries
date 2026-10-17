@@ -823,12 +823,10 @@ namespace WindowPlugins.GUITVSeries
                                 pItem.ItemId = ( int )eContextItems.artworkChooser;
                             }
 
-                            if ( !String.IsNullOrEmpty(DBOption.GetOptions(DBOption.cOnlineUserID)))
-                            {
-                                pItem = new GUIListItem(Translation.RateEpisode + " ...");
-                                dlg.Add(pItem);
-                                pItem.ItemId = (int)eContextMenus.rate;
-                            }
+                            // rating is always available: it's saved in MediaPortal and passed on to Trakt
+                            pItem = new GUIListItem(Translation.RateEpisode + " ...");
+                            dlg.Add(pItem);
+                            pItem.ItemId = (int)eContextMenus.rate;
                         }
                         else if (CurrentViewLevel != Listlevel.Group)
                         {
@@ -847,12 +845,10 @@ namespace WindowPlugins.GUITVSeries
                             dlg.Add(pItem);
                             pItem.ItemId = (int)eContextItems.actionMarkAllUnwatched;
 
-                            if ( !String.IsNullOrEmpty( DBOption.GetOptions( DBOption.cOnlineUserID ) ) )
-                            {
-                                pItem = new GUIListItem( Translation.RateSeries + " ..." );
-                                dlg.Add( pItem );
-                                pItem.ItemId = ( int )eContextMenus.rate;
-                            }
+                            // rating is always available: it's saved in MediaPortal and passed on to Trakt
+                            pItem = new GUIListItem( Translation.RateSeries + " ..." );
+                            dlg.Add( pItem );
+                            pItem.ItemId = ( int )eContextMenus.rate;
                         }
 
                         // Add To Playlist is supported on all views
@@ -3869,25 +3865,7 @@ namespace WindowPlugins.GUITVSeries
                     value = "0";
             }           
 
-            new Thread(delegate(object o)
-            {
-                DBTable tItem = ((KeyValuePair<DBTable, string>)o).Key;
-                string tValue = ((KeyValuePair<DBTable, string>)o).Value;
-
-                Listlevel tLevel = tItem is DBEpisode ? Listlevel.Episode : Listlevel.Series;
-                string id = tItem[tLevel == Listlevel.Episode ? DBOnlineEpisode.cID : DBOnlineSeries.cID];
-                
-                // Submit rating online database
-                int rating = -1;
-                if (Int32.TryParse(tValue, out rating))
-                {
-                    Online_Parsing_Classes.OnlineAPI.SubmitRating(tLevel == Listlevel.Episode ? Online_Parsing_Classes.OnlineAPI.RatingType.episode : Online_Parsing_Classes.OnlineAPI.RatingType.series, id, rating);
-                }
-            })
-            {
-                IsBackground = true,
-                Name = "tvdb rating sender"
-            }.Start(new KeyValuePair<DBTable, string>(item, value));
+            // (ratings are no longer sent to TheTVDB: its current service has no personal ratings)
 
             // Apply to local database
             item["myRating"] = value;
@@ -4497,19 +4475,28 @@ namespace WindowPlugins.GUITVSeries
             // We need to add/remove from online database
             if (selectedItem == DBView.cTranslateTokenOnlineFavourite)
             {
-                string account = DBOption.GetOptions(DBOption.cOnlineUserID);
-                if (String.IsNullOrEmpty(account))
+                // online favourites belong to the TheTVDB account the subscriber PIN logs in as
+                if (!Online_Parsing_Classes.V4.TvdbV4Favourites.IsAvailable)
                 {
                     GUIDialogOK dlgOK = (GUIDialogOK)GUIWindowManager.GetWindow((int)GUIWindow.Window.WINDOW_DIALOG_OK);
                     dlgOK.SetHeading(Translation.OnlineFavourites);
-                    dlgOK.SetLine(1, Translation.TVDB_INFO_ACCOUNTID_1);
-                    dlgOK.SetLine(2, Translation.TVDB_INFO_ACCOUNTID_2);
+                    dlgOK.SetLine(1, "Online Favourites need your TheTVDB PIN.");
+                    dlgOK.SetLine(2, "Enter it in MP-TVSeries Configuration.");
                     dlgOK.DoModal(GUIWindowManager.ActiveWindow);
-                    MPTVSeriesLog.Write("Cannot submit online favourite, make sure you have your Account identifier set!");
+                    MPTVSeriesLog.Write("Cannot change online favourites: they need your TheTVDB subscriber PIN to be set.");
                 }
                 else
                 {
-                    Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(add, account, series[DBOnlineSeries.cID]);
+                    Online_Parsing_Classes.OnlineAPI.ConfigureFavourites(add, series[DBOnlineSeries.cID]);
+                    if (!add)
+                    {
+                        // TheTVDB's service can't remove favourites
+                        GUIDialogOK dlgOK = (GUIDialogOK)GUIWindowManager.GetWindow((int)GUIWindow.Window.WINDOW_DIALOG_OK);
+                        dlgOK.SetHeading(Translation.OnlineFavourites);
+                        dlgOK.SetLine(1, "Removed here. Please also remove it");
+                        dlgOK.SetLine(2, "on thetvdb.com, or it will come back.");
+                        dlgOK.DoModal(GUIWindowManager.ActiveWindow);
+                    }
                 }
             }
 
@@ -4816,32 +4803,37 @@ namespace WindowPlugins.GUITVSeries
                 Type = LoadingParameterType.None
             };
 
-            if (string.IsNullOrEmpty(_loadParameter)) return loadingParameter;
+            // _loadParameter (string) is obsolete in favour of _loadParameterObject (object) - this
+            // whole method only ever treated it as a string, so pull it out once, cast, and use that
+            // local from here on rather than repeatedly casting inline.
+            string loadParameter = _loadParameterObject as string;
 
-            MPTVSeriesLog.Write("Parsing Loading Parameters: " + _loadParameter, MPTVSeriesLog.LogLevel.Debug);
+            if (string.IsNullOrEmpty(loadParameter)) return loadingParameter;
+
+            MPTVSeriesLog.Write("Parsing Loading Parameters: " + loadParameter, MPTVSeriesLog.LogLevel.Debug);
 
             // check for legacy support (viewname only) or single parameter types
-            if (!_loadParameter.Contains("|"))
+            if (!loadParameter.Contains("|"))
             {                
                 loadingParameter.Type = LoadingParameterType.View;
-                loadingParameter.ViewName = _loadParameter;
+                loadingParameter.ViewName = loadParameter;
                 // view only
-                if (_loadParameter.Contains("view:"))
+                if (loadParameter.Contains("view:"))
                 {
-                    loadingParameter.ViewName = _loadParameter.Substring(5);
+                    loadingParameter.ViewName = loadParameter.Substring(5);
                 }
                 // series only
-                if (_loadParameter.Contains("seriesid:"))
+                if (loadParameter.Contains("seriesid:"))
                 {
                     loadingParameter.Type = LoadingParameterType.Series;
-                    loadingParameter.SeriesId = _loadParameter.Substring(9);
+                    loadingParameter.SeriesId = loadParameter.Substring(9);
                 }
                 return loadingParameter;
             }
 
             try
             {
-                foreach (string currParam in _loadParameter.Split('|'))
+                foreach (string currParam in loadParameter.Split('|'))
                 {
                     string[] keyValue = currParam.Split(':');
                     string key = keyValue[0];
@@ -4876,7 +4868,7 @@ namespace WindowPlugins.GUITVSeries
             }
             catch (Exception)
             {
-                MPTVSeriesLog.Write("Error parsing loading parameters: " + _loadParameter);
+                MPTVSeriesLog.Write("Error parsing loading parameters: " + loadParameter);
                 loadingParameter.Type = LoadingParameterType.None;
                 return loadingParameter;
             }

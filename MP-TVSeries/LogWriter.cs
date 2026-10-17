@@ -97,6 +97,7 @@ namespace WindowPlugins.GUITVSeries
             FanartTvAPI.FanartTvAPI.OnDataError += new FanartTvAPI.FanartTvAPI.OnDataErrorDelegate(API_OnDataError);
             FanartTvAPI.FanartTvAPI.OnDataReceived += new FanartTvAPI.FanartTvAPI.OnDataReceivedDelegate(API_OnDataReceived);
 
+
             pauseAutoWriteDB = true;
             
         }
@@ -130,6 +131,7 @@ namespace WindowPlugins.GUITVSeries
         {
             Write( aError );
         }
+
         #endregion
 
         #region Other Public Methods

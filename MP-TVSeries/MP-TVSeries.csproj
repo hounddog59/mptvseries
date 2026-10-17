@@ -16,7 +16,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -42,7 +42,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -52,19 +52,19 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>
     </DocumentationFile>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <OutputPath>bin\Debug\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Release\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
@@ -303,12 +303,21 @@
     <Compile Include="Online Parsing Classes\GetEpisodes.cs" />
     <Compile Include="Online Parsing Classes\GetLanguages.cs" />
     <Compile Include="Online Parsing Classes\GetSeries.cs" />
+    <Compile Include="Online Parsing Classes\LocalSeriesIdFinder.cs" />
+    <Compile Include="Online Parsing Classes\TraktPkceAuth.cs" />
+    <Compile Include="Online Parsing Classes\ArtworkRepair.cs" />
+    <Compile Include="Online Parsing Classes\TraktRatingsClient.cs" />
     <Compile Include="Online Parsing Classes\GetUpdates.cs" />
     <Compile Include="Online Parsing Classes\GetUserFavourites.cs" />
-    <Compile Include="Online Parsing Classes\GetUserRatings.cs" />
     <Compile Include="Online Parsing Classes\OnlineAPI.cs" />
     <Compile Include="Online Parsing Classes\OnlineParse.cs" />
     <Compile Include="Online Parsing Classes\UpdateSeries.cs" />
+    <Compile Include="Online Parsing Classes\V4\MiniJson.cs" />
+    <Compile Include="Online Parsing Classes\V4\TvdbV4Client.cs" />
+    <Compile Include="Online Parsing Classes\V4\TvdbV4XmlAdapter.cs" />
+    <Compile Include="Online Parsing Classes\V4\TvdbV4SeriesFetcher.cs" />
+    <Compile Include="Online Parsing Classes\V4\TvdbV4Favourites.cs" />
+    <Compile Include="Online Parsing Classes\V4\TvdbV4Languages.cs" />
     <Compile Include="PerfWatch.cs" />
     <Compile Include="Playlist Classes\GUITVSeriesPlaylist.cs" />
     <Compile Include="Playlist Classes\IPlayListIO.cs" />

@@ -45,34 +45,8 @@ namespace WindowPlugins.GUITVSeries
 
         public GetLanguages()
         {
-            XmlNode rootNode = Online_Parsing_Classes.OnlineAPI.GetLanguages();
-            if (rootNode != null)
-            {
-                Language lang = null;
-                foreach (XmlNode itemNode in rootNode.ChildNodes)
-                {
-                    lang = new Language();
-                    foreach (XmlNode node in itemNode)
-                    {
-                        if (node.Name == "id") int.TryParse(node.InnerText, out lang.Id);
-                        if (node.Name == "name") lang.Name = node.InnerText;
-                        if (node.Name == "abbreviation")
-                        {
-                            lang.Abbreviation = node.InnerText;
-                            try
-                            {
-                                lang.EnglishName = new System.Globalization.CultureInfo( lang.Abbreviation ).EnglishName;
-                            }
-                            catch
-                            {
-                                MPTVSeriesLog.Write( $"Unable to get English name for language code '{lang.Abbreviation}'", MPTVSeriesLog.LogLevel.Debug );
-                            }
-                        }
-                    }
-                    if (lang.Id != default(int) && lang.EnglishName.Length > 0 && !lang.EnglishName.StartsWith("Unknown"))
-                        languages.Add(lang);
-                }
-            }
+            // TheTVDB v3's language feed no longer exists; the list now comes from v4 (see TvdbV4Languages)
+            languages.AddRange(Online_Parsing_Classes.V4.TvdbV4Languages.GetAll());
         }
     }
 }

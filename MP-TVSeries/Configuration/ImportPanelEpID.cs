@@ -282,6 +282,17 @@ namespace WindowPlugins.GUITVSeries.Configuration
             txtBoxStatusBar.Text = localEp[DBEpisode.cFilename];
         }
 
+        private void listBoxLocal_MouseDown(object sender, MouseEventArgs e)
+        {
+            // right-clicking an item should select it first, same as left-click would - otherwise the
+            // context menu would act on whatever was already selected, not on what you right-clicked
+            if (e.Button == MouseButtons.Right)
+            {
+                int index = listBoxLocal.IndexFromPoint(e.Location);
+                if (index >= 0) listBoxLocal.SelectedIndex = index;
+            }
+        }
+
         private void listBoxOnline_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listBoxLocal.SelectedIndex < 0) return; // maybe already matched all local
@@ -300,6 +311,31 @@ namespace WindowPlugins.GUITVSeries.Configuration
         {
             txtBoxStatusBar.Text = string.Empty;
             FillSeriesList();
+        }
+
+        private void buttonOpenFileLocation_Click(object sender, EventArgs e)
+        {
+            string filename = txtBoxStatusBar.Text;
+            if (string.IsNullOrEmpty(filename))
+            {
+                MessageBox.Show("Select a local episode first.", "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!System.IO.File.Exists(filename))
+            {
+                MessageBox.Show("The file could not be found - it may have been moved, renamed, or is on a share that isn't currently reachable:\n\n" + filename, "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + filename + "\"");
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Failed to open file location for '" + filename + "': " + ex.Message);
+            }
         }
 
         private void buttonMatchAgain_Click(object sender, EventArgs e)

@@ -47,28 +47,40 @@ namespace WindowPlugins.GUITVSeries
         {
             List<PathPair> outList = new List<PathPair>();
             int prev = 0;
+            int lastReported = 0;
             foreach (String path in listFolders)
             {
-                filesInFolder(path, ref outList, path.Length);
+                filesInFolder(path, ref outList, path.Length, ref lastReported);
                 prev = outList.Count;
             }
             return outList;
         }
 
-        private static bool filesInFolder(string folder, ref List<PathPair> outList, int importPathLength)
+        private static bool filesInFolder(string folder, ref List<PathPair> outList, int importPathLength, ref int lastReported)
         {
             try
             {
                 if (System.IO.Directory.Exists(folder))
                 {
-                    string[] sfiles = System.IO.Directory.GetFiles(folder, "*", System.IO.SearchOption.AllDirectories);
-                    for (int i = 0; i < sfiles.Length; i++)
+                    // EnumerateFiles (rather than GetFiles) yields results as it finds them instead of
+                    // blocking until the entire tree is walked - that's what lets us log progress below
+                    // instead of one long silent gap before anything shows up (on a big library over a
+                    // network share, that gap can run past a minute with zero visible feedback anywhere).
+                    foreach (string sfile in System.IO.Directory.EnumerateFiles(folder, "*", System.IO.SearchOption.AllDirectories))
                     {
                         // check if extension is supported by mediaportal
-                        if (MediaPortal.Util.Utils.VideoExtensions.Contains(System.IO.Path.GetExtension(sfiles[i]).ToLowerInvariant()))
+                        if (MediaPortal.Util.Utils.VideoExtensions.Contains(System.IO.Path.GetExtension(sfile).ToLowerInvariant()))
                         {
                             // remove uneeded data by trimming the import path root from the filenames
-                            outList.Add(new PathPair(sfiles[i].Substring(importPathLength).TrimStart('\\'), sfiles[i]));
+                            outList.Add(new PathPair(sfile.Substring(importPathLength).TrimStart('\\'), sfile));
+                        }
+
+                        // report every 2000 files scanned (not just matched) so a large, slow folder
+                        // (e.g. a network share with lots of non-video files too) still shows movement
+                        if (outList.Count - lastReported >= 2000)
+                        {
+                            lastReported = outList.Count;
+                            MPTVSeriesLog.Write("Scanning for video files... " + outList.Count + " found so far");
                         }
                     }
                 }
@@ -80,7 +92,7 @@ namespace WindowPlugins.GUITVSeries
                 try
                 {
                     foreach (string subDir in System.IO.Directory.GetDirectories(folder))
-                        filesInFolder(subDir, ref outList, importPathLength);
+                        filesInFolder(subDir, ref outList, importPathLength, ref lastReported);
                 }
                 catch (Exception)
                 {

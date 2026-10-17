@@ -911,6 +911,38 @@ namespace WindowPlugins.GUITVSeries
                                         // Also try to delete recording in MPtvDB
                                         DeleteFromMPTVDB(f);
                                     }
+
+                                    // Previously only the video file itself was ever deleted here, leaving
+                                    // subtitles, .nfo files, thumbnail images etc. behind every time - this
+                                    // deletes anything else in the same folder sharing the same base
+                                    // filename (before the extension). The "." in the search pattern below
+                                    // is deliberate: it requires an exact base-name match followed by an
+                                    // extension, so e.g. deleting "Show S01E1.mkv" can't also catch
+                                    // "Show S01E10.nfo" the way a bare wildcard suffix would.
+                                    try
+                                    {
+                                        string dir = System.IO.Path.GetDirectoryName(f);
+                                        string baseNameNoExt = System.IO.Path.GetFileNameWithoutExtension(f);
+                                        if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(baseNameNoExt) && System.IO.Directory.Exists(dir))
+                                        {
+                                            foreach (string companion in System.IO.Directory.GetFiles(dir, baseNameNoExt + ".*"))
+                                            {
+                                                try
+                                                {
+                                                    MPTVSeriesLog.Write(string.Format("Deleting companion file: {0}", companion));
+                                                    File.Delete(companion);
+                                                }
+                                                catch (Exception exCompanion)
+                                                {
+                                                    MPTVSeriesLog.Write(string.Format("Failed to delete companion file: {0}, {1}", companion, exCompanion.Message));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception exScan)
+                                    {
+                                        MPTVSeriesLog.Write(string.Format("Failed to scan for companion files for: {0}, {1}", f, exScan.Message));
+                                    }
                                 }
                             }
                             catch (Exception ex)

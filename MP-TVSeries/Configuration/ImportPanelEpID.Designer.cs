@@ -44,6 +44,10 @@
             this.label3 = new System.Windows.Forms.Label();
             this.toolTipLocalEpisode = new System.Windows.Forms.ToolTip(this.components);
             this.txtBoxStatusBar = new System.Windows.Forms.TextBox();
+            this.buttonOpenFileLocation = new System.Windows.Forms.Button();
+            this.contextMenuStripLocalEpisodes = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.openFileLocationLocalEpisodesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStripLocalEpisodes.SuspendLayout();
             this.SuspendLayout();
             // 
             // labelStep
@@ -92,12 +96,28 @@
             // 
             this.listBoxLocal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
+            this.listBoxLocal.ContextMenuStrip = this.contextMenuStripLocalEpisodes;
             this.listBoxLocal.FormattingEnabled = true;
             this.listBoxLocal.Location = new System.Drawing.Point(209, 111);
             this.listBoxLocal.Name = "listBoxLocal";
             this.listBoxLocal.Size = new System.Drawing.Size(271, 355);
             this.listBoxLocal.TabIndex = 18;
             this.listBoxLocal.SelectedIndexChanged += new System.EventHandler(this.listBoxLocal_SelectedIndexChanged);
+            this.listBoxLocal.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBoxLocal_MouseDown);
+            // 
+            // contextMenuStripLocalEpisodes
+            // 
+            this.contextMenuStripLocalEpisodes.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openFileLocationLocalEpisodesToolStripMenuItem});
+            this.contextMenuStripLocalEpisodes.Name = "contextMenuStripLocalEpisodes";
+            this.contextMenuStripLocalEpisodes.Size = new System.Drawing.Size(180, 26);
+            // 
+            // openFileLocationLocalEpisodesToolStripMenuItem
+            // 
+            this.openFileLocationLocalEpisodesToolStripMenuItem.Name = "openFileLocationLocalEpisodesToolStripMenuItem";
+            this.openFileLocationLocalEpisodesToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.openFileLocationLocalEpisodesToolStripMenuItem.Text = "Open File Location";
+            this.openFileLocationLocalEpisodesToolStripMenuItem.Click += new System.EventHandler(this.buttonOpenFileLocation_Click);
             // 
             // listBoxOnline
             // 
@@ -195,14 +215,27 @@
             this.txtBoxStatusBar.Enabled = false;
             this.txtBoxStatusBar.Location = new System.Drawing.Point(6, 473);
             this.txtBoxStatusBar.Name = "txtBoxStatusBar";
-            this.txtBoxStatusBar.Size = new System.Drawing.Size(750, 20);
+            this.txtBoxStatusBar.Size = new System.Drawing.Size(610, 20);
             this.txtBoxStatusBar.TabIndex = 31;
+            // 
+            // buttonOpenFileLocation
+            // 
+            this.buttonOpenFileLocation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOpenFileLocation.Location = new System.Drawing.Point(622, 471);
+            this.buttonOpenFileLocation.Name = "buttonOpenFileLocation";
+            this.buttonOpenFileLocation.Size = new System.Drawing.Size(134, 23);
+            this.buttonOpenFileLocation.TabIndex = 32;
+            this.buttonOpenFileLocation.Text = "Open File Location";
+            this.buttonOpenFileLocation.UseVisualStyleBackColor = true;
+            this.buttonOpenFileLocation.Click += new System.EventHandler(this.buttonOpenFileLocation_Click);
             // 
             // ImportPanelEpID
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
+            this.Controls.Add(this.buttonOpenFileLocation);
             this.Controls.Add(this.txtBoxStatusBar);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -219,6 +252,7 @@
             this.Controls.Add(this.labelWaitParse);
             this.Name = "ImportPanelEpID";
             this.Size = new System.Drawing.Size(771, 522);
+            this.contextMenuStripLocalEpisodes.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -241,5 +275,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ToolTip toolTipLocalEpisode;
         private System.Windows.Forms.TextBox txtBoxStatusBar;
+        private System.Windows.Forms.Button buttonOpenFileLocation;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripLocalEpisodes;
+        private System.Windows.Forms.ToolStripMenuItem openFileLocationLocalEpisodesToolStripMenuItem;
     }
 }

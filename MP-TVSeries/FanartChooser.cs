@@ -154,7 +154,7 @@ namespace WindowPlugins.GUITVSeries
                     // lets put fanart in expected location fanart\original\<seriesID>*.jpg
                     string lLocalFilename = Fanart.GetLocalPath( lFanart );
                     
-                    string lFullUrl = (DBOnlineMirror.Banners.EndsWith("/") ? DBOnlineMirror.Banners : (DBOnlineMirror.Banners + "/")) + lFanart[DBFanart.cBannerPath];
+                    string lFullUrl = Online_Parsing_Classes.OnlineAPI.ResolveImageURL( lFanart[DBFanart.cBannerPath] );
                     int lDownloadGUID = Online_Parsing_Classes.OnlineAPI.StartFileDownload(lFullUrl, Settings.Path.fanart, lLocalFilename);
                     while (Online_Parsing_Classes.OnlineAPI.CheckFileDownload(lDownloadGUID))
                     {
@@ -980,7 +980,7 @@ namespace WindowPlugins.GUITVSeries
                     // lets put the thumbnail in expected path _cache\fanart\original\<seriesID>*.jpg
                     string lLocalThumbPath = Fanart.GetLocalThumbPath( fanart );
 
-                    string lFullURL = (DBOnlineMirror.Banners.EndsWith("/") ? DBOnlineMirror.Banners : (DBOnlineMirror.Banners + "/")) + fanart[DBFanart.cThumbnailPath];
+                    string lFullURL = Online_Parsing_Classes.OnlineAPI.ResolveImageURL( fanart[DBFanart.cThumbnailPath] );
 
                     bool lDownloadSuccess = true;
                     int lDownloadGUID = Online_Parsing_Classes.OnlineAPI.StartFileDownload(lFullURL, Settings.Path.fanart, lLocalThumbPath);

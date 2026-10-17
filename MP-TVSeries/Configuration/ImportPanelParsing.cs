@@ -493,17 +493,28 @@ namespace WindowPlugins.GUITVSeries.Configuration
             if (cell == null) return;
 
             contextMenuStripChangeCell.Items.Clear();
+            contextMenuStripChangeCell.ShowItemToolTips = true;
             parseResult origpr = dataGridViewReview.Rows[cell.RowIndex].Tag as parseResult;
-            contextMenuStripChangeCell.Items.Add("File: " + origpr.full_filename);
-            contextMenuStripChangeCell.Items.Add(string.Format("Matched using expression [{0}]:", origpr.parser.RegexpMatchedIndex));
-            contextMenuStripChangeCell.Items.Add(origpr.parser.RegexpMatched);
+
+            // Long paths and expressions are shortened so the menu stays a sensible width; hovering shows the full text.
+            string fullName = origpr.full_filename ?? string.Empty;
+            int slash = Math.Max(fullName.LastIndexOf('\\'), fullName.LastIndexOf('/'));
+            var fileItem = contextMenuStripChangeCell.Items.Add("File: " + ShortenForMenu(slash >= 0 ? fullName.Substring(slash + 1) : fullName));
+            fileItem.ToolTipText = fullName;
+
+            var openItem = contextMenuStripChangeCell.Items.Add("Open File Location");
+            openItem.Tag = new object[] { "openfilelocation", origpr.full_filename };
+
+            string expression = origpr.parser.RegexpMatched ?? string.Empty;
+            var expressionItem = contextMenuStripChangeCell.Items.Add(string.Format("Matched using expression [{0}]: {1}", origpr.parser.RegexpMatchedIndex, ShortenForMenu(expression)));
+            expressionItem.ToolTipText = expression;
             
             // for enabled column simply offer to change to all
             if (cell is DataGridViewCheckBoxCell && cell.ColumnIndex == 0)
             {
                 bool isChecked = (bool)cell.Value;
-                contextMenuStripChangeCell.Items.Add(string.Format("{0} all currently displayed", isChecked ? "Disable" : "Enable"));
-                contextMenuStripChangeCell.Items[2].Tag = new object[] { cell, isChecked, !isChecked };
+                var allItem = contextMenuStripChangeCell.Items.Add(string.Format("{0} all currently displayed", isChecked ? "Disable" : "Enable"));
+                allItem.Tag = new object[] { cell, isChecked, !isChecked };
                 return;
             }
 
@@ -519,13 +530,29 @@ namespace WindowPlugins.GUITVSeries.Configuration
             if(orig == cellValue) return;
             // else offer to do this change automatically for them all
             
-            contextMenuStripChangeCell.Items.Add(string.Format("Change all \"{0}\" to \"{1}\" in Column \"{2}\"", orig, cellValue, dataGridViewReview.Columns[cell.ColumnIndex].HeaderText));
-            contextMenuStripChangeCell.Items[2].Tag = new object[] { cell, orig, cellValue };
+            string changeText = string.Format("Change all \"{0}\" to \"{1}\" in Column \"{2}\"", orig, cellValue, dataGridViewReview.Columns[cell.ColumnIndex].HeaderText);
+            var changeItem = contextMenuStripChangeCell.Items.Add(ShortenForMenu(changeText));
+            changeItem.ToolTipText = changeText;
+            changeItem.Tag = new object[] { cell, orig, cellValue };
+        }
+
+        // keeps right-click menu lines to a readable width
+        private static string ShortenForMenu(string text)
+        {
+            const int maxLength = 90;
+            if (string.IsNullOrEmpty(text) || text.Length <= maxLength) return text;
+            return text.Substring(0, maxLength - 3) + "...";
         }
 
         private void contextMenuStripChangeCell_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             object[] args = e.ClickedItem.Tag as object[];
+            if (args != null && args.Length == 2 && args[0] as string == "openfilelocation")
+            {
+                OpenFileLocation(args[1] as string);
+                return;
+            }
+
             if (args != null && args.Length == 3 && args[0] is DataGridViewCell)
             {    
                 if (args[1] is string && args[2] is string)
@@ -545,6 +572,26 @@ namespace WindowPlugins.GUITVSeries.Configuration
                     RefreshGrid();
                     dataGridViewReview.ResumeLayout();
                 }
+            }
+        }
+
+        private void OpenFileLocation(string filename)
+        {
+            if (string.IsNullOrEmpty(filename)) return;
+
+            if (!System.IO.File.Exists(filename))
+            {
+                MessageBox.Show("The file could not be found - it may have been moved, renamed, or is on a share that isn't currently reachable:\n\n" + filename, "Open File Location", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + filename + "\"");
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Failed to open file location for '" + filename + "': " + ex.Message);
             }
         }
 
