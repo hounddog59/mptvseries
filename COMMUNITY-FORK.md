@@ -20,12 +20,10 @@ skin updates).
 - **A TheTVDB subscription PIN.** TheTVDB requires every user of an app like this to have their own
   subscription (currently US$11.99 a year) – see <https://support.thetvdb.com/kb/faq.php?id=82>.
   Enter the PIN on the **Online Data** tab of MP-TVSeries Configuration.
-- **API key: nothing to do.** TheTVDB asks for two things. The *API key* identifies the program, and one is
-  built into the release, so leave the **API key** box empty. The *PIN* identifies you as a subscriber, and
-  everyone needs their own. Only fill in the API key box if you have your own key from thetvdb.com, for
-  example because you built MP-TVSeries yourself from this source code (which has no key built in). The API
-  key gives no access to your TheTVDB account. Hover over the box, or click "What are the API key and PIN?",
-  for the same explanation inside MP-TVSeries Configuration.
+- **API key: you don't need one.** TheTVDB asks for two things. The *API key* identifies the program, and
+  one is already built into the release, so leave the **API key** box empty. The *PIN* identifies you as a
+  subscriber, and everyone needs their own. (The API key box is only for people who build MP-TVSeries
+  themselves from this source code, which has no key built in.)
 - **Trakt (optional):** ratings work without logging in. "Authorize with Trakt.tv" makes them faster.
   You can also enter the client ID of your own Trakt application.
 

@@ -816,9 +816,8 @@ namespace WindowPlugins.GUITVSeries
             this.labelTvdbApiKey.Size = new System.Drawing.Size(52, 20);
             this.labelTvdbApiKey.Text = "API &key:";
             this.toolTip_Help.SetToolTip(this.labelTvdbApiKey, "TheTVDB asks for two things:\r\n\r\n" +
-                "API key - identifies the program. One is built into this version, so leave this box empty.\r\n" +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.\r\n\r\n" +
-                "Only enter an API key if you have your own - for example, if you built MP-TVSeries yourself from its source code.");
+                "API key - identifies the program. One is already built in, so you don't need one. Leave this box empty.\r\n\r\n" +
+                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.");
             this.labelTvdbApiKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtTvdbApiKey
@@ -827,9 +826,8 @@ namespace WindowPlugins.GUITVSeries
             this.txtTvdbApiKey.Name = "txtTvdbApiKey";
             this.txtTvdbApiKey.Size = new System.Drawing.Size(240, 20);
             this.toolTip_Help.SetToolTip(this.txtTvdbApiKey, "TheTVDB asks for two things:\r\n\r\n" +
-                "API key - identifies the program. One is built into this version, so leave this box empty.\r\n" +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.\r\n\r\n" +
-                "Only enter an API key if you have your own - for example, if you built MP-TVSeries yourself from its source code.");
+                "API key - identifies the program. One is already built in, so you don't need one. Leave this box empty.\r\n\r\n" +
+                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.");
             this.txtTvdbApiKey.TextChanged += new System.EventHandler(this.txtTvdbApiKey_TextChanged);
             // 
             // lnkTvdbApiKeyHelp
@@ -840,9 +838,8 @@ namespace WindowPlugins.GUITVSeries
             this.lnkTvdbApiKeyHelp.Size = new System.Drawing.Size(150, 13);
             this.lnkTvdbApiKeyHelp.TabStop = true;
             this.toolTip_Help.SetToolTip(this.lnkTvdbApiKeyHelp, "TheTVDB asks for two things:\r\n\r\n" +
-                "API key - identifies the program. One is built into this version, so leave this box empty.\r\n" +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.\r\n\r\n" +
-                "Only enter an API key if you have your own - for example, if you built MP-TVSeries yourself from its source code.");
+                "API key - identifies the program. One is already built in, so you don't need one. Leave this box empty.\r\n\r\n" +
+                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.");
             this.lnkTvdbApiKeyHelp.Text = "What are the API key and PIN?";
             this.lnkTvdbApiKeyHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTvdbApiKeyHelp_LinkClicked);
             // 

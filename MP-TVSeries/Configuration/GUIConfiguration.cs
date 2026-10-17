@@ -5000,10 +5000,10 @@ namespace WindowPlugins.GUITVSeries
             string nl = Environment.NewLine;
             MessageBox.Show(this,
                 "TheTVDB asks for two things:" + nl + nl +
-                "API key - identifies the program (this version of MP-TVSeries). One is built in, so leave the API key box empty." + nl + nl +
+                "API key - identifies the program (this version of MP-TVSeries). One is already built in, so you don't need one. Leave the API key box empty." + nl + nl +
                 "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own: subscribe at thetvdb.com, then copy the PIN from your account there." + nl + nl +
-                "Only fill in the API key box if you have your own key from thetvdb.com - for example if you built MP-TVSeries yourself from its source code, which has no key built in." + nl + nl +
-                "The API key gives no access to your TheTVDB account, and your PIN is only ever sent to TheTVDB.",
+                "Your PIN is only ever sent to TheTVDB." + nl + nl +
+                "(The API key box is only for people who build MP-TVSeries themselves from its source code.)",
                 "TheTVDB API key and PIN", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
