@@ -112,6 +112,7 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoChooseOrder = new System.Windows.Forms.CheckBox();
             this.txtTvdbPin = new System.Windows.Forms.TextBox();
             this.labelTvdbApiKey = new System.Windows.Forms.Label();
+            this.lnkTvdbApiKeyHelp = new System.Windows.Forms.LinkLabel();
             this.txtTvdbApiKey = new System.Windows.Forms.TextBox();
             this.labelTraktOwnClientId = new System.Windows.Forms.Label();
             this.txtTraktOwnClientId = new System.Windows.Forms.TextBox();
@@ -814,6 +815,10 @@ namespace WindowPlugins.GUITVSeries
             this.labelTvdbApiKey.Name = "labelTvdbApiKey";
             this.labelTvdbApiKey.Size = new System.Drawing.Size(52, 20);
             this.labelTvdbApiKey.Text = "API &key:";
+            this.toolTip_Help.SetToolTip(this.labelTvdbApiKey, "TheTVDB asks for two things:\r\n\r\n" +
+                "API key - identifies the program. One is built into this version, so leave this box empty.\r\n" +
+                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.\r\n\r\n" +
+                "Only enter an API key if you have your own - for example, if you built MP-TVSeries yourself from its source code.");
             this.labelTvdbApiKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtTvdbApiKey
@@ -821,23 +826,41 @@ namespace WindowPlugins.GUITVSeries
             this.txtTvdbApiKey.Location = new System.Drawing.Point(375, 53);
             this.txtTvdbApiKey.Name = "txtTvdbApiKey";
             this.txtTvdbApiKey.Size = new System.Drawing.Size(240, 20);
-            this.toolTip_Help.SetToolTip(this.txtTvdbApiKey, "Your own TheTVDB API key - create one free in your account at thetvdb.com. Needed together with your PIN.");
+            this.toolTip_Help.SetToolTip(this.txtTvdbApiKey, "TheTVDB asks for two things:\r\n\r\n" +
+                "API key - identifies the program. One is built into this version, so leave this box empty.\r\n" +
+                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.\r\n\r\n" +
+                "Only enter an API key if you have your own - for example, if you built MP-TVSeries yourself from its source code.");
             this.txtTvdbApiKey.TextChanged += new System.EventHandler(this.txtTvdbApiKey_TextChanged);
+            // 
+            // lnkTvdbApiKeyHelp
+            // 
+            this.lnkTvdbApiKeyHelp.AutoSize = true;
+            this.lnkTvdbApiKeyHelp.Location = new System.Drawing.Point(372, 78);
+            this.lnkTvdbApiKeyHelp.Name = "lnkTvdbApiKeyHelp";
+            this.lnkTvdbApiKeyHelp.Size = new System.Drawing.Size(150, 13);
+            this.lnkTvdbApiKeyHelp.TabStop = true;
+            this.toolTip_Help.SetToolTip(this.lnkTvdbApiKeyHelp, "TheTVDB asks for two things:\r\n\r\n" +
+                "API key - identifies the program. One is built into this version, so leave this box empty.\r\n" +
+                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.\r\n\r\n" +
+                "Only enter an API key if you have your own - for example, if you built MP-TVSeries yourself from its source code.");
+            this.lnkTvdbApiKeyHelp.Text = "What are the API key and PIN?";
+            this.lnkTvdbApiKeyHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTvdbApiKeyHelp_LinkClicked);
             // 
             // labelTraktOwnClientId
             // 
-            this.labelTraktOwnClientId.Location = new System.Drawing.Point(467, 150);
+            this.labelTraktOwnClientId.Location = new System.Drawing.Point(467, 153);
             this.labelTraktOwnClientId.Name = "labelTraktOwnClientId";
-            this.labelTraktOwnClientId.Size = new System.Drawing.Size(150, 20);
-            this.labelTraktOwnClientId.Text = "Own Trakt client ID (optional):";
+            this.labelTraktOwnClientId.Size = new System.Drawing.Size(120, 20);
+            this.labelTraktOwnClientId.Text = "Own Trakt client ID:";
             this.labelTraktOwnClientId.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtTraktOwnClientId
             // 
-            this.txtTraktOwnClientId.Location = new System.Drawing.Point(620, 150);
+            this.txtTraktOwnClientId.Location = new System.Drawing.Point(590, 153);
             this.txtTraktOwnClientId.Name = "txtTraktOwnClientId";
-            this.txtTraktOwnClientId.Size = new System.Drawing.Size(268, 20);
-            this.toolTip_Help.SetToolTip(this.txtTraktOwnClientId, "Leave empty to use MP-TVSeries' own Trakt application. To use your own, register one at trakt.tv/oauth/applications and paste its client ID here.");
+            this.txtTraktOwnClientId.Size = new System.Drawing.Size(298, 20);
+            this.toolTip_Help.SetToolTip(this.labelTraktOwnClientId, "Optional. Leave the box empty to use MP-TVSeries' own Trakt application.");
+            this.toolTip_Help.SetToolTip(this.txtTraktOwnClientId, "Optional. Leave empty to use MP-TVSeries' own Trakt application. To use your own, register one at trakt.tv/oauth/applications and paste its client ID here.");
             this.txtTraktOwnClientId.TextChanged += new System.EventHandler(this.txtTraktOwnClientId_TextChanged);
             // 
             // txtTvdbPin
@@ -847,7 +870,7 @@ namespace WindowPlugins.GUITVSeries
             this.txtTvdbPin.Name = "txtTvdbPin";
             this.txtTvdbPin.Size = new System.Drawing.Size(180, 20);
             this.txtTvdbPin.TabIndex = 5;
-            this.toolTip_Help.SetToolTip(this.txtTvdbPin, "Your TheTVDB.com subscriber PIN, used to log in to the v4 API. Leave blank if you are not a TVDB subscriber.");
+            this.toolTip_Help.SetToolTip(this.txtTvdbPin, "Your own TheTVDB subscriber PIN, from your account at thetvdb.com. TheTVDB needs it to send show information.");
             this.txtTvdbPin.TextChanged += new System.EventHandler(this.txtTvdbPin_TextChanged);
             // 
             // checkDownloadEpisodeSnapshots
@@ -957,7 +980,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_LookForLocalIdFiles
             // 
             this.checkBox_LookForLocalIdFiles.AutoSize = true;
-            this.checkBox_LookForLocalIdFiles.Location = new System.Drawing.Point(467, 171);
+            this.checkBox_LookForLocalIdFiles.Location = new System.Drawing.Point(467, 178);
             this.checkBox_LookForLocalIdFiles.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_LookForLocalIdFiles.Name = "checkBox_LookForLocalIdFiles";
             this.checkBox_LookForLocalIdFiles.Size = new System.Drawing.Size(420, 17);
@@ -989,7 +1012,7 @@ namespace WindowPlugins.GUITVSeries
             // labelTraktAuthStatus
             // 
             this.labelTraktAuthStatus.AutoSize = true;
-            this.labelTraktAuthStatus.Location = new System.Drawing.Point(467, 136);
+            this.labelTraktAuthStatus.Location = new System.Drawing.Point(467, 135);
             this.labelTraktAuthStatus.Name = "labelTraktAuthStatus";
             this.labelTraktAuthStatus.Size = new System.Drawing.Size(120, 13);
             this.labelTraktAuthStatus.TabIndex = 62;
@@ -2730,6 +2753,7 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoChooseOrder);
             this.panel_OnlineData.Controls.Add(this.txtTvdbPin);
             this.panel_OnlineData.Controls.Add(this.labelTvdbApiKey);
+            this.panel_OnlineData.Controls.Add(this.lnkTvdbApiKeyHelp);
             this.panel_OnlineData.Controls.Add(this.txtTvdbApiKey);
             this.panel_OnlineData.Controls.Add(this.labelTraktOwnClientId);
             this.panel_OnlineData.Controls.Add(this.txtTraktOwnClientId);
@@ -4211,6 +4235,7 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.CheckBox checkBox_AutoChooseOrder;
         private System.Windows.Forms.TextBox txtTvdbPin;
         private System.Windows.Forms.Label labelTvdbApiKey;
+        private System.Windows.Forms.LinkLabel lnkTvdbApiKeyHelp;
         private System.Windows.Forms.TextBox txtTvdbApiKey;
         private System.Windows.Forms.Label labelTraktOwnClientId;
         private System.Windows.Forms.TextBox txtTraktOwnClientId;
