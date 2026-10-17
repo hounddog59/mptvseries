@@ -748,9 +748,12 @@ namespace WindowPlugins.GUITVSeries.GUI
         private bool LoadParameters()
         {
             // _loadingParameter can be set by a plugin developer or a skin designer
-            // _loadParameter (string) is obsolete in favour of _loadParameterObject (object) - this
+            // _loadingParameter is a string (JSON / pipe-separated) - this
             // is only ever used as a string (JSON) here, so cast once and use that from here on.
-            string loadParameter = _loadParameterObject as string;
+            #pragma warning disable 618 // _loadParameter is marked obsolete in newer MediaPortal, but _loadParameterObject
+            // doesn't exist before MediaPortal 1.38 - the old one keeps the plugin working on every version
+            string loadParameter = _loadParameter;
+#pragma warning restore 618
 
             if ( string.IsNullOrEmpty( loadParameter ) )
                 return false;

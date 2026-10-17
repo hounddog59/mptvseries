@@ -4803,10 +4803,13 @@ namespace WindowPlugins.GUITVSeries
                 Type = LoadingParameterType.None
             };
 
-            // _loadParameter (string) is obsolete in favour of _loadParameterObject (object) - this
+            // _loadingParameter is a string (JSON / pipe-separated) - this
             // whole method only ever treated it as a string, so pull it out once, cast, and use that
             // local from here on rather than repeatedly casting inline.
-            string loadParameter = _loadParameterObject as string;
+            #pragma warning disable 618 // _loadParameter is marked obsolete in newer MediaPortal, but _loadParameterObject
+            // doesn't exist before MediaPortal 1.38 - the old one keeps the plugin working on every version
+            string loadParameter = _loadParameter;
+#pragma warning restore 618
 
             if (string.IsNullOrEmpty(loadParameter)) return loadingParameter;
 

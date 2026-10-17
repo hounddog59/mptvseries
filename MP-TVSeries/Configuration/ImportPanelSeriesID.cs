@@ -326,7 +326,9 @@ namespace WindowPlugins.GUITVSeries.Configuration
         private void FireOffSearch(IGrouping<string, parseResult> newSeries, DataGridViewRow row, string customString)
         {
             string toSearch = string.IsNullOrEmpty(customString) ? newSeries.Key : customString;
-            if(lastSearch.ContainsKey(row.Index))
+            int tvdbID = newSeries.FirstOrDefault()?.SeriesTVDBID ?? -1;
+            
+            if (lastSearch.ContainsKey(row.Index))
                 lastSearch[row.Index] = toSearch;
             else lastSearch.Add(row.Index, toSearch);
                         
@@ -347,28 +349,46 @@ namespace WindowPlugins.GUITVSeries.Configuration
 
             System.Threading.ThreadPool.QueueUserWorkItem((o) =>
                 {
-                    // tell user we are now searching
-                    SearchProgress(cSearching, null, row);
-
-                    GetSeries gs = null;
-                    if (localFiles != null)
+                    try
                     {
-                        string idSource;
-                        int localId = LocalSeriesIdFinder.FindSeriesId(localFiles, out idSource);
-                        if (localId > 0)
+                        // tell user we are now searching
+                        SearchProgress(cSearching, null, row);
+
+                        GetSeries gs = null;
+                        if (tvdbID > 0 && string.IsNullOrEmpty(customString))
                         {
-                            gs = GetSeries.FromKnownId(localId);
-                            if (gs != null)
-                                MPTVSeriesLog.Write(string.Format("\"{0}\" identified as series {1} from local file '{2}' (name search skipped)", toSearch, localId, idSource));
+                            // a .tvdb file next to the files names the series
+                            gs = new GetSeries(toSearch, tvdbID);
                         }
+                        else if (localFiles != null)
+                        {
+                            string idSource;
+                            int localId = LocalSeriesIdFinder.FindSeriesId(localFiles, out idSource);
+                            if (localId > 0)
+                            {
+                                gs = GetSeries.FromKnownId(localId);
+                                if (gs != null)
+                                    MPTVSeriesLog.Write(string.Format("\"{0}\" identified as series {1} from local file '{2}' (name search skipped)", toSearch, localId, idSource));
+                            }
+                        }
+
+                        // no usable local id (or the option is off / the user searched by hand): normal name search
+                        if (gs == null)
+                            gs = new GetSeries(toSearch);
+
+                        // and give the results
+                        SearchProgress(toSearch, gs, row);
                     }
-
-                    // no usable local id (or the option is off / the user searched by hand): normal name search
-                    if (gs == null)
-                        gs = new GetSeries(toSearch);
-
-                    // and give the results
-                    SearchProgress(toSearch, gs, row);
+                    catch ( Exception ex )
+                    {
+                        // Unhandled ThreadPool exceptions terminate the Configuration process
+                        MPTVSeriesLog.Write( $"Series search failed for \"{toSearch}\" (tvdbID={tvdbID}): {ex}" );
+                        System.Threading.Interlocked.Decrement( ref activeSearches );
+                        if ( dataGridViewIdentifySeries.InvokeRequired )
+                            dataGridViewIdentifySeries.Invoke( new Action( setSearchStatus ) );
+                        else
+                            setSearchStatus();
+                    }
                 });
             
         }

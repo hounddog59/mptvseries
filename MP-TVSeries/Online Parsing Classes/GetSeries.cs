@@ -152,15 +152,30 @@ namespace WindowPlugins.GUITVSeries
             return string.Join( " ", words.ToArray() );
         }
 
-        public GetSeries(String aSeriesName)
+        public GetSeries( String aSeriesName, int aTVDBId = -1 )
         {
+            XmlNode lNode;
+
+            // if we already have a TVDBId, fetch the series via the existing UpdateSeries parser
+            // (avoids fragile XML handling / races in the parallel Configuration import searches)
+            if ( aTVDBId > 0 )
+            {
+              var updateSeries = new UpdateSeries( aTVDBId.ToString() );
+              if ( updateSeries.Results.Count > 0 )
+              {
+                mListSeries.Add( updateSeries.Results[ 0 ] );
+                PerfectMatch = updateSeries.Results[ 0 ];
+              }
+              return;
+            }
+
             string lUserLanguage = DBOption.GetOptions( DBOption.cOnlineLanguage );
 
             if (DBOption.GetOptions(DBOption.cOverrideSearchLanguageToEnglish))
                 lUserLanguage = "en";
 
             // search for series basis the user's language
-            XmlNode lNode = Online_Parsing_Classes.OnlineAPI.GetSeries( aSeriesName, lUserLanguage );
+            lNode = Online_Parsing_Classes.OnlineAPI.GetSeries( aSeriesName, lUserLanguage );
             if ( lNode == null ) return;
 
             // if we have no results from the user's language try English
