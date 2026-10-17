@@ -128,6 +128,7 @@ namespace WindowPlugins.GUITVSeries
             this.buttonTraktAuthorize = new System.Windows.Forms.Button();
             this.buttonTraktRemoveAuth = new System.Windows.Forms.Button();
             this.labelTraktAuthStatus = new System.Windows.Forms.Label();
+            this.lnkTraktAuthHelp = new System.Windows.Forms.LinkLabel();
             this.checkBox_FullSeriesRetrieval = new System.Windows.Forms.CheckBox();
             this.nudRecentlyAddedDays = new System.Windows.Forms.NumericUpDown();
             this.nudScanRemoteShareFrequency = new System.Windows.Forms.NumericUpDown();
@@ -994,6 +995,10 @@ namespace WindowPlugins.GUITVSeries
             this.buttonTraktAuthorize.TabIndex = 61;
             this.buttonTraktAuthorize.Text = "Authorize with Trakt.tv (optional)...";
             this.buttonTraktAuthorize.UseVisualStyleBackColor = true;
+            this.toolTip_Help.SetToolTip(this.buttonTraktAuthorize, "Optional - Trakt ratings work without it.\r\n\r\n" +
+                "Without it, everyone using this version of MP-TVSeries shares one Trakt allowance, so ratings can download slowly when many people are busy.\r\n" +
+                "Authorizing gives you your own allowance, so ratings download at full speed.\r\n\r\n" +
+                "Needs a free Trakt.tv account. MP-TVSeries only reads ratings with it.");
             this.buttonTraktAuthorize.Click += new System.EventHandler(this.buttonTraktAuthorize_Click);
             // 
             // buttonTraktRemoveAuth
@@ -1005,6 +1010,20 @@ namespace WindowPlugins.GUITVSeries
             this.buttonTraktRemoveAuth.Text = "Remove Trakt authorization";
             this.buttonTraktRemoveAuth.UseVisualStyleBackColor = true;
             this.buttonTraktRemoveAuth.Click += new System.EventHandler(this.buttonTraktRemoveAuth_Click);
+            // 
+            // lnkTraktAuthHelp
+            // 
+            this.lnkTraktAuthHelp.AutoSize = true;
+            this.lnkTraktAuthHelp.Location = new System.Drawing.Point(698, 135);
+            this.lnkTraktAuthHelp.Name = "lnkTraktAuthHelp";
+            this.lnkTraktAuthHelp.Size = new System.Drawing.Size(80, 13);
+            this.lnkTraktAuthHelp.TabStop = true;
+            this.lnkTraktAuthHelp.Text = "Why authorize?";
+            this.toolTip_Help.SetToolTip(this.lnkTraktAuthHelp, "Optional - Trakt ratings work without it.\r\n\r\n" +
+                "Without it, everyone using this version of MP-TVSeries shares one Trakt allowance, so ratings can download slowly when many people are busy.\r\n" +
+                "Authorizing gives you your own allowance, so ratings download at full speed.\r\n\r\n" +
+                "Needs a free Trakt.tv account. MP-TVSeries only reads ratings with it.");
+            this.lnkTraktAuthHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTraktAuthHelp_LinkClicked);
             // 
             // labelTraktAuthStatus
             // 
@@ -2751,6 +2770,7 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.txtTvdbPin);
             this.panel_OnlineData.Controls.Add(this.labelTvdbApiKey);
             this.panel_OnlineData.Controls.Add(this.lnkTvdbApiKeyHelp);
+            this.panel_OnlineData.Controls.Add(this.lnkTraktAuthHelp);
             this.panel_OnlineData.Controls.Add(this.txtTvdbApiKey);
             this.panel_OnlineData.Controls.Add(this.labelTraktOwnClientId);
             this.panel_OnlineData.Controls.Add(this.txtTraktOwnClientId);
@@ -4233,6 +4253,7 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.TextBox txtTvdbPin;
         private System.Windows.Forms.Label labelTvdbApiKey;
         private System.Windows.Forms.LinkLabel lnkTvdbApiKeyHelp;
+        private System.Windows.Forms.LinkLabel lnkTraktAuthHelp;
         private System.Windows.Forms.TextBox txtTvdbApiKey;
         private System.Windows.Forms.Label labelTraktOwnClientId;
         private System.Windows.Forms.TextBox txtTraktOwnClientId;

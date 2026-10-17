@@ -24,7 +24,9 @@ skin updates).
   one is already built into the release, so leave the **API key** box empty. The *PIN* identifies you as a
   subscriber, and everyone needs their own. (The API key box is only for people who build MP-TVSeries
   themselves from this source code, which has no key built in.)
-- **Trakt (optional):** ratings work without logging in. "Authorize with Trakt.tv" makes them faster.
+- **Trakt (optional):** ratings work without logging in. Without it, everyone using this version shares one
+  Trakt allowance, so ratings can download slowly when many people are busy. "Authorize with Trakt.tv" (free
+  Trakt account) gives you your own allowance. MP-TVSeries only reads ratings with it.
   You can also enter the client ID of your own Trakt application.
 
 ## What's different from the official version

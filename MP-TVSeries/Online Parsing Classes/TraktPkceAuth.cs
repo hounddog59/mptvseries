@@ -81,7 +81,7 @@ namespace WindowPlugins.GUITVSeries
         public static string GetStatusText()
         {
             return string.IsNullOrEmpty(DBOption.GetOptions(DBOption.cTraktAccessToken))
-                ? "Not authorized - ratings work, but authorizing makes them faster"
+                ? "Not authorized (ratings still work)"
                 : "Authorized through MP-TVSeries";
         }
 

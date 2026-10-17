@@ -2776,6 +2776,21 @@ namespace WindowPlugins.GUITVSeries
             buttonTraktRemoveAuth.Enabled = TraktPkceAuth.IsAuthorized();
         }
 
+        private void lnkTraktAuthHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string nl = Environment.NewLine;
+            MessageBox.Show(this,
+                "Authorizing is optional. Trakt.tv community ratings work without it." + nl + nl +
+                "Why do it? Trakt limits how often a program may ask it for ratings. Without authorizing, everyone using this " +
+                "version of MP-TVSeries shares one allowance, so when many people are downloading ratings at the same time, " +
+                "yours can slow down. Once you authorize, you get your own allowance, so ratings download at full speed." + nl + nl +
+                "You need a free Trakt.tv account. Click \"Authorize with Trakt.tv\", sign in on the page that opens and enter the code shown. " +
+                "You only need to do this once." + nl + nl +
+                "MP-TVSeries only reads ratings with it - it doesn't post anything or change your Trakt account. " +
+                "You can remove the authorization at any time.",
+                "Why authorize with Trakt.tv?", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         private void buttonTraktRemoveAuth_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Remove MP-TVSeries' authorization from your Trakt.tv account?\n\n" +
