@@ -26,7 +26,6 @@ skin updates).
 - **Trakt (optional):** ratings work without logging in. Without it, everyone using this version shares one
   Trakt allowance, so ratings can download slowly when many people are busy. "Authorize with Trakt.tv" (free
   Trakt account) gives you your own allowance. MP-TVSeries only reads ratings with it.
-  You can also enter the client ID of your own Trakt application.
 
 ## What's different from the official version
 

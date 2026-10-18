@@ -147,8 +147,6 @@ namespace WindowPlugins.GUITVSeries
         public const string cArtworkLoadingDelay = "ArtworkLoadingDelay";
         public const string cRandomFanartInterval = "RandomFanartInterval";
         public const string cParentalControlPinCode = "ParentalControlPinCode";		
-        // optional: the user's own Trakt application client ID, instead of the one MP-TVSeries ships with
-        public const string cTraktOwnClientId = "TraktOwnClientId";
         public const string cTvdbV4Pin = "TvdbV4Pin"; // subscriber PIN for TheTVDB v4 API login (leave empty if not a TVDB subscriber)
         public const string cSubstituteMissingArtwork = "SubstituteMissingArtwork";
         public const string cSkipSeasonViewOnSingleSeason = "SkipSeasonViewOnSingleSeason";
@@ -455,8 +453,6 @@ namespace WindowPlugins.GUITVSeries
             if (GetOptions(cParentalControlPinCode) == null)
                 SetOptions(cParentalControlPinCode, string.Empty);
 
-            if (GetOptions(cTraktOwnClientId) == null)
-                SetOptions(cTraktOwnClientId, "");
             if (GetOptions(cTvdbV4Pin) == null)
                 SetOptions(cTvdbV4Pin, string.Empty);
 

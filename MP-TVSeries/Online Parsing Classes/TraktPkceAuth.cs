@@ -20,8 +20,8 @@ namespace WindowPlugins.GUITVSeries
     /// token is sent along too. A Trakt token only works with the client ID that issued it, so the token stored
     /// here is always used together with <see cref="ClientId"/>.
     ///
-    /// Users (or forks) can use their own application, registered at trakt.tv/oauth/applications, by entering its
-    /// client ID in Configuration; otherwise <see cref="DefaultClientId"/> is used. Register it with the redirect URI below, which Trakt asks for when creating an
+    /// A fork that wants its own Trakt application registers one at trakt.tv/oauth/applications and changes
+    /// <see cref="DefaultClientId"/>. Register it with the redirect URI below, which Trakt asks for when creating an
     /// application; the device flow itself doesn't use it, but renewing a token sends it.
     /// </summary>
     public static class TraktPkceAuth
@@ -29,27 +29,10 @@ namespace WindowPlugins.GUITVSeries
         /// <summary>Client ID of the Trakt application MP-TVSeries ships with (public by design - Trakt client IDs are meant to be built into apps).</summary>
         public const string DefaultClientId = "HcSFeM7V1gNx3N5CdIyZYyVxBDZ0gnX00sNfcGYIP2M";
 
-        /// <summary>The client ID in use: the user's own Trakt application if one is entered in Configuration, otherwise the default.</summary>
+        /// <summary>The client ID in use.</summary>
         public static string ClientId
         {
-            get
-            {
-                string own = DBOption.GetOptions(DBOption.cTraktOwnClientId);
-                return string.IsNullOrEmpty(own) || own.Trim().Length == 0 ? DefaultClientId : own.Trim();
-            }
-        }
-
-        /// <summary>
-        /// Called when the user changes their own client ID: a Trakt authorization only works with the application that
-        /// issued it, so the stored one is dropped (ratings carry on without it; the user can authorize again).
-        /// </summary>
-        public static void ClientIdChanged()
-        {
-            if (string.IsNullOrEmpty((string)DBOption.GetOptions(DBOption.cTraktAccessToken)) &&
-                string.IsNullOrEmpty((string)DBOption.GetOptions(DBOption.cTraktRefreshToken))) return;
-            DBOption.SetOptions(DBOption.cTraktAccessToken, "");
-            DBOption.SetOptions(DBOption.cTraktRefreshToken, "");
-            MPTVSeriesLog.Write("Trakt: client ID changed - the previous authorization was removed (authorize again if you want it)");
+            get { return DefaultClientId; }
         }
 
         private const string DeviceCodeUrl = "https://api.trakt.tv/oauth/device/code";

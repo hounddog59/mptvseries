@@ -260,7 +260,6 @@ namespace WindowPlugins.GUITVSeries
             this.chkAllowDeletes.Checked = (bool)DBOption.GetOptions(DBOption.cShowDeleteMenu);
             this.chkUseRegionalDateFormatString.Checked = (bool)DBOption.GetOptions(DBOption.cAltImgLoading);
             txtTvdbPin.Text = DBOption.GetOptions(DBOption.cTvdbV4Pin);
-            txtTraktOwnClientId.Text = DBOption.GetOptions(DBOption.cTraktOwnClientId);
             chkBlankBanners.Checked = DBOption.GetOptions(DBOption.cGetBlankBanners);
             checkDownloadEpisodeSnapshots.Checked = DBOption.GetOptions(DBOption.cGetEpisodeSnapshots);
             checkBox_ShowHidden.Checked = DBOption.GetOptions(DBOption.cShowHiddenItems);            
@@ -5007,15 +5006,6 @@ namespace WindowPlugins.GUITVSeries
             DBView.ClearAll();
             DBView.fillDefaults();
             LoadViews();
-        }
-
-        private void txtTraktOwnClientId_TextChanged(object sender, EventArgs e)
-        {
-            string newId = txtTraktOwnClientId.Text.Trim();
-            if (newId == ((string)DBOption.GetOptions(DBOption.cTraktOwnClientId) ?? "").Trim()) return;
-            DBOption.SetOptions(DBOption.cTraktOwnClientId, newId);
-            TraktPkceAuth.ClientIdChanged();
-            UpdateTraktAuthStatus();
         }
 
         private void txtTvdbPin_TextChanged(object sender, EventArgs e)

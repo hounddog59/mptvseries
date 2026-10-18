@@ -229,44 +229,46 @@ namespace WindowPlugins.GUITVSeries
 
         static void FindSeriesTVDBID( parseResult result )
         {
-          string filePath = result.full_filename;
-          string directory = Path.GetDirectoryName( filePath );
-
-          if ( mSeriesIdLookupByDirectory.ContainsKey( directory ) )
+          result.SeriesTVDBID = -1;
+          string directory = null;
+          try
           {
-            result.SeriesTVDBID = mSeriesIdLookupByDirectory[ directory ];
-            return;
+            directory = Path.GetDirectoryName( result.full_filename );
+            if ( string.IsNullOrEmpty( directory ) ) return;
+
+            if ( mSeriesIdLookupByDirectory.ContainsKey( directory ) )
+            {
+              result.SeriesTVDBID = mSeriesIdLookupByDirectory[ directory ];
+              return;
+            }
+
+            string[] tvdbFiles = Directory.GetFiles( directory, "*.tvdb" );
+
+            // If no .tvdb file was found in the episode folder, check the parent
+            // (e.g. Series/Season 01 -> Series).
+            if ( tvdbFiles.Length == 0 )
+            {
+              string parentDirectory = Directory.GetParent( directory )?.FullName;
+
+              if ( !string.IsNullOrEmpty( parentDirectory ) )
+                tvdbFiles = Directory.GetFiles( parentDirectory, "*.tvdb" );
+            }
+
+            // get id from the first .tvdb file found in the directory (or parent); -1 if there is none
+            int tvdbID = -1;
+            if ( tvdbFiles.Length > 0 && !int.TryParse( Path.GetFileNameWithoutExtension( tvdbFiles[ 0 ] ), out tvdbID ) )
+              tvdbID = -1;
+
+            result.SeriesTVDBID = tvdbID;
+            mSeriesIdLookupByDirectory[ directory ] = tvdbID;
           }
-
-          string[] tvdbFiles = Directory.GetFiles( directory, "*.tvdb" );
-
-          // If no .tvdb file was found in the episode folder, check the parent
-          // (e.g. Series/Season 01 -> Series).
-          if ( tvdbFiles.Length == 0 )
+          catch ( Exception ex )
           {
-            string parentDirectory = Directory.GetParent( directory )?.FullName;
-
-            if ( !string.IsNullOrEmpty( parentDirectory ) )
-              tvdbFiles = Directory.GetFiles( parentDirectory, "*.tvdb" );
+            // a path longer than Windows allows (260 characters), a folder that can't be read, a drive that went
+            // away... - this file just gets no .tvdb ID, instead of stopping the whole import
+            MPTVSeriesLog.Write( string.Format( "Could not look for a .tvdb file for \"{0}\": {1}", result.full_filename, ex.Message ) );
+            if ( !string.IsNullOrEmpty( directory ) ) mSeriesIdLookupByDirectory[ directory ] = -1;
           }
-
-          // if no .tvdb file was found in the episode folder or the parent, give up
-          if ( tvdbFiles.Length == 0 )
-          {
-            result.SeriesTVDBID = -1;
-            mSeriesIdLookupByDirectory.Add( directory, -1 );
-            return;
-          }
-
-          // get id from the first .tvdb file found in the directory (or parent)
-          string tvdbFile = tvdbFiles[ 0 ];
-          string tvdbFileName = Path.GetFileNameWithoutExtension( tvdbFile );
-
-          int.TryParse( tvdbFileName, out int tvdbID );
-          result.SeriesTVDBID = tvdbID;
-          mSeriesIdLookupByDirectory.Add( directory, tvdbID );
-
-          return;
         }
     }
 

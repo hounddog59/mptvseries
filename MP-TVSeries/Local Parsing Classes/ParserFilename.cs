@@ -235,10 +235,15 @@ namespace WindowPlugins.GUITVSeries
                         }
 
                         // try get the series name from the folder
+                        // get directory of file (null when the path is longer than Windows allows)
+                        string lDirectory = null;
                         if ( DBOption.GetOptions( DBOption.cParsedNameFromFolder ) )
                         {
-                            // get directory of file
-                            string lDirectory = Path.GetDirectoryName( aPathPair.m_sFull_FileName );
+                            try { lDirectory = Path.GetDirectoryName( aPathPair.m_sFull_FileName ); }
+                            catch ( Exception ) { MPTVSeriesLog.Write( "Path too long to take the series name from its folder: " + aPathPair.m_sFull_FileName ); }
+                        }
+                        if ( !string.IsNullOrEmpty( lDirectory ) )
+                        {
 
                             // now get the name basis the last part of the directory
                             string lLastFolderName = Path.GetFileName( lDirectory );

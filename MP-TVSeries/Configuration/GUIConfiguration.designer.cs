@@ -111,8 +111,6 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoOnlineDataRefresh = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoChooseOrder = new System.Windows.Forms.CheckBox();
             this.txtTvdbPin = new System.Windows.Forms.TextBox();
-            this.labelTraktOwnClientId = new System.Windows.Forms.Label();
-            this.txtTraktOwnClientId = new System.Windows.Forms.TextBox();
             this.checkDownloadEpisodeSnapshots = new System.Windows.Forms.CheckBox();
             this.chkBlankBanners = new System.Windows.Forms.CheckBox();
             this.txtMainMirror = new System.Windows.Forms.TextBox();
@@ -807,23 +805,6 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoChooseOrder.UseVisualStyleBackColor = true;
             this.checkBox_AutoChooseOrder.CheckedChanged += new System.EventHandler(this.checkBox_AutoChooseOrder_CheckedChanged);
             // 
-            // labelTraktOwnClientId
-            // 
-            this.labelTraktOwnClientId.Location = new System.Drawing.Point(467, 153);
-            this.labelTraktOwnClientId.Name = "labelTraktOwnClientId";
-            this.labelTraktOwnClientId.Size = new System.Drawing.Size(120, 20);
-            this.labelTraktOwnClientId.Text = "Own Trakt client ID:";
-            this.labelTraktOwnClientId.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // txtTraktOwnClientId
-            // 
-            this.txtTraktOwnClientId.Location = new System.Drawing.Point(590, 153);
-            this.txtTraktOwnClientId.Name = "txtTraktOwnClientId";
-            this.txtTraktOwnClientId.Size = new System.Drawing.Size(298, 20);
-            this.toolTip_Help.SetToolTip(this.labelTraktOwnClientId, "Optional. Leave the box empty to use MP-TVSeries' own Trakt application.");
-            this.toolTip_Help.SetToolTip(this.txtTraktOwnClientId, "Optional. Leave empty to use MP-TVSeries' own Trakt application. To use your own, register one at trakt.tv/oauth/applications and paste its client ID here.");
-            this.txtTraktOwnClientId.TextChanged += new System.EventHandler(this.txtTraktOwnClientId_TextChanged);
-            // 
             // txtTvdbPin
             // 
             this.txtTvdbPin.Location = new System.Drawing.Point(127, 53);
@@ -941,7 +922,7 @@ namespace WindowPlugins.GUITVSeries
             // checkBox_LookForLocalIdFiles
             // 
             this.checkBox_LookForLocalIdFiles.AutoSize = true;
-            this.checkBox_LookForLocalIdFiles.Location = new System.Drawing.Point(467, 178);
+            this.checkBox_LookForLocalIdFiles.Location = new System.Drawing.Point(467, 158);
             this.checkBox_LookForLocalIdFiles.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBox_LookForLocalIdFiles.Name = "checkBox_LookForLocalIdFiles";
             this.checkBox_LookForLocalIdFiles.Size = new System.Drawing.Size(420, 17);
@@ -2732,8 +2713,6 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoChooseOrder);
             this.panel_OnlineData.Controls.Add(this.txtTvdbPin);
             this.panel_OnlineData.Controls.Add(this.lnkTraktAuthHelp);
-            this.panel_OnlineData.Controls.Add(this.labelTraktOwnClientId);
-            this.panel_OnlineData.Controls.Add(this.txtTraktOwnClientId);
             this.panel_OnlineData.Controls.Add(this.label54);
             this.panel_OnlineData.Controls.Add(this.checkDownloadEpisodeSnapshots);
             this.panel_OnlineData.Controls.Add(this.chkBlankBanners);
@@ -4212,8 +4191,6 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.CheckBox checkBox_AutoChooseOrder;
         private System.Windows.Forms.TextBox txtTvdbPin;
         private System.Windows.Forms.LinkLabel lnkTraktAuthHelp;
-        private System.Windows.Forms.Label labelTraktOwnClientId;
-        private System.Windows.Forms.TextBox txtTraktOwnClientId;
         private System.Windows.Forms.Label label54;
         private System.Windows.Forms.CheckBox checkDownloadEpisodeSnapshots;
         private System.Windows.Forms.CheckBox chkBlankBanners;
