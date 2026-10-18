@@ -111,9 +111,6 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoOnlineDataRefresh = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoChooseOrder = new System.Windows.Forms.CheckBox();
             this.txtTvdbPin = new System.Windows.Forms.TextBox();
-            this.labelTvdbApiKey = new System.Windows.Forms.Label();
-            this.lnkTvdbApiKeyHelp = new System.Windows.Forms.LinkLabel();
-            this.txtTvdbApiKey = new System.Windows.Forms.TextBox();
             this.labelTraktOwnClientId = new System.Windows.Forms.Label();
             this.txtTraktOwnClientId = new System.Windows.Forms.TextBox();
             this.checkDownloadEpisodeSnapshots = new System.Windows.Forms.CheckBox();
@@ -809,40 +806,6 @@ namespace WindowPlugins.GUITVSeries
         "ound online e.g. DVD or Absolute");
             this.checkBox_AutoChooseOrder.UseVisualStyleBackColor = true;
             this.checkBox_AutoChooseOrder.CheckedChanged += new System.EventHandler(this.checkBox_AutoChooseOrder_CheckedChanged);
-            // 
-            // labelTvdbApiKey
-            // 
-            this.labelTvdbApiKey.Location = new System.Drawing.Point(320, 53);
-            this.labelTvdbApiKey.Name = "labelTvdbApiKey";
-            this.labelTvdbApiKey.Size = new System.Drawing.Size(52, 20);
-            this.labelTvdbApiKey.Text = "API &key:";
-            this.toolTip_Help.SetToolTip(this.labelTvdbApiKey, "TheTVDB asks for two things:\r\n\r\n" +
-                "API key - identifies the program. One is already built in, so you don't need one. Leave this box empty.\r\n\r\n" +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.");
-            this.labelTvdbApiKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // txtTvdbApiKey
-            // 
-            this.txtTvdbApiKey.Location = new System.Drawing.Point(375, 53);
-            this.txtTvdbApiKey.Name = "txtTvdbApiKey";
-            this.txtTvdbApiKey.Size = new System.Drawing.Size(240, 20);
-            this.toolTip_Help.SetToolTip(this.txtTvdbApiKey, "TheTVDB asks for two things:\r\n\r\n" +
-                "API key - identifies the program. One is already built in, so you don't need one. Leave this box empty.\r\n\r\n" +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.");
-            this.txtTvdbApiKey.TextChanged += new System.EventHandler(this.txtTvdbApiKey_TextChanged);
-            // 
-            // lnkTvdbApiKeyHelp
-            // 
-            this.lnkTvdbApiKeyHelp.AutoSize = true;
-            this.lnkTvdbApiKeyHelp.Location = new System.Drawing.Point(372, 78);
-            this.lnkTvdbApiKeyHelp.Name = "lnkTvdbApiKeyHelp";
-            this.lnkTvdbApiKeyHelp.Size = new System.Drawing.Size(150, 13);
-            this.lnkTvdbApiKeyHelp.TabStop = true;
-            this.toolTip_Help.SetToolTip(this.lnkTvdbApiKeyHelp, "TheTVDB asks for two things:\r\n\r\n" +
-                "API key - identifies the program. One is already built in, so you don't need one. Leave this box empty.\r\n\r\n" +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own, from their account at thetvdb.com.");
-            this.lnkTvdbApiKeyHelp.Text = "What are the API key and PIN?";
-            this.lnkTvdbApiKeyHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTvdbApiKeyHelp_LinkClicked);
             // 
             // labelTraktOwnClientId
             // 
@@ -2768,10 +2731,7 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoOnlineDataRefresh);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoChooseOrder);
             this.panel_OnlineData.Controls.Add(this.txtTvdbPin);
-            this.panel_OnlineData.Controls.Add(this.labelTvdbApiKey);
-            this.panel_OnlineData.Controls.Add(this.lnkTvdbApiKeyHelp);
             this.panel_OnlineData.Controls.Add(this.lnkTraktAuthHelp);
-            this.panel_OnlineData.Controls.Add(this.txtTvdbApiKey);
             this.panel_OnlineData.Controls.Add(this.labelTraktOwnClientId);
             this.panel_OnlineData.Controls.Add(this.txtTraktOwnClientId);
             this.panel_OnlineData.Controls.Add(this.label54);
@@ -4251,10 +4211,7 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.CheckBox checkBox_AutoOnlineDataRefresh;
         private System.Windows.Forms.CheckBox checkBox_AutoChooseOrder;
         private System.Windows.Forms.TextBox txtTvdbPin;
-        private System.Windows.Forms.Label labelTvdbApiKey;
-        private System.Windows.Forms.LinkLabel lnkTvdbApiKeyHelp;
         private System.Windows.Forms.LinkLabel lnkTraktAuthHelp;
-        private System.Windows.Forms.TextBox txtTvdbApiKey;
         private System.Windows.Forms.Label labelTraktOwnClientId;
         private System.Windows.Forms.TextBox txtTraktOwnClientId;
         private System.Windows.Forms.Label label54;

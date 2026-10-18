@@ -260,7 +260,6 @@ namespace WindowPlugins.GUITVSeries
             this.chkAllowDeletes.Checked = (bool)DBOption.GetOptions(DBOption.cShowDeleteMenu);
             this.chkUseRegionalDateFormatString.Checked = (bool)DBOption.GetOptions(DBOption.cAltImgLoading);
             txtTvdbPin.Text = DBOption.GetOptions(DBOption.cTvdbV4Pin);
-            txtTvdbApiKey.Text = DBOption.GetOptions(DBOption.cTvdbApiKey);
             txtTraktOwnClientId.Text = DBOption.GetOptions(DBOption.cTraktOwnClientId);
             chkBlankBanners.Checked = DBOption.GetOptions(DBOption.cGetBlankBanners);
             checkDownloadEpisodeSnapshots.Checked = DBOption.GetOptions(DBOption.cGetEpisodeSnapshots);
@@ -5008,23 +5007,6 @@ namespace WindowPlugins.GUITVSeries
             DBView.ClearAll();
             DBView.fillDefaults();
             LoadViews();
-        }
-
-        private void lnkTvdbApiKeyHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            string nl = Environment.NewLine;
-            MessageBox.Show(this,
-                "TheTVDB asks for two things:" + nl + nl +
-                "API key - identifies the program (this version of MP-TVSeries). One is already built in, so you don't need one. Leave the API key box empty." + nl + nl +
-                "PIN - identifies you as a TheTVDB subscriber. Everyone needs their own: subscribe at thetvdb.com, then copy the PIN from your account there." + nl + nl +
-                "Your PIN is only ever sent to TheTVDB." + nl + nl +
-                "(The API key box is only for people who build MP-TVSeries themselves from its source code.)",
-                "TheTVDB API key and PIN", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void txtTvdbApiKey_TextChanged(object sender, EventArgs e)
-        {
-            DBOption.SetOptions(DBOption.cTvdbApiKey, txtTvdbApiKey.Text.Trim());
         }
 
         private void txtTraktOwnClientId_TextChanged(object sender, EventArgs e)

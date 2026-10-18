@@ -43,16 +43,14 @@ namespace WindowPlugins.GUITVSeries
         /// <summary>
         /// if you compile yourself get you're own key or it will have to be disabled!
         /// </summary>
-        // key built into this copy (APIKey.resx) - empty / placeholder in a public release
+        // key built into this copy (APIKey.resx); the source code on GitHub has only a placeholder
         private static string builtInApiKey = string.Empty;
 
-        /// <summary>The TheTVDB API key to use: the one entered in Configuration, otherwise one built into this copy.</summary>
+        /// <summary>The TheTVDB API key built into this copy, or empty if there is none.</summary>
         public static string cApiKey
         {
             get
             {
-                string own = DBOption.GetOptions(DBOption.cTvdbApiKey);
-                if (!string.IsNullOrEmpty(own) && own.Trim().Length > 0) return own.Trim();
                 if (string.IsNullOrEmpty(builtInApiKey) || builtInApiKey.StartsWith("PUT-YOUR")) return string.Empty;
                 return builtInApiKey;
             }
@@ -112,7 +110,7 @@ namespace WindowPlugins.GUITVSeries
 
             if (String.IsNullOrEmpty(cApiKey))
             {
-                MPTVSeriesLog.Write("No TheTVDB API key: create your own (free) at thetvdb.com and enter it, with your PIN, on the Online Data tab of MP-TVSeries Configuration. Nothing can be downloaded until then.");
+                MPTVSeriesLog.Write("No TheTVDB API key is built into this copy of MP-TVSeries. If you built it yourself, put your own key (free from thetvdb.com) in Online Parsing Classes\\APIKey.resx and build it again. Nothing can be downloaded until then.");
                 IsMirrorsAvailable = false;
                 return;
             }
