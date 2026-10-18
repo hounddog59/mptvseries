@@ -5,9 +5,9 @@ namespace WindowPlugins.GUITVSeries
 {
     public partial class About : UserControl
     {
-        // Mark Willmer's PayPal link for this community version (a PayPal.me or donate-button link, never an
-        // e-mail address). While it is empty the "buy Mark a coffee" link is hidden.
-        private const string MaintainerDonateUrl = "";
+        // Mark Willmer's PayPal.me link for this community version (never an e-mail address).
+        // If it is ever emptied, the "buy Mark a coffee" link is hidden.
+        private const string MaintainerDonateUrl = "https://www.paypal.me/MarkWillmer59";
 
         public About()
         {
