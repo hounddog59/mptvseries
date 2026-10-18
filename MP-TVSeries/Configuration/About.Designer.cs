@@ -53,6 +53,8 @@
             this.locationBrowser2 = new WindowPlugins.GUITVSeries.LocationBrowser();
             this.locationBrowser1 = new WindowPlugins.GUITVSeries.LocationBrowser();
             this.lnkPayPal = new System.Windows.Forms.LinkLabel();
+            this.lblMaintainer = new System.Windows.Forms.Label();
+            this.lnkMaintainerDonate = new System.Windows.Forms.LinkLabel();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -111,7 +113,7 @@
             this.groupBox2.Controls.Add(this.linkLabel2);
             this.groupBox2.Controls.Add(this.linkLabel1);
             this.groupBox2.Controls.Add(this.linkForum);
-            this.groupBox2.Location = new System.Drawing.Point(23, 286);
+            this.groupBox2.Location = new System.Drawing.Point(23, 331);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(546, 105);
             this.groupBox2.TabIndex = 4;
@@ -169,7 +171,7 @@
             this.groupBox3.Controls.Add(this.lblEpisodes);
             this.groupBox3.Controls.Add(this.lblSeasons);
             this.groupBox3.Controls.Add(this.lblSeries);
-            this.groupBox3.Location = new System.Drawing.Point(23, 391);
+            this.groupBox3.Location = new System.Drawing.Point(23, 436);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(546, 49);
             this.groupBox3.TabIndex = 5;
@@ -212,7 +214,7 @@
             this.groupBox4.Controls.Add(this.locationBrowser3);
             this.groupBox4.Controls.Add(this.locationBrowser2);
             this.groupBox4.Controls.Add(this.locationBrowser1);
-            this.groupBox4.Location = new System.Drawing.Point(23, 440);
+            this.groupBox4.Location = new System.Drawing.Point(23, 485);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(546, 141);
             this.groupBox4.TabIndex = 6;
@@ -241,12 +243,14 @@
             this.grbDonate.Controls.Add(this.lnkPayPal);
             this.grbDonate.Controls.Add(this.picPayPal);
             this.grbDonate.Controls.Add(this.lblPayPal);
+            this.grbDonate.Controls.Add(this.lblMaintainer);
+            this.grbDonate.Controls.Add(this.lnkMaintainerDonate);
             this.grbDonate.Location = new System.Drawing.Point(23, 231);
             this.grbDonate.Name = "grbDonate";
-            this.grbDonate.Size = new System.Drawing.Size(546, 55);
+            this.grbDonate.Size = new System.Drawing.Size(546, 100);
             this.grbDonate.TabIndex = 7;
             this.grbDonate.TabStop = false;
-            this.grbDonate.Text = "Donate";
+            this.grbDonate.Text = "Thanks";
             // 
             // picPayPal
             // 
@@ -267,8 +271,27 @@
             this.lblPayPal.Name = "lblPayPal";
             this.lblPayPal.Size = new System.Drawing.Size(465, 13);
             this.lblPayPal.TabIndex = 0;
-            this.lblPayPal.Text = "If you enjoy using MP-TVSeries please consider donating to help support continued" +
-    " development.";
+            this.lblPayPal.Text = "MP-TVSeries was created by Damien Haynes and the MP-TVSeries team - thank you for years of work!";
+            // 
+            // lblMaintainer
+            // 
+            this.lblMaintainer.AutoSize = true;
+            this.lblMaintainer.Location = new System.Drawing.Point(56, 56);
+            this.lblMaintainer.Name = "lblMaintainer";
+            this.lblMaintainer.Size = new System.Drawing.Size(300, 13);
+            this.lblMaintainer.TabIndex = 3;
+            this.lblMaintainer.Text = "This version for TheTVDB\'s new service is kept going by Mark Willmer.";
+            // 
+            // lnkMaintainerDonate
+            // 
+            this.lnkMaintainerDonate.AutoSize = true;
+            this.lnkMaintainerDonate.Location = new System.Drawing.Point(57, 72);
+            this.lnkMaintainerDonate.Name = "lnkMaintainerDonate";
+            this.lnkMaintainerDonate.Size = new System.Drawing.Size(250, 13);
+            this.lnkMaintainerDonate.TabIndex = 4;
+            this.lnkMaintainerDonate.TabStop = true;
+            this.lnkMaintainerDonate.Text = "If it\'s useful to you, you can buy Mark a coffee with PayPal";
+            this.lnkMaintainerDonate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkMaintainerDonate_LinkClicked);
             // 
             // locationBrowser5
             // 
@@ -344,7 +367,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Name = "About";
-            this.Size = new System.Drawing.Size(597, 590);
+            this.Size = new System.Drawing.Size(597, 635);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -386,5 +409,7 @@
         private System.Windows.Forms.PictureBox picPayPal;
         private System.Windows.Forms.Label lblPayPal;
         private System.Windows.Forms.LinkLabel lnkPayPal;
+        private System.Windows.Forms.Label lblMaintainer;
+        private System.Windows.Forms.LinkLabel lnkMaintainerDonate;
     }
 }

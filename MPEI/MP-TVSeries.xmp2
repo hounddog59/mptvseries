@@ -1753,7 +1753,7 @@ public class Script
   <GeneralInfo>
     <Name>MP-TVSeries</Name>
     <Id>5e2777c3-966c-407f-b5a9-e51205b70b3e</Id>
-    <Author>ltfearme</Author>
+    <Author>Mark Willmer (community version of the MP-TVSeries team's plugin)</Author>
     <HomePage>https://github.com/damienhaynes/mptvseries</HomePage>
     <ForumPage>https://forum.team-mediaportal.com/forums/my-tvseries.162/</ForumPage>
     <UpdateUrl />

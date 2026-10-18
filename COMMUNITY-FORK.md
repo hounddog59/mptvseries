@@ -56,3 +56,5 @@ official team releases an update later, uninstall this version first to install 
 MP-TVSeries was created by the MP-TVSeries team and is maintained by the MediaPortal Plugin Team
 (damienhaynes, andrewjswan, ltfearme and contributors). This fork builds on their work and keeps the original
 licence.
+
+This community version for TheTVDB v4 is maintained by Mark Willmer.

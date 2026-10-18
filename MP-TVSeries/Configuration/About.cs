@@ -5,9 +5,14 @@ namespace WindowPlugins.GUITVSeries
 {
     public partial class About : UserControl
     {
+        // Mark Willmer's PayPal link for this community version (a PayPal.me or donate-button link, never an
+        // e-mail address). While it is empty the "buy Mark a coffee" link is hidden.
+        private const string MaintainerDonateUrl = "";
+
         public About()
         {
             InitializeComponent();
+            lnkMaintainerDonate.Visible = MaintainerDonateUrl.Length > 0;
         }
 
         public void setUpMPInfo(string version, DateTime buildDate)
@@ -44,7 +49,7 @@ namespace WindowPlugins.GUITVSeries
 
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start( @"https://github.com/damienhaynes/mptvseries" );
+            System.Diagnostics.Process.Start( @"https://github.com/hounddog59/mptvseries/tree/tvdb-v4" );
         }
 
         private void linkLabel3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -60,6 +65,12 @@ namespace WindowPlugins.GUITVSeries
         private void picPayPal_Click( object sender, EventArgs e )
         {
             System.Diagnostics.Process.Start( @"https://www.paypal.me/damienlhaynes" );
+        }
+
+        private void lnkMaintainerDonate_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
+        {
+            if (MaintainerDonateUrl.Length > 0)
+                System.Diagnostics.Process.Start( MaintainerDonateUrl );
         }
     }
 }
