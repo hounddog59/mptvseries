@@ -47,7 +47,7 @@ skin updates).
 2. Back up `C:\ProgramData\Team MediaPortal\MediaPortal\Database\TVSeriesDatabase4.db3`.
 3. The first import after installing refreshes every show's details once, so it takes a while.
 
-Version 4.6.0.0 is numbered above the official 4.5.1 releases, so MediaPortal treats it as an upgrade. If the
+Version 4.6 is numbered above the official 4.5.1 releases, so MediaPortal treats it as an upgrade. If the
 official team releases an update later, uninstall this version first to install theirs.
 
 ## Credits
