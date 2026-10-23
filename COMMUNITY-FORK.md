@@ -41,6 +41,27 @@ skin updates).
 - Favourites use TheTVDB's current service (removing a favourite is done on thetvdb.com).
 - Removed: TheTVDB personal ratings and the Account ID box (TheTVDB no longer offers them).
 
+## How to name your files
+
+I name my episodes like **`Show Name S03E16 Episode Title.mkv`** (season 3, episode 16), each show in its own
+folder – that's the most reliable. Out of the box MP-TVSeries also understands these:
+
+| Example | Notes |
+|---|---|
+| `Show Name S03E16 Episode Title.mkv` | also `Show.Name.s03e16`, `Show_Name_S03E16`, `Show Name 3x16` |
+| `Show Name S03E16E17.mkv` | double episodes, also `S03E16-E17` or `3x16x17` |
+| `Show Name\Season 3\Show Name S03E16.mkv` | season folders are fine |
+| `Show Name\S03E16.mkv` | show name taken from the folder when the file name doesn't have it |
+| `Show Name 316.mkv` | three-digit numbers: season 3, episode 16 (also `s3ep16`) |
+| `Show Name - [3x16] - Episode Title.mkv` | |
+| `Show Name - 3x16 - Episode Title.mkv` | |
+| `Show Name\3x16 - Episode Title.mkv` | |
+| `Show Name\Season 3\Episode 16 - Episode Title.mkv` | |
+| `Show Name 2024-03-15 Episode Title.mkv` | daily shows, matched by air date |
+
+Files with "sample" in the name are skipped. Other layouts can be added on the **Import** tab of MP-TVSeries
+Configuration (Parsing Expressions), and there's an option there to take the show name from the folder.
+
 ## Before you install
 
 1. Close MediaPortal and MP-TVSeries Configuration.
