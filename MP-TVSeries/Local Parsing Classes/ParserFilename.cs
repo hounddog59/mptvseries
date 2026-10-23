@@ -240,7 +240,7 @@ namespace WindowPlugins.GUITVSeries
                         if ( DBOption.GetOptions( DBOption.cParsedNameFromFolder ) )
                         {
                             try { lDirectory = Path.GetDirectoryName( aPathPair.m_sFull_FileName ); }
-                            catch ( Exception ) { MPTVSeriesLog.Write( "Path too long to take the series name from its folder: " + aPathPair.m_sFull_FileName ); }
+                            catch ( Exception ex ) { LocalParse.LogPathProblemOnce( aPathPair.m_sFull_FileName, "taking the series name from the folder", ex ); }
                         }
                         if ( !string.IsNullOrEmpty( lDirectory ) )
                         {

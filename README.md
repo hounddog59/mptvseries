@@ -1,3 +1,9 @@
+> **Community version for TheTVDB v4** – this is Mark Willmer's community version of MP-TVSeries, which works
+> with TheTVDB's current service. It is not the official release. See **[COMMUNITY-FORK.md](COMMUNITY-FORK.md)**
+> for what it does, what you need, and how to install it, and the
+> **[Releases](https://github.com/hounddog59/mptvseries/releases)** page to download it.
+> If you don't like it, simply uninstall it and go back to the original MP-TVSeries you had before.
+
 # What is MP-TVSeries #
 
 [![MP AnyCPU](https://img.shields.io/badge/MP-AnyCPU-blue?logo=windows&logoColor=white)](https://github.com/Mediaportal-Plugin-Team/mptvseries/releases)

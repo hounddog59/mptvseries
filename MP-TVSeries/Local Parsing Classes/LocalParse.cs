@@ -43,6 +43,27 @@ namespace WindowPlugins.GUITVSeries
 
         private static Dictionary<string, int> mSeriesIdLookupByDirectory = new Dictionary<string, int>();
 
+        // folders already reported in the log as having paths too long for Windows (one line per folder, not per file)
+        private static HashSet<string> mLongPathFoldersLogged = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+
+        /// <summary>
+        /// Writes one log line per folder (and per kind of check) for files whose path Windows can't handle, instead of
+        /// one per file - a season of long episode names would otherwise fill the log.
+        /// </summary>
+        internal static void LogPathProblemOnce( string fullFileName, string skipped, Exception ex )
+        {
+          int cut = fullFileName == null ? -1 : fullFileName.LastIndexOf( '\\' );
+          string folder = cut > 0 ? fullFileName.Substring( 0, cut ) : ( fullFileName ?? string.Empty );
+          lock ( mLongPathFoldersLogged )
+          {
+            if ( !mLongPathFoldersLogged.Add( skipped + "|" + folder ) ) return;
+          }
+          if ( ex is PathTooLongException )
+            MPTVSeriesLog.Write( string.Format( "Path too long for Windows ({0} characters) - skipped {1} for the files in: {2}", fullFileName.Length, skipped, folder ) );
+          else
+            MPTVSeriesLog.Write( string.Format( "Skipped {0} for the files in: {1} ({2})", skipped, folder, ex.Message ) );
+        }
+
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
@@ -266,7 +287,7 @@ namespace WindowPlugins.GUITVSeries
           {
             // a path longer than Windows allows (260 characters), a folder that can't be read, a drive that went
             // away... - this file just gets no .tvdb ID, instead of stopping the whole import
-            MPTVSeriesLog.Write( string.Format( "Could not look for a .tvdb file for \"{0}\": {1}", result.full_filename, ex.Message ) );
+            LogPathProblemOnce( result.full_filename, "the .tvdb file check", ex );
             if ( !string.IsNullOrEmpty( directory ) ) mSeriesIdLookupByDirectory[ directory ] = -1;
           }
         }
