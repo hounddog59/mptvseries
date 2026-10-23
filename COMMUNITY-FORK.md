@@ -124,6 +124,12 @@ the official version.
 Version 4.6 is numbered above the official 4.5.1 releases, so MediaPortal treats it as an upgrade. If the
 official team releases an update later, uninstall this version first to install theirs.
 
+## Planned
+
+- **A free option without a TheTVDB subscription:** show details, episodes and artwork from TMDB (The Movie
+  Database, free sign-up), chosen on the Online Data tab.
+- **TVmaze as a second backup** (free, no sign-up) for shows the main source doesn't have.
+
 ## Credits
 
 MP-TVSeries was created by the MP-TVSeries team and is maintained by the MediaPortal Plugin Team
