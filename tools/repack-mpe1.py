@@ -3,6 +3,8 @@
 # The installer details (version, author, description) come from MPEI/MP-TVSeries.xmp2.
 import zipfile, sys, re, datetime
 src, out, dll, exe86, exe64, xmp2 = sys.argv[1:7]
+import os
+links = os.path.join(os.path.dirname(os.path.abspath(xmp2)), 'OnlineLinks')  # Start-menu web links from MPEI/OnlineLinks
 zin = zipfile.ZipFile(src)
 xml = zin.read('MediaPortalExtension.xml').decode('utf-8-sig')
 had_bom = zin.read('MediaPortalExtension.xml')[:3] == b'\xef\xbb\xbf'
@@ -44,6 +46,9 @@ zout = zipfile.ZipFile(out, 'w')
 for i in zin.infolist():
     if i.filename == PDB: continue
     data = xml.encode('utf-8') if i.filename == 'MediaPortalExtension.xml' else repl.get(i.filename, zin.read(i.filename))
+    base = i.filename.rsplit('}-', 1)[-1]
+    if i.filename.endswith('.url') and os.path.isfile(os.path.join(links, base)):
+        data = open(os.path.join(links, base), 'rb').read()
     if i.filename == 'MediaPortalExtension.xml' and had_bom: data = b'\xef\xbb\xbf' + data
     ni = zipfile.ZipInfo(i.filename, date_time=datetime.datetime.now().timetuple()[:6] if i.filename in repl or i.filename=='MediaPortalExtension.xml' else i.date_time)
     ni.compress_type = i.compress_type; ni.external_attr = i.external_attr; ni.create_system = i.create_system
