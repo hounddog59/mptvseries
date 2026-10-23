@@ -1401,34 +1401,6 @@ Click Next to continue or Cancel to exit Setup.
               </Params>
               <ExecuteLocation>AfterPanelShow</ExecuteLocation>
             </ActionItem>
-            <ActionItem Name="Creating Configuration Desktop Shortcut" ActionType="CreateShortCut" ConditionGroup="Main" Condition="None">
-              <Params>
-                <Items>
-                  <SectionParam Name="ShortCut location">
-                    <Value>%Desktop%\MP-TVSeries Configuration.lnk</Value>
-                    <ValueType>Template</ValueType>
-                    <Description>Location of shortcut</Description>
-                  </SectionParam>
-                  <SectionParam Name="ShortCut target">
-                    <Value>%Base%\MP-TVSeries-Configuration.exe</Value>
-                    <ValueType>Template</ValueType>
-                    <Description>Target of short cut</Description>
-                  </SectionParam>
-                  <SectionParam Name="Description">
-                    <Value>MP-TVSeries Configuration</Value>
-                    <ValueType>String</ValueType>
-                    <Description>Description tooltip text </Description>
-                  </SectionParam>
-                  <SectionParam Name="Icon of the shortcut">
-                    <Value />
-                    <ValueType>Template</ValueType>
-                    <Description>Icon of the shortcut, 
- if is empty the icon of the target will be used</Description>
-                  </SectionParam>
-                </Items>
-              </Params>
-              <ExecuteLocation>AfterPanelShow</ExecuteLocation>
-            </ActionItem>
             <ActionItem Name="Creating Forums Shortcut" ActionType="CreateShortCut" ConditionGroup="ShortcutUrls" Condition="None">
               <Params>
                 <Items>

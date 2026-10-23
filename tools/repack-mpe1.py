@@ -19,6 +19,12 @@ blocks = re.findall(r'[ \t]*<FileItem [^>]*>\s*(?:(?!</FileItem>).)*?' + re.esca
 assert len(blocks) == 2, len(blocks)
 for b in blocks: xml = xml.replace(b, '', 1)
 
+# no desktop icon: the uninstall/reinstall of every update deleted it and put a new one in the first free
+# spot on the desktop; people who want one make their own, which the installer then never touches
+dsk = re.findall(r'[ \t]*<ActionItem Name="Creating Configuration Desktop Shortcut".*?</ActionItem>\r?\n', xml, re.S)
+assert len(dsk) == 1, len(dsk)
+xml = xml.replace(dsk[0], '', 1)
+
 # general info from our MP-TVSeries.xmp2
 x = open(xmp2, encoding='utf-8-sig').read()
 def tag(s, t):

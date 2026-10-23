@@ -118,6 +118,11 @@ Configuration (Parsing Expressions), and there's an option there to take the sho
 5. Open MP-TVSeries Configuration > **Online Data**, enter your TheTVDB PIN, and run an import. The first
    import refreshes every show's details once, so it takes a while.
 
+The installer doesn't put an icon on your desktop (each update used to delete it and put a new one in a
+different spot). MP-TVSeries Configuration is in the Start menu under Team MediaPortal > MediaPortal Plugins >
+MP-TVSeries. For a desktop icon that stays where you put it, open `C:\Program Files\Team MediaPortal\MediaPortal`,
+right-click `MP-TVSeries-Configuration.exe` > Show more options > Send to > Desktop (create shortcut).
+
 To go back: uninstall it in MediaPortal Configuration > Extensions, restore your database backup and install
 the official version.
 
