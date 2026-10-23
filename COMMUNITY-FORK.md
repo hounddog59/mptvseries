@@ -8,9 +8,14 @@ The official version is at <https://github.com/Mediaportal-Plugin-Team/mptvserie
 
 ## Why it exists
 
-TheTVDB switched off the old service that MP-TVSeries was written for. The official plugin now needs a
-`.tvdb` file in each show's folder to find new shows. This version talks to TheTVDB's current (v4) service
-directly, so shows are found by name again, and it adds a number of fixes.
+TheTVDB is moving everything to its current (v4) service. This version gets all its TheTVDB data from
+that service – searching, show details, episodes, languages and favourites – and adds a number of features
+and fixes (listed below).
+
+**Which should you use?** The official MP-TVSeries 4.5.1.764 (October 2026) also finds shows by name through
+TheTVDB's current service and doesn't need a subscription; it still gets the rest of its data from TheTVDB's
+older service. If finding new shows is all you need, the official version is the simplest choice. This version
+needs your own TheTVDB PIN, and in return adds everything in the lists below. Choose whichever suits you best.
 
 It includes the official team's work up to 4.5.1.756 (configuration crash fixes, `.tvdb` files, the x265 rule,
 skin updates).
