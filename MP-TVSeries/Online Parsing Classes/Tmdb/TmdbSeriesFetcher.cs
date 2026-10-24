@@ -202,7 +202,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             Append(doc, series, "lastupdated", string.Empty);
             Append(doc, series, "poster", TmdbClient.ImageUrl(PosterSize, JsonHelpers.GetString(d, "poster_path")));
             Append(doc, series, "banner", string.Empty);
-            Append(doc, series, "fanart", TmdbClient.ImageUrl("original", JsonHelpers.GetString(d, "backdrop_path")));
+            Append(doc, series, "fanart", TmdbClient.ImageUrl("w1280", JsonHelpers.GetString(d, "backdrop_path")));
             Append(doc, series, "slug", string.Empty);
             Append(doc, series, "language", languageCode);
 
@@ -317,10 +317,14 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
                     string path = JsonHelpers.GetString(b, "file_path");
                     if (string.IsNullOrEmpty(path)) continue;
                     int width = JsonHelpers.GetInt(b, "width"), height = JsonHelpers.GetInt(b, "height");
-                    // the Fanart "Resolution" choice filters on 1280x720 / 1920x1080: anything Full HD or larger counts
-                    // as Full HD (MediaPortal scales it to the screen anyway)
-                    string resolution = width >= 1920 ? "1920x1080" : (width > 0 && height > 0 ? width + "x" + height : "1280x720");
-                    AppendBanner(doc, root, path, "fanart", resolution, TmdbClient.ImageUrl("original", path), TmdbClient.ImageUrl(BackdropThumbSize, path),
+                    // Full HD pictures are fetched as they are. Larger ones (often 4K, several MB each - far more than a TV
+                    // screen needs, and slow over Wi-Fi) are fetched at TMDB's 1280-wide size instead; TMDB offers nothing
+                    // between that and the original. The labels match the Fanart "Resolution" choice (1280x720 / 1920x1080).
+                    string size, resolution;
+                    if (width > 1920) { size = "w1280"; resolution = "1280x720"; }
+                    else if (width == 1920) { size = "original"; resolution = "1920x1080"; }
+                    else { size = "original"; resolution = width > 0 && height > 0 ? width + "x" + height : "1280x720"; }
+                    AppendBanner(doc, root, path, "fanart", resolution, TmdbClient.ImageUrl(size, path), TmdbClient.ImageUrl(BackdropThumbSize, path),
                                  JsonHelpers.GetString(b, "iso_639_1"), b, null);
                 }
 
