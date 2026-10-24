@@ -13,6 +13,18 @@ namespace WindowPlugins.GUITVSeries
         {
             InitializeComponent();
             lnkMaintainerDonate.Visible = MaintainerDonateUrl.Length > 0;
+
+            // TMDB's logo, which its free-use terms ask for next to the credit (a file inside the plugin, not a .resx resource)
+            try
+            {
+                using (var stream = typeof(About).Assembly.GetManifestResourceStream("WindowPlugins.GUITVSeries.Resources.Images.tmdb_logo.png"))
+                {
+                    if (stream != null)
+                        using (var image = System.Drawing.Image.FromStream(stream))
+                            picTmdb.Image = new System.Drawing.Bitmap(image);
+                }
+            }
+            catch (Exception) { }
         }
 
         public void setUpMPInfo(string version, DateTime buildDate)
@@ -68,6 +80,11 @@ namespace WindowPlugins.GUITVSeries
         }
 
         private void lnkTmdb_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
+        {
+            System.Diagnostics.Process.Start( @"https://www.themoviedb.org" );
+        }
+
+        private void lnkTmdb_Click( object sender, EventArgs e )
         {
             System.Diagnostics.Process.Start( @"https://www.themoviedb.org" );
         }

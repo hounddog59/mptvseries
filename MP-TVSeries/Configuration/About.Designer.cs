@@ -48,6 +48,7 @@
             this.grbDataSources = new System.Windows.Forms.GroupBox();
             this.lblDataSources = new System.Windows.Forms.Label();
             this.lnkTmdb = new System.Windows.Forms.LinkLabel();
+            this.picTmdb = new System.Windows.Forms.PictureBox();
             this.picPayPal = new System.Windows.Forms.PictureBox();
             this.lblPayPal = new System.Windows.Forms.Label();
             this.locationBrowser5 = new WindowPlugins.GUITVSeries.LocationBrowser();
@@ -66,6 +67,7 @@
             this.grbDonate.SuspendLayout();
             this.grbDataSources.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPayPal)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picTmdb)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -246,6 +248,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grbDataSources.Controls.Add(this.lblDataSources);
             this.grbDataSources.Controls.Add(this.lnkTmdb);
+            this.grbDataSources.Controls.Add(this.picTmdb);
             this.grbDataSources.Location = new System.Drawing.Point(23, 331);
             this.grbDataSources.Name = "grbDataSources";
             this.grbDataSources.Size = new System.Drawing.Size(546, 80);
@@ -274,6 +277,19 @@
             this.lnkTmdb.TabStop = true;
             this.lnkTmdb.Text = "https://www.themoviedb.org";
             this.lnkTmdb.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTmdb_LinkClicked);
+            // 
+            // picTmdb
+            // 
+            this.picTmdb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.picTmdb.BackColor = System.Drawing.Color.Transparent;
+            this.picTmdb.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picTmdb.Location = new System.Drawing.Point(462, 22);
+            this.picTmdb.Name = "picTmdb";
+            this.picTmdb.Size = new System.Drawing.Size(70, 30);
+            this.picTmdb.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picTmdb.TabIndex = 2;
+            this.picTmdb.TabStop = false;
+            this.picTmdb.Click += new System.EventHandler(this.lnkTmdb_Click);
             // 
             // grbDonate
             // 
@@ -421,6 +437,7 @@
             this.grbDonate.ResumeLayout(false);
             this.grbDonate.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPayPal)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picTmdb)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -451,6 +468,7 @@
         private System.Windows.Forms.GroupBox grbDataSources;
         private System.Windows.Forms.Label lblDataSources;
         private System.Windows.Forms.LinkLabel lnkTmdb;
+        private System.Windows.Forms.PictureBox picTmdb;
         private System.Windows.Forms.PictureBox picPayPal;
         private System.Windows.Forms.Label lblPayPal;
         private System.Windows.Forms.LinkLabel lnkPayPal;

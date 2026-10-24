@@ -348,6 +348,9 @@
     <Compile Include="GUIPinCode.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Images\tmdb_logo.png">
+      <LogicalName>WindowPlugins.GUITVSeries.Resources.Images.tmdb_logo.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Configuration\About.resx">
       <DependentUpon>About.cs</DependentUpon>
       <SubType>Designer</SubType>
