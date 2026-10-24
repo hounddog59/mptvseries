@@ -89,7 +89,9 @@ namespace WindowPlugins.GUITVSeries
         {
             try
             {
-                string all = DBOption.GetOptions(optionName).ToString().Trim();
+                // a new database has no logo rules stored yet
+                DBValue stored = DBOption.GetOptions(optionName);
+                string all = (object)stored == null ? string.Empty : stored.ToString().Trim();
                 entries.Clear();
                 entriesValidForInfo.Clear();
                 splitConditions.Clear();
