@@ -2,7 +2,8 @@
 > with TheTVDB's current service. It is not the official release. See **[COMMUNITY-FORK.md](COMMUNITY-FORK.md)**
 > for what it does, what you need, and how to install it, and the
 > **[Releases](https://github.com/hounddog59/mptvseries/releases)** page to download it.
-> If you don't like it, simply uninstall it and go back to the original MP-TVSeries you had before.
+> **Already have a TheTVDB PIN** (for example for Kodi, Plex or Emby)? It works here too, so this version is well
+> worth a try. If you don't like it, simply uninstall it and go back to the original MP-TVSeries you had before.
 
 # What is MP-TVSeries #
 

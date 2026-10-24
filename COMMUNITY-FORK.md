@@ -17,6 +17,10 @@ TheTVDB's current service and doesn't need a subscription; it still gets the res
 older service. If finding new shows is all you need, the official version is the simplest choice. This version
 needs your own TheTVDB PIN, and in return adds everything in the lists below. Choose whichever suits you best.
 
+**Already have a TheTVDB PIN?** Then this version is well worth a try. One TheTVDB subscription covers every
+app that uses TheTVDB this way (Kodi, Plex, Emby and others), so if you already pay for one, your PIN works
+here too at no extra cost. Try it, and if it doesn't suit you, uninstall it and go back to the original.
+
 It includes the official team's work up to 4.5.1.756 (configuration crash fixes, `.tvdb` files, the x265 rule,
 skin updates).
 
