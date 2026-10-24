@@ -1,3 +1,5 @@
+[![Downloads](https://img.shields.io/github/downloads/hounddog59/mptvseries/total?label=community%20version%20downloads)](https://github.com/hounddog59/mptvseries/releases)
+
 > **Community version for TheTVDB v4** – this is Mark Willmer's community version of MP-TVSeries, which works
 > with TheTVDB's current service. It is not the official release. See **[COMMUNITY-FORK.md](COMMUNITY-FORK.md)**
 > for what it does, what you need, and how to install it, and the
