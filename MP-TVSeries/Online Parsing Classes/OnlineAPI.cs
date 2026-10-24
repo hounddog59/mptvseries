@@ -102,6 +102,9 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
             // TVDB v4 migration: search now goes through /search (JSON), not GetSeries.php
             // (XML). TvdbV4SeriesFetcher.Search returns the v3-shaped <Data><Series>...
             // document GetSeries.cs already knows how to parse.
+            // without a TheTVDB subscription, show information comes from TMDB instead (see OnlineSource)
+            if ( OnlineSource.UseTmdb )
+                return Tmdb.TmdbSeriesFetcher.Search( sSeriesName, aLanguageCode );
             return V4.TvdbV4SeriesFetcher.Search( sSeriesName, aLanguageCode );
         }
 
@@ -399,7 +402,9 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
                     return null;
                 }
 
-                bool fetched = V4.TvdbV4SeriesFetcher.FetchAndCacheSeries( seriesIDIfZip, aLanguageId );
+                bool fetched = OnlineSource.UseTmdb
+                    ? Tmdb.TmdbSeriesFetcher.FetchAndCacheSeries( seriesIDIfZip, aLanguageId )
+                    : V4.TvdbV4SeriesFetcher.FetchAndCacheSeries( seriesIDIfZip, aLanguageId );
                 if ( !fetched ) return null;
 
                 // Both callers (getFromCache and GetBannerList) discard/only null-check this

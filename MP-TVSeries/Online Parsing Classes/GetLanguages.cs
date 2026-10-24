@@ -46,7 +46,10 @@ namespace WindowPlugins.GUITVSeries
         public GetLanguages()
         {
             // TheTVDB v3's language feed no longer exists; the list now comes from v4 (see TvdbV4Languages)
-            languages.AddRange(Online_Parsing_Classes.V4.TvdbV4Languages.GetAll());
+            if (Online_Parsing_Classes.OnlineSource.UseTmdb)
+                languages.AddRange(Online_Parsing_Classes.Tmdb.TmdbLanguages.GetAll());
+            else
+                languages.AddRange(Online_Parsing_Classes.V4.TvdbV4Languages.GetAll());
         }
     }
 }

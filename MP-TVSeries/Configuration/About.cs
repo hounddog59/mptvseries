@@ -67,6 +67,11 @@ namespace WindowPlugins.GUITVSeries
             System.Diagnostics.Process.Start( @"https://www.paypal.me/damienlhaynes" );
         }
 
+        private void lnkTmdb_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
+        {
+            System.Diagnostics.Process.Start( @"https://www.themoviedb.org" );
+        }
+
         private void lnkMaintainerDonate_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
         {
             if (MaintainerDonateUrl.Length > 0)
