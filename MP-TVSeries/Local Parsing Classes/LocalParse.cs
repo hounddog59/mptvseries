@@ -138,6 +138,10 @@ namespace WindowPlugins.GUITVSeries
             ListViewItem item = null;
             paths = null;
                   
+            // files already in the library are dropped right after parsing, so they don't need the .tvdb file check -
+            // which reads every show's folder, a few minutes on a big library over the network
+            HashSet<string> knownFiles = FilesInDatabase();
+
             foreach (PathPair file in files)
             {
                 parser = new FilenameParser(file);
@@ -212,8 +216,9 @@ namespace WindowPlugins.GUITVSeries
 
                 if(includeFailed || progressReporter.success)
                 {
-                  // see if we can find a TVDB ID for the series
-                  FindSeriesTVDBID(progressReporter);
+                  // see if we can find a TVDB ID for the series (new files only, see knownFiles)
+                  if (!knownFiles.Contains(file.m_sFull_FileName))
+                    FindSeriesTVDBID(progressReporter);
                   results.Add( progressReporter );
                 }                    
             }
@@ -246,6 +251,23 @@ namespace WindowPlugins.GUITVSeries
             List<parseResult> results = (List<parseResult>)e.UserState;
             if (LocalParseProgress != null)
                 LocalParseProgress.Invoke(e.ProgressPercentage, results);
+        }
+
+        /// <summary>The files already in the library (empty if it can't be read).</summary>
+        static HashSet<string> FilesInDatabase()
+        {
+          var known = new HashSet<string>();
+          try
+          {
+            SQLite.NET.SQLiteResultSet results = DBTVSeries.Execute( "select episodefilename from local_episodes where not (SeriesID < 0 and SeriesID not in (select ID from local_series))" ); // not the stranded ones, which get imported again
+            for ( int i = 0; i < results.Rows.Count; i++ )
+              known.Add( results.Rows[ i ].fields[ 0 ] );
+          }
+          catch ( Exception ex )
+          {
+            MPTVSeriesLog.Write( "Could not read the list of files already in the library: " + ex.Message );
+          }
+          return known;
         }
 
         static void FindSeriesTVDBID( parseResult result )
