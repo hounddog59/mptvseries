@@ -104,9 +104,10 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             MPTVSeriesLog.Write(string.Format("TMDB: fetching show with TheTVDB number {0} ({1})", tvdbId, languageCode));
 
             int tmdbId = TmdbIdFor(tvdbId);
+            if (tmdbId <= 0) tmdbId = FindByName(tvdbId);
             if (tmdbId <= 0)
             {
-                MPTVSeriesLog.Write(string.Format("TMDB: no show on TMDB has TheTVDB number {0} - nothing downloaded for it", tvdbId));
+                MPTVSeriesLog.Write(string.Format("TMDB: no show on TMDB has TheTVDB number {0}, and none matched its name - nothing downloaded for it", tvdbId));
                 return false;
             }
 
@@ -151,6 +152,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             Helper.SaveXmlCache(Path.Combine(cacheDir, languageCode + ".xml"), BuildSeriesXml(tvdbId, details, seasons, seasonsEnglish, languageCode));
             Helper.SaveXmlCache(Path.Combine(cacheDir, "actors.xml"), BuildActorsXml(JsonHelpers.AsObject(JsonHelpers.Get(details, "aggregate_credits"))));
             Helper.SaveXmlCache(Path.Combine(cacheDir, "banners.xml"), BuildBannersXml(tvdbId, details, seasons, languageCode));
+            OnlineSource.MarkFetched(tvdbId);
             return true;
         }
 
@@ -420,6 +422,90 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
                 if (tvdbId > 0) Remember(tvdbId, tmdbId);
             }
             return tvdbId;
+        }
+
+        /// <summary>
+        /// For a show TMDB has without its TheTVDB number (common for documentaries): look it up on TMDB by the name
+        /// the library knows it by, and use it only when exactly one TMDB show has that name and started in the same
+        /// year (give or take one), and isn't linked to a different TheTVDB show. Returns TMDB's number, or 0.
+        /// </summary>
+        static int FindByName(int tvdbId)
+        {
+            DBSeries series = null;
+            try { series = Helper.getCorrespondingSeries(tvdbId); } catch (Exception) { }
+            if (series == null) return 0;
+
+            var names = new List<string>();
+            foreach (string field in new[] { DBOnlineSeries.cPrettyName, DBOnlineSeries.cOriginalName, DBSeries.cParsedName })
+            {
+                string n = CleanName(series[field]);
+                if (!string.IsNullOrEmpty(n) && !names.Contains(n)) names.Add(n);
+            }
+
+            int year = YearOf(series[DBOnlineSeries.cFirstAired]);
+            if (year == 0)
+            {
+                Match m = Regex.Match((string)series[DBSeries.cParsedName] ?? string.Empty, @"\((\d{4})\)");
+                if (m.Success) year = int.Parse(m.Groups[1].Value);
+            }
+
+            foreach (string name in names)
+            {
+                var reply = JsonHelpers.AsObject(TmdbClient.Get(string.Format("/search/tv?query={0}&include_adult=false&page=1", Uri.EscapeDataString(name))));
+                List<object> results = JsonHelpers.GetArray(reply, "results");
+                if (results == null) continue;
+
+                string wanted = Normalize(name);
+                var matches = new List<Dictionary<string, object>>();
+                foreach (object item in results)
+                {
+                    var r = JsonHelpers.AsObject(item);
+                    if (r == null) continue;
+                    if (Normalize(JsonHelpers.GetString(r, "name")) != wanted && Normalize(JsonHelpers.GetString(r, "original_name")) != wanted) continue;
+                    int resultYear = YearOf(JsonHelpers.GetString(r, "first_air_date"));
+                    if (year > 0 && (resultYear == 0 || Math.Abs(resultYear - year) > 1)) continue;
+                    matches.Add(r);
+                }
+                if (matches.Count != 1) continue; // none, or too close to call
+
+                int tmdbId = JsonHelpers.GetInt(matches[0], "id");
+                int linkedTvdb = TvdbIdFor(tmdbId);
+                if (linkedTvdb > 0 && linkedTvdb != tvdbId) continue; // that one belongs to another TheTVDB show
+
+                MPTVSeriesLog.Write(string.Format("TMDB: \"{0}\" (TheTVDB {1}) has no TheTVDB number on TMDB - matched by name{2} to TMDB show {3}",
+                    name, tvdbId, year > 0 ? " and year" : string.Empty, tmdbId));
+                Remember(tvdbId, tmdbId);
+                return tmdbId;
+            }
+            return 0;
+        }
+
+        /// <summary>A name as the library stores it, made searchable: "Jinx, The (2015) [8.0]" becomes "The Jinx".</summary>
+        static string CleanName(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return string.Empty;
+            string n = Regex.Replace(name, @"\[[^\]]*\]", " ");
+            n = Regex.Replace(n, @"\(\d{4}\)", " ");
+            n = Regex.Replace(n, @"\s+", " ").Trim();
+            Match the = Regex.Match(n, @"^(.*), (The|A|An)$", RegexOptions.IgnoreCase);
+            if (the.Success) n = the.Groups[2].Value + " " + the.Groups[1].Value;
+            return n;
+        }
+
+        /// <summary>Lower case, letters and digits only, "&amp;" as "and" - so punctuation differences don't matter.</summary>
+        static string Normalize(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return string.Empty;
+            var sb = new System.Text.StringBuilder();
+            foreach (char c in name.Replace("&", " and ").ToLowerInvariant())
+                if (char.IsLetterOrDigit(c)) sb.Append(c);
+            return sb.ToString();
+        }
+
+        static int YearOf(string date)
+        {
+            int y;
+            return !string.IsNullOrEmpty(date) && date.Length >= 4 && int.TryParse(date.Substring(0, 4), out y) && y > 1900 ? y : 0;
         }
 
         static void Remember(int tvdbId, int tmdbId)

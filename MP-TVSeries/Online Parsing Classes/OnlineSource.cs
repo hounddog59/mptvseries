@@ -45,6 +45,28 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
             }
         }
 
+        // series downloaded recently (by either source), with when; MediaPortal can run for weeks, so this is time-limited
+        static readonly System.Collections.Generic.Dictionary<string, System.DateTime> sFetched = new System.Collections.Generic.Dictionary<string, System.DateTime>();
+        static readonly System.TimeSpan FreshFor = System.TimeSpan.FromHours(6);
+
+        /// <summary>Remembers that a series' details were just downloaded.</summary>
+        public static void MarkFetched(int seriesId)
+        {
+            lock (sFetched) sFetched[seriesId.ToString()] = System.DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// True if this series' details were downloaded within the last few hours - its saved copy is fresh, so an update
+        /// or refresh later in the same import doesn't download it all again (a first import used to fetch every show
+        /// twice). Older downloads don't count, so regular updates still happen however long MediaPortal stays open.
+        /// </summary>
+        public static bool FetchedThisSession(string seriesId)
+        {
+            System.DateTime when;
+            lock (sFetched)
+                return seriesId != null && sFetched.TryGetValue(seriesId, out when) && System.DateTime.UtcNow - when < FreshFor;
+        }
+
         /// <summary>The source in use, for messages: "TMDB" or "TheTVDB".</summary>
         public static string Name
         {

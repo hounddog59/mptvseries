@@ -456,7 +456,7 @@ namespace WindowPlugins.GUITVSeries
                             {
                                 DBOption.SetOptions(DBOption.cFullTextRefreshPending, false);
                                 mFullRefreshThisRun = false;
-                                MPTVSeriesLog.Write("Refresh of every series' details from TheTVDB is complete");
+                                MPTVSeriesLog.Write("Refresh of every series' details from " + Online_Parsing_Classes.OnlineSource.Name + " is complete");
                             }
                         }
                         break;
@@ -989,7 +989,7 @@ namespace WindowPlugins.GUITVSeries
             DBOnlineSeries.GlobalSet(new DBOnlineSeries(), DBOnlineSeries.cOriginalName, (DBValue)string.Empty, new SQLCondition());
 
             mFullRefreshThisRun = true;
-            MPTVSeriesLog.Write(string.Format("Refreshing the details of all {0} series ({1} episodes) from TheTVDB, so titles, descriptions and episode names are in each series' language. This takes a while, once.",
+            MPTVSeriesLog.Write(string.Format("Refreshing the details of all {0} series ({1} episodes) from " + Online_Parsing_Classes.OnlineSource.Name + ", so titles, descriptions and episode names are in each series' language. This takes a while, once.",
                                               allSeriesIds.Count, episodeCount));
         }
 
@@ -1015,6 +1015,13 @@ namespace WindowPlugins.GUITVSeries
 
             if (DBOption.GetOptions(DBOption.cFullTextRefreshPending))
                 AddEverySeriesForFullRefresh(lUpdates);
+
+            // series whose details were downloaded earlier in this import (e.g. every show on a first import) already
+            // have a fresh saved copy - don't download them all a second time
+            var lFreshlyFetched = lUpdates.UpdatedSeries.Keys.Where(k => Online_Parsing_Classes.OnlineSource.FetchedThisSession((string)k)).ToList();
+            foreach (var key in lFreshlyFetched) lUpdates.UpdatedSeries.Remove(key);
+            if (lFreshlyFetched.Count > 0)
+                MPTVSeriesLog.Write(string.Format("{0} series were already downloaded in this import, so they are not downloaded again", lFreshlyFetched.Count));
 
             MPTVSeriesLog.Write("Available series with updates: {0}", lUpdates.UpdatedSeries?.Count);
             MPTVSeriesLog.Write("Available episodes with updates: {0}", lUpdates.UpdatedEpisodes?.Count);
