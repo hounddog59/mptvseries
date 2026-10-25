@@ -870,12 +870,19 @@ namespace WindowPlugins.GUITVSeries
                     if (UserChosenSeries == null)
                         UserChosenSeries = SearchForSeries(sSeriesNameToSearch, -1, bNoExactMatch, mFeedback);
                 }
-                else if (sap != null && sap.RequestedAction == UserInputResults.SeriesAction.Approve)
+                else if (sap == null)
+                {
+                    // not offered in this import's wizard (e.g. left unidentified by an earlier import, before its
+                    // source could find it): an id file next to its videos is exact, so try that - otherwise such a
+                    // series would never be looked at again by Configuration imports
+                    UserChosenSeries = TryGetSeriesFromLocalIdFile(series, sSeriesNameToSearch);
+                }
+                else if (sap.RequestedAction == UserInputResults.SeriesAction.Approve)
                 {
                     MPTVSeriesLog.Write("User has approved \"" + sSeriesNameToSearch + "\" as being: " + sap.ChosenSeries.ToString(), MPTVSeriesLog.LogLevel.Debug);
                     UserChosenSeries = sap.ChosenSeries;
                 }
-                else if (sap != null && sap.RequestedAction == UserInputResults.SeriesAction.IgnoreAlways)
+                else if (sap.RequestedAction == UserInputResults.SeriesAction.IgnoreAlways)
                 {
                     // duplicate code from SearchForSeries - should be changed
                     MPTVSeriesLog.Write("User has Ignored \"" + sSeriesNameToSearch + "\" in the future", MPTVSeriesLog.LogLevel.Debug);
