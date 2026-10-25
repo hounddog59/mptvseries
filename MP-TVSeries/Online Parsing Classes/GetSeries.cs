@@ -120,10 +120,11 @@ namespace WindowPlugins.GUITVSeries
         /// so no name search is needed. Returns null if the id can't be fetched, so callers can fall back
         /// to the normal name search.
         /// </summary>
-        public static GetSeries FromKnownId(int tvdbId)
+        public static GetSeries FromKnownId(int tvdbId, string nameHint = null)
         {
             try
             {
+                Online_Parsing_Classes.OnlineSource.SetNameHint(tvdbId, nameHint);
                 var fetched = new UpdateSeries(tvdbId.ToString()).Results;
                 DBOnlineSeries series = fetched == null ? null : fetched.FirstOrDefault(s => s != null && (int)s[DBOnlineSeries.cID] == tvdbId);
                 return series == null ? null : new GetSeries(series);
@@ -160,6 +161,7 @@ namespace WindowPlugins.GUITVSeries
             // (avoids fragile XML handling / races in the parallel Configuration import searches)
             if ( aTVDBId > 0 )
             {
+              Online_Parsing_Classes.OnlineSource.SetNameHint( aTVDBId, aSeriesName );
               var updateSeries = new UpdateSeries( aTVDBId.ToString() );
               if ( updateSeries.Results.Count > 0 )
               {

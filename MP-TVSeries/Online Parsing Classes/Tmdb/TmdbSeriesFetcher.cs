@@ -433,20 +433,26 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
         {
             DBSeries series = null;
             try { series = Helper.getCorrespondingSeries(tvdbId); } catch (Exception) { }
-            if (series == null) return 0;
+            string hint = OnlineSource.NameHint(tvdbId); // the folder/file name, for a show not in the library yet
+            if (series == null && string.IsNullOrEmpty(hint)) return 0;
+
+            var rawNames = new List<string>();
+            if (series != null)
+                foreach (string field in new[] { DBOnlineSeries.cPrettyName, DBOnlineSeries.cOriginalName, DBSeries.cParsedName })
+                    rawNames.Add(series[field]);
+            rawNames.Add(hint);
 
             var names = new List<string>();
-            foreach (string field in new[] { DBOnlineSeries.cPrettyName, DBOnlineSeries.cOriginalName, DBSeries.cParsedName })
+            int year = series != null ? YearOf(series[DBOnlineSeries.cFirstAired]) : 0;
+            foreach (string raw in rawNames)
             {
-                string n = CleanName(series[field]);
+                if (year == 0)
+                {
+                    Match m = Regex.Match(raw ?? string.Empty, @"\((\d{4})\)|\b(19\d\d|20\d\d)$");
+                    if (m.Success) year = int.Parse(m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value);
+                }
+                string n = CleanName(raw);
                 if (!string.IsNullOrEmpty(n) && !names.Contains(n)) names.Add(n);
-            }
-
-            int year = YearOf(series[DBOnlineSeries.cFirstAired]);
-            if (year == 0)
-            {
-                Match m = Regex.Match((string)series[DBSeries.cParsedName] ?? string.Empty, @"\((\d{4})\)");
-                if (m.Success) year = int.Parse(m.Groups[1].Value);
             }
 
             foreach (string name in names)
@@ -461,7 +467,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
                 {
                     var r = JsonHelpers.AsObject(item);
                     if (r == null) continue;
-                    if (Normalize(JsonHelpers.GetString(r, "name")) != wanted && Normalize(JsonHelpers.GetString(r, "original_name")) != wanted) continue;
+                    if (Normalize(CleanName(JsonHelpers.GetString(r, "name"))) != wanted && Normalize(CleanName(JsonHelpers.GetString(r, "original_name"))) != wanted) continue;
                     int resultYear = YearOf(JsonHelpers.GetString(r, "first_air_date"));
                     if (year > 0 && (resultYear == 0 || Math.Abs(resultYear - year) > 1)) continue;
                     matches.Add(r);
@@ -486,6 +492,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             if (string.IsNullOrEmpty(name)) return string.Empty;
             string n = Regex.Replace(name, @"\[[^\]]*\]", " ");
             n = Regex.Replace(n, @"\(\d{4}\)", " ");
+            n = Regex.Replace(n, @"\s(19\d\d|20\d\d)$", " ");
             n = Regex.Replace(n, @"\s+", " ").Trim();
             Match the = Regex.Match(n, @"^(.*), (The|A|An)$", RegexOptions.IgnoreCase);
             if (the.Success) n = the.Groups[2].Value + " " + the.Groups[1].Value;

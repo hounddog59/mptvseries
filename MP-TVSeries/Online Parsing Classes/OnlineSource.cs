@@ -67,6 +67,22 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes
                 return seriesId != null && sFetched.TryGetValue(seriesId, out when) && System.DateTime.UtcNow - when < FreshFor;
         }
 
+        // the name a show is known by locally (folder or file name), for shows identified by number before they are in
+        // the library - lets TMDB find a show it has without that number (see TmdbSeriesFetcher.FindByName)
+        static readonly System.Collections.Generic.Dictionary<int, string> sNameHints = new System.Collections.Generic.Dictionary<int, string>();
+
+        public static void SetNameHint(int seriesId, string name)
+        {
+            if (seriesId <= 0 || string.IsNullOrEmpty(name)) return;
+            lock (sNameHints) sNameHints[seriesId] = name;
+        }
+
+        public static string NameHint(int seriesId)
+        {
+            string name;
+            lock (sNameHints) return sNameHints.TryGetValue(seriesId, out name) ? name : null;
+        }
+
         /// <summary>The source in use, for messages: "TMDB" or "TheTVDB".</summary>
         public static string Name
         {

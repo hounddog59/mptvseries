@@ -2540,7 +2540,7 @@ namespace WindowPlugins.GUITVSeries
             var separated = System.Text.RegularExpressions.Regex.Match(seriesName ?? string.Empty, @"\[tvdb (\d+)\]$");
             if (separated.Success)
             {
-                WindowPlugins.GUITVSeries.GetSeries byId = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(int.Parse(separated.Groups[1].Value));
+                WindowPlugins.GUITVSeries.GetSeries byId = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(int.Parse(separated.Groups[1].Value), seriesName.Substring(0, separated.Index).Trim());
                 if (byId != null && byId.PerfectMatch != null) return byId.PerfectMatch;
             }
 
@@ -2560,7 +2560,7 @@ namespace WindowPlugins.GUITVSeries
                 if (localId <= 0) return null;
 
                 // fully qualified: inside OnlineParsing, a bare "GetSeries" means the GetSeries() method
-                WindowPlugins.GUITVSeries.GetSeries known = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(localId);
+                WindowPlugins.GUITVSeries.GetSeries known = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(localId, seriesName);
                 if (known == null) return null;
 
                 MPTVSeriesLog.Write(string.Format("\"{0}\" identified as series {1} from local file '{2}' (name search skipped)", seriesName, localId, idSource));
