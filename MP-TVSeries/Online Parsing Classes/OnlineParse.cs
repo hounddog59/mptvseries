@@ -456,7 +456,7 @@ namespace WindowPlugins.GUITVSeries
                             {
                                 DBOption.SetOptions(DBOption.cFullTextRefreshPending, false);
                                 mFullRefreshThisRun = false;
-                                MPTVSeriesLog.Write("Refresh of every series' details from TheTVDB is complete");
+                                MPTVSeriesLog.Write("Refresh of every series' details from " + Online_Parsing_Classes.OnlineSource.Name + " is complete");
                             }
                         }
                         break;
@@ -870,12 +870,19 @@ namespace WindowPlugins.GUITVSeries
                     if (UserChosenSeries == null)
                         UserChosenSeries = SearchForSeries(sSeriesNameToSearch, -1, bNoExactMatch, mFeedback);
                 }
-                else if (sap != null && sap.RequestedAction == UserInputResults.SeriesAction.Approve)
+                else if (sap == null)
+                {
+                    // not offered in this import's wizard (e.g. left unidentified by an earlier import, before its
+                    // source could find it): an id file next to its videos is exact, so try that - otherwise such a
+                    // series would never be looked at again by Configuration imports
+                    UserChosenSeries = TryGetSeriesFromLocalIdFile(series, sSeriesNameToSearch);
+                }
+                else if (sap.RequestedAction == UserInputResults.SeriesAction.Approve)
                 {
                     MPTVSeriesLog.Write("User has approved \"" + sSeriesNameToSearch + "\" as being: " + sap.ChosenSeries.ToString(), MPTVSeriesLog.LogLevel.Debug);
                     UserChosenSeries = sap.ChosenSeries;
                 }
-                else if (sap != null && sap.RequestedAction == UserInputResults.SeriesAction.IgnoreAlways)
+                else if (sap.RequestedAction == UserInputResults.SeriesAction.IgnoreAlways)
                 {
                     // duplicate code from SearchForSeries - should be changed
                     MPTVSeriesLog.Write("User has Ignored \"" + sSeriesNameToSearch + "\" in the future", MPTVSeriesLog.LogLevel.Debug);
@@ -989,7 +996,7 @@ namespace WindowPlugins.GUITVSeries
             DBOnlineSeries.GlobalSet(new DBOnlineSeries(), DBOnlineSeries.cOriginalName, (DBValue)string.Empty, new SQLCondition());
 
             mFullRefreshThisRun = true;
-            MPTVSeriesLog.Write(string.Format("Refreshing the details of all {0} series ({1} episodes) from TheTVDB, so titles, descriptions and episode names are in each series' language. This takes a while, once.",
+            MPTVSeriesLog.Write(string.Format("Refreshing the details of all {0} series ({1} episodes) from " + Online_Parsing_Classes.OnlineSource.Name + ", so titles, descriptions and episode names are in each series' language. This takes a while, once.",
                                               allSeriesIds.Count, episodeCount));
         }
 
@@ -1015,6 +1022,13 @@ namespace WindowPlugins.GUITVSeries
 
             if (DBOption.GetOptions(DBOption.cFullTextRefreshPending))
                 AddEverySeriesForFullRefresh(lUpdates);
+
+            // series whose details were downloaded earlier in this import (e.g. every show on a first import) already
+            // have a fresh saved copy - don't download them all a second time
+            var lFreshlyFetched = lUpdates.UpdatedSeries.Keys.Where(k => Online_Parsing_Classes.OnlineSource.FetchedThisSession((string)k)).ToList();
+            foreach (var key in lFreshlyFetched) lUpdates.UpdatedSeries.Remove(key);
+            if (lFreshlyFetched.Count > 0)
+                MPTVSeriesLog.Write(string.Format("{0} series were already downloaded in this import, so they are not downloaded again", lFreshlyFetched.Count));
 
             MPTVSeriesLog.Write("Available series with updates: {0}", lUpdates.UpdatedSeries?.Count);
             MPTVSeriesLog.Write("Available episodes with updates: {0}", lUpdates.UpdatedEpisodes?.Count);
@@ -2533,7 +2547,7 @@ namespace WindowPlugins.GUITVSeries
             var separated = System.Text.RegularExpressions.Regex.Match(seriesName ?? string.Empty, @"\[tvdb (\d+)\]$");
             if (separated.Success)
             {
-                WindowPlugins.GUITVSeries.GetSeries byId = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(int.Parse(separated.Groups[1].Value));
+                WindowPlugins.GUITVSeries.GetSeries byId = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(int.Parse(separated.Groups[1].Value), seriesName.Substring(0, separated.Index).Trim());
                 if (byId != null && byId.PerfectMatch != null) return byId.PerfectMatch;
             }
 
@@ -2553,7 +2567,7 @@ namespace WindowPlugins.GUITVSeries
                 if (localId <= 0) return null;
 
                 // fully qualified: inside OnlineParsing, a bare "GetSeries" means the GetSeries() method
-                WindowPlugins.GUITVSeries.GetSeries known = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(localId);
+                WindowPlugins.GUITVSeries.GetSeries known = WindowPlugins.GUITVSeries.GetSeries.FromKnownId(localId, seriesName);
                 if (known == null) return null;
 
                 MPTVSeriesLog.Write(string.Format("\"{0}\" identified as series {1} from local file '{2}' (name search skipped)", seriesName, localId, idSource));

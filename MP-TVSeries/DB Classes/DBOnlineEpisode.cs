@@ -171,6 +171,10 @@ namespace WindowPlugins.GUITVSeries
             base.AddColumn(cEpisodeThumbnailFilename, new DBField(DBField.cTypeString));
             base.AddColumn(cTMDbEpisodeThumbnailUrl, new DBField(DBField.cTypeString));
             base.AddColumn(cEpisodeThumbnailSource, new DBField(DBField.cTypeInt));
+            // DVD season number: TheTVDB's old service sent it with every episode, which is how the column came to exist.
+            // The current services don't, so on a new database it was missing and the episode counts failed
+            // ("no such column: online_episodes.Combined_season").
+            base.AddColumn(cCombinedSeason, new DBField(DBField.cTypeString));
 
             foreach (KeyValuePair<String, DBField> pair in m_fields)
             {

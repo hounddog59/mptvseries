@@ -121,4 +121,8 @@
     <value>PUT-YOUR-TVDB-V4-API-KEY-HERE</value>
     <comment>Do NOT commit a working key. Create a v4 project key from your thetvdb.com account and put it here before building - every developer needs their own. Users of a built copy never see this; they enter their own subscriber PIN in the plugin settings.</comment>
   </data>
+  <data name="TmdbKey" xml:space="preserve">
+    <value>PUT-YOUR-TMDB-KEY-HERE</value>
+    <comment>Optional. Your own TMDB key (the short API key, or the long "API Read Access Token" starting with eyJ) from themoviedb.org/settings/api. Do NOT commit a working key. Without one, the TMDB key MP-TVSeries has always shipped (TmdbAPI/TmdbURIs.cs) is used.</comment>
+  </data>
 </root>

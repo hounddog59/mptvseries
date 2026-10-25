@@ -111,6 +111,9 @@ namespace WindowPlugins.GUITVSeries
             this.checkBox_AutoOnlineDataRefresh = new System.Windows.Forms.CheckBox();
             this.checkBox_AutoChooseOrder = new System.Windows.Forms.CheckBox();
             this.txtTvdbPin = new System.Windows.Forms.TextBox();
+            this.labelOnlineSource = new System.Windows.Forms.Label();
+            this.comboOnlineSource = new System.Windows.Forms.ComboBox();
+            this.labelSourceInUse = new System.Windows.Forms.Label();
             this.checkDownloadEpisodeSnapshots = new System.Windows.Forms.CheckBox();
             this.chkBlankBanners = new System.Windows.Forms.CheckBox();
             this.txtMainMirror = new System.Windows.Forms.TextBox();
@@ -812,8 +815,49 @@ namespace WindowPlugins.GUITVSeries
             this.txtTvdbPin.Name = "txtTvdbPin";
             this.txtTvdbPin.Size = new System.Drawing.Size(180, 20);
             this.txtTvdbPin.TabIndex = 5;
-            this.toolTip_Help.SetToolTip(this.txtTvdbPin, "Your own TheTVDB subscriber PIN, from your account at thetvdb.com. TheTVDB needs it to send show information.");
+            this.toolTip_Help.SetToolTip(this.txtTvdbPin, "Your own TheTVDB subscriber PIN, from your account at thetvdb.com.\r\nLeave it empty to get show information from TMDB instead (free).");
             this.txtTvdbPin.TextChanged += new System.EventHandler(this.txtTvdbPin_TextChanged);
+            this.txtTvdbPin.Leave += new System.EventHandler(this.txtTvdbPin_Leave);
+            // 
+            // labelOnlineSource
+            // 
+            this.labelOnlineSource.Location = new System.Drawing.Point(320, 53);
+            this.labelOnlineSource.Name = "labelOnlineSource";
+            this.labelOnlineSource.Size = new System.Drawing.Size(52, 20);
+            this.labelOnlineSource.Text = "&Source:";
+            this.labelOnlineSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolTip_Help.SetToolTip(this.labelOnlineSource, "Where show information comes from.\r\n\r\n" +
+                "Automatic: TheTVDB if you have entered your TheTVDB PIN, otherwise TMDB.\r\n" +
+                "TheTVDB: needs your own TheTVDB subscription PIN.\r\n" +
+                "TMDB: free, nothing to enter.\r\n\r\n" +
+                "Your library keeps the same show numbers either way.");
+            // 
+            // comboOnlineSource
+            // 
+            this.comboOnlineSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboOnlineSource.DropDownWidth = 330;
+            this.comboOnlineSource.Items.AddRange(new object[] {
+            "Automatic (TheTVDB if a PIN is entered, otherwise TMDB)",
+            "TheTVDB (needs your PIN)",
+            "TMDB (free)"});
+            this.comboOnlineSource.Location = new System.Drawing.Point(375, 53);
+            this.comboOnlineSource.Name = "comboOnlineSource";
+            this.comboOnlineSource.Size = new System.Drawing.Size(240, 21);
+            this.toolTip_Help.SetToolTip(this.comboOnlineSource, "Where show information comes from.\r\n\r\n" +
+                "Automatic: TheTVDB if you have entered your TheTVDB PIN, otherwise TMDB.\r\n" +
+                "TheTVDB: needs your own TheTVDB subscription PIN.\r\n" +
+                "TMDB: free, nothing to enter.\r\n\r\n" +
+                "Your library keeps the same show numbers either way.");
+            this.comboOnlineSource.SelectedIndexChanged += new System.EventHandler(this.comboOnlineSource_SelectedIndexChanged);
+            // 
+            // labelSourceInUse
+            // 
+            this.labelSourceInUse.AutoSize = true;
+            this.labelSourceInUse.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.labelSourceInUse.Location = new System.Drawing.Point(372, 79);
+            this.labelSourceInUse.Name = "labelSourceInUse";
+            this.labelSourceInUse.Size = new System.Drawing.Size(100, 13);
+            this.labelSourceInUse.Text = "";
             // 
             // checkDownloadEpisodeSnapshots
             // 
@@ -2712,6 +2756,9 @@ namespace WindowPlugins.GUITVSeries
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoOnlineDataRefresh);
             this.panel_OnlineData.Controls.Add(this.checkBox_AutoChooseOrder);
             this.panel_OnlineData.Controls.Add(this.txtTvdbPin);
+            this.panel_OnlineData.Controls.Add(this.labelOnlineSource);
+            this.panel_OnlineData.Controls.Add(this.comboOnlineSource);
+            this.panel_OnlineData.Controls.Add(this.labelSourceInUse);
             this.panel_OnlineData.Controls.Add(this.lnkTraktAuthHelp);
             this.panel_OnlineData.Controls.Add(this.label54);
             this.panel_OnlineData.Controls.Add(this.checkDownloadEpisodeSnapshots);
@@ -4190,6 +4237,9 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.CheckBox checkBox_AutoOnlineDataRefresh;
         private System.Windows.Forms.CheckBox checkBox_AutoChooseOrder;
         private System.Windows.Forms.TextBox txtTvdbPin;
+        private System.Windows.Forms.Label labelOnlineSource;
+        private System.Windows.Forms.ComboBox comboOnlineSource;
+        private System.Windows.Forms.Label labelSourceInUse;
         private System.Windows.Forms.LinkLabel lnkTraktAuthHelp;
         private System.Windows.Forms.Label label54;
         private System.Windows.Forms.CheckBox checkDownloadEpisodeSnapshots;

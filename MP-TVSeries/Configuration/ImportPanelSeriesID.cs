@@ -366,7 +366,7 @@ namespace WindowPlugins.GUITVSeries.Configuration
                             int localId = LocalSeriesIdFinder.FindSeriesId(localFiles, out idSource);
                             if (localId > 0)
                             {
-                                gs = GetSeries.FromKnownId(localId);
+                                gs = GetSeries.FromKnownId(localId, toSearch);
                                 if (gs != null)
                                     MPTVSeriesLog.Write(string.Format("\"{0}\" identified as series {1} from local file '{2}' (name search skipped)", toSearch, localId, idSource));
                             }

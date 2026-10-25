@@ -260,6 +260,11 @@ namespace WindowPlugins.GUITVSeries
             this.chkAllowDeletes.Checked = (bool)DBOption.GetOptions(DBOption.cShowDeleteMenu);
             this.chkUseRegionalDateFormatString.Checked = (bool)DBOption.GetOptions(DBOption.cAltImgLoading);
             txtTvdbPin.Text = DBOption.GetOptions(DBOption.cTvdbV4Pin);
+            mLoadingOnlineSource = true;
+            comboOnlineSource.SelectedIndex = Online_Parsing_Classes.OnlineSource.Setting == Online_Parsing_Classes.OnlineSource.TheTvdb ? 1 : Online_Parsing_Classes.OnlineSource.Setting == Online_Parsing_Classes.OnlineSource.Tmdb ? 2 : 0;
+            mLoadingOnlineSource = false;
+            mSourceInUse = Online_Parsing_Classes.OnlineSource.Name;
+            ShowSourceInUse();
             chkBlankBanners.Checked = DBOption.GetOptions(DBOption.cGetBlankBanners);
             checkDownloadEpisodeSnapshots.Checked = DBOption.GetOptions(DBOption.cGetEpisodeSnapshots);
             checkBox_ShowHidden.Checked = DBOption.GetOptions(DBOption.cShowHiddenItems);            
@@ -5011,6 +5016,49 @@ namespace WindowPlugins.GUITVSeries
         private void txtTvdbPin_TextChanged(object sender, EventArgs e)
         {
             DBOption.SetOptions(DBOption.cTvdbV4Pin, txtTvdbPin.Text);
+            ShowSourceInUse();
+        }
+
+        // with "Automatic", entering or clearing the PIN switches between TheTVDB and TMDB
+        private void txtTvdbPin_Leave(object sender, EventArgs e)
+        {
+            SourceMayHaveChanged();
+        }
+
+        bool mLoadingOnlineSource;
+        string mSourceInUse;
+
+        private void comboOnlineSource_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (mLoadingOnlineSource) return;
+            string[] settings = { Online_Parsing_Classes.OnlineSource.Automatic, Online_Parsing_Classes.OnlineSource.TheTvdb, Online_Parsing_Classes.OnlineSource.Tmdb };
+            int i = comboOnlineSource.SelectedIndex;
+            DBOption.SetOptions(DBOption.cOnlineDataSource, i >= 0 && i < settings.Length ? settings[i] : Online_Parsing_Classes.OnlineSource.Automatic);
+
+            if (Online_Parsing_Classes.OnlineSource.Setting == Online_Parsing_Classes.OnlineSource.TheTvdb && !Online_Parsing_Classes.OnlineSource.HasTvdbPin)
+                MessageBox.Show(this, "TheTVDB needs your own TheTVDB subscription PIN. Enter it in the TVDB PIN box, or choose Automatic or TMDB to use TMDB for free.",
+                                "Show information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            SourceMayHaveChanged();
+        }
+
+        private void ShowSourceInUse()
+        {
+            labelSourceInUse.Text = "In use: " + (Online_Parsing_Classes.OnlineSource.UseTmdb ? "TMDB (free)" : "TheTVDB");
+        }
+
+        /// <summary>When the source in use changes: check the new one can be reached, and reload its language list.</summary>
+        private void SourceMayHaveChanged()
+        {
+            ShowSourceInUse();
+            string now = Online_Parsing_Classes.OnlineSource.Name;
+            if (now == mSourceInUse) return;
+            mSourceInUse = now;
+            MPTVSeriesLog.Write("Show information will now come from " + now);
+
+            System.Threading.Tasks.Task.Factory.StartNew(() => DBOnlineMirror.Init());
+            mOnlineLanguages.Clear();
+            comboOnlineLang.Items.Clear();
+            LoadOnlineLanguages();
         }
 
         private void btnLogoDeleteAll_Click(object sender, EventArgs e)

@@ -96,6 +96,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.V4
                 string.Format(@"Cache\{0}\{1}\{2}", seriesId, languageCode, "banners.xml"));
             Helper.SaveXmlCache(bannersFilename, bannersXml);
 
+            OnlineSource.MarkFetched(seriesId);
             return true;
         }
 

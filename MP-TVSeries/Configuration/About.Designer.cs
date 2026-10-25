@@ -45,6 +45,10 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.grbDonate = new System.Windows.Forms.GroupBox();
+            this.grbDataSources = new System.Windows.Forms.GroupBox();
+            this.lblDataSources = new System.Windows.Forms.Label();
+            this.lnkTmdb = new System.Windows.Forms.LinkLabel();
+            this.picTmdb = new System.Windows.Forms.PictureBox();
             this.picPayPal = new System.Windows.Forms.PictureBox();
             this.lblPayPal = new System.Windows.Forms.Label();
             this.locationBrowser5 = new WindowPlugins.GUITVSeries.LocationBrowser();
@@ -61,7 +65,9 @@
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.grbDonate.SuspendLayout();
+            this.grbDataSources.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPayPal)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picTmdb)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -113,7 +119,7 @@
             this.groupBox2.Controls.Add(this.linkLabel2);
             this.groupBox2.Controls.Add(this.linkLabel1);
             this.groupBox2.Controls.Add(this.linkForum);
-            this.groupBox2.Location = new System.Drawing.Point(23, 331);
+            this.groupBox2.Location = new System.Drawing.Point(23, 411);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(546, 105);
             this.groupBox2.TabIndex = 4;
@@ -171,7 +177,7 @@
             this.groupBox3.Controls.Add(this.lblEpisodes);
             this.groupBox3.Controls.Add(this.lblSeasons);
             this.groupBox3.Controls.Add(this.lblSeries);
-            this.groupBox3.Location = new System.Drawing.Point(23, 436);
+            this.groupBox3.Location = new System.Drawing.Point(23, 516);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(546, 49);
             this.groupBox3.TabIndex = 5;
@@ -214,7 +220,7 @@
             this.groupBox4.Controls.Add(this.locationBrowser3);
             this.groupBox4.Controls.Add(this.locationBrowser2);
             this.groupBox4.Controls.Add(this.locationBrowser1);
-            this.groupBox4.Location = new System.Drawing.Point(23, 485);
+            this.groupBox4.Location = new System.Drawing.Point(23, 565);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(546, 141);
             this.groupBox4.TabIndex = 6;
@@ -235,6 +241,55 @@
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.UseWaitCursor = true;
+            // 
+            // grbDataSources
+            // 
+            this.grbDataSources.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.grbDataSources.Controls.Add(this.lblDataSources);
+            this.grbDataSources.Controls.Add(this.lnkTmdb);
+            this.grbDataSources.Controls.Add(this.picTmdb);
+            this.grbDataSources.Location = new System.Drawing.Point(23, 331);
+            this.grbDataSources.Name = "grbDataSources";
+            this.grbDataSources.Size = new System.Drawing.Size(546, 80);
+            this.grbDataSources.TabIndex = 8;
+            this.grbDataSources.TabStop = false;
+            this.grbDataSources.Text = "Show information";
+            // 
+            // lblDataSources
+            // 
+            this.lblDataSources.AutoSize = true;
+            this.lblDataSources.Location = new System.Drawing.Point(9, 18);
+            this.lblDataSources.Name = "lblDataSources";
+            this.lblDataSources.Size = new System.Drawing.Size(380, 39);
+            this.lblDataSources.TabIndex = 0;
+            this.lblDataSources.Text = "Show details: TheTVDB.com (with your PIN) or TMDB (free).\r\n" +
+    "Ratings: Trakt.tv. Extra artwork: fanart.tv.\r\n" +
+    "This product uses the TMDB API but is not endorsed or certified by TMDB.";
+            // 
+            // lnkTmdb
+            // 
+            this.lnkTmdb.AutoSize = true;
+            this.lnkTmdb.Location = new System.Drawing.Point(9, 60);
+            this.lnkTmdb.Name = "lnkTmdb";
+            this.lnkTmdb.Size = new System.Drawing.Size(140, 13);
+            this.lnkTmdb.TabIndex = 1;
+            this.lnkTmdb.TabStop = true;
+            this.lnkTmdb.Text = "https://www.themoviedb.org";
+            this.lnkTmdb.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTmdb_LinkClicked);
+            // 
+            // picTmdb
+            // 
+            this.picTmdb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.picTmdb.BackColor = System.Drawing.Color.Transparent;
+            this.picTmdb.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picTmdb.Location = new System.Drawing.Point(462, 22);
+            this.picTmdb.Name = "picTmdb";
+            this.picTmdb.Size = new System.Drawing.Size(70, 30);
+            this.picTmdb.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picTmdb.TabIndex = 2;
+            this.picTmdb.TabStop = false;
+            this.picTmdb.Click += new System.EventHandler(this.lnkTmdb_Click);
             // 
             // grbDonate
             // 
@@ -361,13 +416,14 @@
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.grbDonate);
+            this.Controls.Add(this.grbDataSources);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Name = "About";
-            this.Size = new System.Drawing.Size(597, 635);
+            this.Size = new System.Drawing.Size(597, 715);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -376,9 +432,12 @@
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.grbDataSources.ResumeLayout(false);
+            this.grbDataSources.PerformLayout();
             this.grbDonate.ResumeLayout(false);
             this.grbDonate.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPayPal)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picTmdb)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -406,6 +465,10 @@
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.LinkLabel linkForum;
         private System.Windows.Forms.GroupBox grbDonate;
+        private System.Windows.Forms.GroupBox grbDataSources;
+        private System.Windows.Forms.Label lblDataSources;
+        private System.Windows.Forms.LinkLabel lnkTmdb;
+        private System.Windows.Forms.PictureBox picTmdb;
         private System.Windows.Forms.PictureBox picPayPal;
         private System.Windows.Forms.Label lblPayPal;
         private System.Windows.Forms.LinkLabel lnkPayPal;

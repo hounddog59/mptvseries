@@ -305,6 +305,10 @@
     <Compile Include="Online Parsing Classes\UpdateSeries.cs" />
     <Compile Include="Online Parsing Classes\V4\MiniJson.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4Client.cs" />
+    <Compile Include="Online Parsing Classes\OnlineSource.cs" />
+    <Compile Include="Online Parsing Classes\Tmdb\TmdbClient.cs" />
+    <Compile Include="Online Parsing Classes\Tmdb\TmdbLanguages.cs" />
+    <Compile Include="Online Parsing Classes\Tmdb\TmdbSeriesFetcher.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4XmlAdapter.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4SeriesFetcher.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4Favourites.cs" />
@@ -344,6 +348,9 @@
     <Compile Include="GUIPinCode.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Images\tmdb_logo.png">
+      <LogicalName>WindowPlugins.GUITVSeries.Resources.Images.tmdb_logo.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Configuration\About.resx">
       <DependentUpon>About.cs</DependentUpon>
       <SubType>Designer</SubType>

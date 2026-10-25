@@ -108,6 +108,15 @@ namespace WindowPlugins.GUITVSeries
                 DBTVSeries.Execute(sqlDel);
             }
 
+            // no TheTVDB subscription: show information comes from TMDB, so check that instead (see OnlineSource)
+            if (Online_Parsing_Classes.OnlineSource.UseTmdb)
+            {
+                MPTVSeriesLog.Write("Show information comes from TMDB (" + (Online_Parsing_Classes.OnlineSource.Setting == Online_Parsing_Classes.OnlineSource.Tmdb
+                    ? "chosen on the Online Data tab" : "no TheTVDB PIN entered") + ")");
+                IsMirrorsAvailable = Online_Parsing_Classes.Tmdb.TmdbClient.Verify();
+                return;
+            }
+
             if (String.IsNullOrEmpty(cApiKey))
             {
                 MPTVSeriesLog.Write("No TheTVDB API key is built into this copy of MP-TVSeries. If you built it yourself, put your own key (free from thetvdb.com) in Online Parsing Classes\\APIKey.resx and build it again. Nothing can be downloaded until then.");

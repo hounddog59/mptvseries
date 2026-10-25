@@ -239,6 +239,11 @@ namespace WindowPlugins.GUITVSeries
 
             int secondsSince1970 = BitConverter.ToInt32(b, BitConverter.ToInt32(b, PeHeaderOffset) + LinkerTimestampOffset);
 
+            // some compilers (deterministic builds) leave the timestamp empty, which showed as "1/01/1970" on the
+            // About tab - use the file's own date then
+            if (secondsSince1970 <= 0)
+                return System.IO.File.GetLastWriteTimeUtc(filePath);
+
             return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(secondsSince1970);
         }
 

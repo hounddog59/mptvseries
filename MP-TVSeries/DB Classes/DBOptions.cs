@@ -148,6 +148,7 @@ namespace WindowPlugins.GUITVSeries
         public const string cRandomFanartInterval = "RandomFanartInterval";
         public const string cParentalControlPinCode = "ParentalControlPinCode";		
         public const string cTvdbV4Pin = "TvdbV4Pin"; // subscriber PIN for TheTVDB v4 API login (leave empty if not a TVDB subscriber)
+        public const string cOnlineDataSource = "OnlineDataSource"; // where show information comes from: Auto, TheTVDB or TMDB (see OnlineSource)
         public const string cSubstituteMissingArtwork = "SubstituteMissingArtwork";
         public const string cSkipSeasonViewOnSingleSeason = "SkipSeasonViewOnSingleSeason";
         public const string cInvokeExtBeforePlayback = "InvokeExtBeforePlayback";
@@ -455,6 +456,8 @@ namespace WindowPlugins.GUITVSeries
 
             if (GetOptions(cTvdbV4Pin) == null)
                 SetOptions(cTvdbV4Pin, string.Empty);
+            if (GetOptions(cOnlineDataSource) == null)
+                SetOptions(cOnlineDataSource, "Auto");
 
 
             if (GetOptions(cSubstituteMissingArtwork) == null)
