@@ -302,6 +302,8 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.V4
                 AppendElement(doc, banner, "RatingCount", "0");
                 if (bannerType == "season")
                     AppendElement(doc, banner, "Season", JsonHelpers.GetString(a, "seasonNumber"));
+                if (bannerType == "fanart")
+                    AppendElement(doc, banner, "SeriesName", "false"); // "has the show's name on it" - not known
             }
 
             return root;

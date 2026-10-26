@@ -814,7 +814,11 @@ namespace WindowPlugins.GUITVSeries.GUI
                 lFanart.OnlinePath = banner.SelectSingleNode( "BannerPath" ).InnerText;
                 lFanart.OnlineThumbPath = banner.SelectSingleNode( "ThumbnailPath" ).InnerText;
                 lFanart.Resolution = banner.SelectSingleNode( "BannerType2" ).InnerText;
-                lFanart.HasLogo = Convert.ToBoolean( banner.SelectSingleNode( "SeriesName" ).InnerText );
+                // TheTVDB's old service said here whether the picture has the show's name on it; its current service
+                // and TMDB don't, so a missing or empty value just means "no"
+                bool lHasLogo;
+                var lSeriesNameNode = banner.SelectSingleNode( "SeriesName" );
+                lFanart.HasLogo = lSeriesNameNode != null && bool.TryParse( lSeriesNameNode.InnerText, out lHasLogo ) && lHasLogo;
 
                 if ( !string.IsNullOrEmpty( banner.SelectSingleNode( "Rating" ).InnerText ) )
                 {

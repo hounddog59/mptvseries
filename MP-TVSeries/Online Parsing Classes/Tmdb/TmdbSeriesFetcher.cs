@@ -381,6 +381,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             Append(doc, banner, "Rating", rating ?? (tmdbImage != null ? JsonHelpers.GetString(tmdbImage, "vote_average") : string.Empty));
             Append(doc, banner, "RatingCount", ratingCount ?? (tmdbImage != null ? JsonHelpers.GetInt(tmdbImage, "vote_count").ToString() : "0"));
             if (season != null) Append(doc, banner, "Season", season);
+            if (type == "fanart") Append(doc, banner, "SeriesName", "false"); // "has the show's name on it" - not known
         }
 
         // ------------------------------------------------------------------
