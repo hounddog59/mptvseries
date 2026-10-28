@@ -32,7 +32,7 @@ namespace WindowPlugins.GUITVSeries
     public class DBView : DBTable
     {
         public const String cTableName = "Views";
-        public const int cDBVersion = 5;
+        public const int cDBVersion = 6; // 6: community version - Recently Added lists series
 
         public const String cIndex = "ID";
         public const String cEnabled = "enabled";
@@ -55,6 +55,15 @@ namespace WindowPlugins.GUITVSeries
         public const String cTranslateTokenActors = "Actors";
         public const String cTranslateTokenLatest = "Latest";
         public const String cTranslateTokenRecentlyAdded = "RecentlyAdded";
+        public const String cTranslateTokenRecentlyAddedEpisodes = "RecentlyAddedEpisodes";
+
+        /// community version: Recently Added lists the series with episodes added in the last 7 days; picking one shows
+        /// just its new episodes (the episode condition is inherited by the season and episode steps)
+        public const String cRecentlyAddedSeriesConfig = @"series<;><Episode.FileDateCreated>;>=;<today-7><;><;>" +
+                                                          "<nextStep>season<;><;><Season.seasonIndex>;asc<;>" +
+                                                          "<nextStep>episode<;><;><Episode.EpisodeIndex>;asc<;>";
+        /// the original Recently Added: one flat list of episodes, newest first
+        public const String cRecentlyAddedEpisodesConfig = @"episode<;><Episode.FileDateCreated>;>=;<today-7><;><Episode.FileDateCreated>;desc<;>";
         public const String cTranslateTokenContinuing = "Continuing";
         public const String cTranslateTokenEnded = "Ended";
         public const String cTranslateTokenTop10User = "Top10User";
@@ -344,7 +353,7 @@ namespace WindowPlugins.GUITVSeries
                 view[cSort] = "10";
                 view[cTransToken] = cTranslateTokenRecentlyAdded;
                 view[cPrettyName] = "";
-                view[cViewConfig] = @"episode<;><Episode.FileDateCreated>;>=;<today-7><;><Episode.FileDateCreated>;desc<;>";
+                view[cViewConfig] = cRecentlyAddedSeriesConfig;
                 view[cTaggedView] = "0";
                 view[cParentalControl] = "0";
                 view.Commit();
@@ -440,6 +449,21 @@ namespace WindowPlugins.GUITVSeries
                         view[cTaggedView] = "1";
                         view.Commit();                        
 
+                        nUpgradeDBVersion++;
+                        break;
+
+                    case 5:
+                        // Upgrade to version 6 (community version): Recently Added lists series instead of one long list of
+                        // episodes - only when it is still the original, so a view someone changed is left alone
+                        foreach (DBView v in DBView.getAll(true))
+                        {
+                            if (v[DBView.cTransToken] == cTranslateTokenRecentlyAdded && v[cViewConfig] == cRecentlyAddedEpisodesConfig)
+                            {
+                                v[cViewConfig] = cRecentlyAddedSeriesConfig;
+                                v.Commit();
+                                MPTVSeriesLog.Write("Views: 'Recently Added' now lists series with new episodes");
+                            }
+                        }
                         nUpgradeDBVersion++;
                         break;
 

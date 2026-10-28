@@ -152,8 +152,18 @@ namespace WindowPlugins.GUITVSeries.Configuration {
                 ViewTemplate template = new ViewTemplate();
                 template.name = DBView.cTranslateTokenRecentlyAdded;
                 template.prettyname = Translation.RecentlyAdded;
+                template.description = "Lists the series that have had episodes added to your library in the last 7 days. Pick a series to see just its new episodes.";
+                template.configuration = DBView.cRecentlyAddedSeriesConfig;
+                templates.Add(template);
+            }
+
+            // Recently Added Episodes (the original flat list, last 7 days)
+            if (!viewNames.Contains(DBView.cTranslateTokenRecentlyAddedEpisodes)) {
+                ViewTemplate template = new ViewTemplate();
+                template.name = DBView.cTranslateTokenRecentlyAddedEpisodes;
+                template.prettyname = Translation.RecentlyAddedEpisodes;
                 template.description = "Filters the last 7 days of recently added episodes into your library. This view will skip Series selection and take you directly to the list of episodes. Episodes are listed in descending order.";
-                template.configuration = @"episode<;><Episode.FileDateCreated>;>=;<today-7><;><Episode.FileDateCreated>;desc<;>";
+                template.configuration = DBView.cRecentlyAddedEpisodesConfig;
                 templates.Add(template);
             }
 

@@ -4,7 +4,7 @@
 > free from TMDB with nothing to sign up for, or from TheTVDB's current service if you have a TheTVDB PIN.
 > It is not the official release. See **[COMMUNITY-FORK.md](COMMUNITY-FORK.md)** for what it does, what you need,
 > and how to install it, and the **[Releases](https://github.com/hounddog59/mptvseries/releases)** page to
-> download it.
+> download it. The **[User Guide](docs/User-Guide.md)** explains where to find every feature.
 > **Already have a TheTVDB PIN** (for example for Kodi, Plex or Emby)? It works here too, so this version is well
 > worth a try. If you don't like it, simply uninstall it and go back to the original MP-TVSeries you had before.
 
