@@ -162,6 +162,7 @@ namespace WindowPlugins.GUITVSeries
         public const string cOnPlaySeriesOrSeasonAction = "OnPlaySeriesOrSeasonAction";
         public const string cNewEpisodeThumbType = "NewEpisodeThumbType";
         public const string cNewEpisodeRecentDays = "NewEpisodeRecentDays";
+        public const string cResumePosition = "ResumePosition"; // community version: the show/season you were in, reopened after MediaPortal restarts
         public const string cContinueWatchingDays = "ContinueWatchingDays"; // how far back the Continue Watching view looks
         public const string cSubCentralEnabled = "SubCentral_Enabled";
         public const string cSubCentralEnabledForEpisodes = "SubCentral_EnabledForEpisodes";
@@ -506,6 +507,9 @@ namespace WindowPlugins.GUITVSeries
 
             if (GetOptions(cNewEpisodeRecentDays) == null)
                 SetOptions(cNewEpisodeRecentDays, 7);
+
+            if (GetOptions(cResumePosition) == null)
+                SetOptions(cResumePosition, "");
 
             if (GetOptions(cContinueWatchingDays) == null)
                 SetOptions(cContinueWatchingDays, 60);

@@ -670,6 +670,12 @@ namespace WindowPlugins.GUITVSeries
                     GUIWindowManager.ShowPreviousWindow();
                     return;
                 }
+
+                if (m_LoadingParameter.Type == LoadingParameterType.None && !s_resumeTried)
+                {
+                    s_resumeTried = true;
+                    RestoreResumePosition();
+                }
             }
             #endregion
            
@@ -1601,6 +1607,7 @@ namespace WindowPlugins.GUITVSeries
                         m_back_up_select_this = m_stepSelection;
                         m_stepSelection = m_stepSelections[m_CurrViewStep];
                         skipSeasonIfOne_DirectionDown = false; // otherwise the user cant get back out
+                        SaveResumePosition();
                         LoadFacade();
                     }
                     break;
@@ -2203,6 +2210,7 @@ namespace WindowPlugins.GUITVSeries
                         m_stepSelections.Add(m_stepSelection);
                         m_stepSelectionPretty.Add(m_SelectedSeries.ToString());
                         MPTVSeriesLog.Write("Series Clicked: ", m_stepSelection[0], MPTVSeriesLog.LogLevel.Debug);
+                        SaveResumePosition();
                         this.LoadFacade();
                         this.m_Facade.Focus = true;
                         break;
@@ -2217,6 +2225,7 @@ namespace WindowPlugins.GUITVSeries
                         m_stepSelections.Add(m_stepSelection);
                         m_stepSelectionPretty.Add(m_SelectedSeason[DBSeason.cIndex] == 0 ? Translation.specials : Translation.Season + " " + m_SelectedSeason[DBSeason.cIndex]);
                         MPTVSeriesLog.Write("Season Clicked: ", m_stepSelection[0] + " - " + m_stepSelection[1], MPTVSeriesLog.LogLevel.Debug);
+                        SaveResumePosition();
                         this.LoadFacade();
                         this.m_Facade.Focus = true;
                         break;
@@ -2940,10 +2949,38 @@ namespace WindowPlugins.GUITVSeries
                             if (DBOption.GetOptions(DBOption.cFilterUnwatched))
                             {
                                 seriesList.RemoveAll(s => s[DBOnlineSeries.cEpisodesUnWatched] == 0);
+
+                                // community version: in a view with conditions (e.g. Recently Added), a show can have
+                                // unwatched episodes elsewhere but none in the seasons this view lists - opening it then
+                                // showed nothing, so leave such shows out too
+                                int nextStep = m_CurrViewStep + 1;
+                                if (nextStep < m_CurrLView.m_steps.Count
+                                    && m_CurrLView.gettypeOfStep(nextStep) == logicalViewStep.type.season
+                                    && !string.IsNullOrEmpty((string)m_CurrLView.m_steps[m_CurrViewStep].conds))
+                                {
+                                    seriesList.RemoveAll(s =>
+                                    {
+                                        try
+                                        {
+                                            List<DBSeason> viewSeasons = m_CurrLView.getSeasonItems(nextStep, new string[] { s[DBSeries.cID].ToString() });
+                                            return viewSeasons != null && !viewSeasons.Exists(se => (int)se[DBSeason.cEpisodesUnWatched] > 0);
+                                        }
+                                        catch { return false; }
+                                    });
+                                }
                             }
                             #endregion
 
+                            // community version: a view with its own order (e.g. Continue Watching, newest watched
+                            // first) keeps it - only views ordered by name (or with no order) are sorted A-Z here
+                            string viewOrder = m_CurrLView.m_steps[m_CurrViewStep].conds.orderString ?? string.Empty;
+                            bool keepViewOrder = m_CurrLView.m_steps[m_CurrViewStep].conds.customOrderStringIsSet
+                                && viewOrder.IndexOf(DBOnlineSeries.cPrettyName, StringComparison.OrdinalIgnoreCase) < 0
+                                && viewOrder.IndexOf(DBOnlineSeries.cSortName, StringComparison.OrdinalIgnoreCase) < 0;
+
                             // Sort Series List if Title has been user edited
+                            if (!keepViewOrder)
+                            {
                             string titleField = DBOption.GetOptions(DBOption.cUseSortName) ? DBOnlineSeries.cSortName : DBOnlineSeries.cPrettyName;
                             seriesList.Sort(new Comparison<DBSeries>((x, y) =>
                             {
@@ -2958,6 +2995,7 @@ namespace WindowPlugins.GUITVSeries
 
                                 return string.Compare(seriesX, seriesY);
                             }));
+                            }
 
                             MPTVSeriesLog.Write(string.Format("Displaying {0} series", seriesList.Count.ToString()), MPTVSeriesLog.LogLevel.Debug);
                             foreach (DBSeries series in seriesList)
@@ -4886,6 +4924,86 @@ namespace WindowPlugins.GUITVSeries
         {
             // Switch to previous view
             switchView(Helper.getElementFromList<logicalView, string>(m_CurrLView.Name, "Name", offset, m_allViews));
+        }
+
+        // community version: remember the show / season you were in, so MediaPortal reopens there after a restart
+        private static bool s_resumeTried = false;
+
+        private void SaveResumePosition()
+        {
+            try
+            {
+                string pos = string.Empty;
+                if (m_CurrLView != null && m_CurrLView.m_steps.Count == 3 && m_CurrLView.gettypeOfStep(0) == logicalViewStep.type.series && m_CurrViewStep > 0
+                    && m_stepSelections.Count > m_CurrViewStep && m_stepSelections[m_CurrViewStep] != null && m_stepSelections[m_CurrViewStep].Length > 0)
+                {
+                    string[] sel = m_stepSelections[m_CurrViewStep];
+                    pos = "view:" + m_CurrLView.Name + "|seriesid:" + sel[0];
+                    if (sel.Length > 1) pos += "|seasonidx:" + sel[1];
+                }
+                DBOption.SetOptions(DBOption.cResumePosition, pos);
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Could not save where you were: " + ex.Message);
+            }
+        }
+
+        private void RestoreResumePosition()
+        {
+            try
+            {
+                string pos = DBOption.GetOptions(DBOption.cResumePosition);
+                if (string.IsNullOrEmpty(pos) || m_CurrLView == null) return;
+                if (m_CurrLView.m_steps.Count != 3 || m_CurrLView.gettypeOfStep(0) != logicalViewStep.type.series) return;
+
+                string view = null, seriesId = null, seasonIdx = null;
+                foreach (string part in pos.Split('|'))
+                {
+                    int c = part.IndexOf(':');
+                    if (c < 0) continue;
+                    string key = part.Substring(0, c), value = part.Substring(c + 1);
+                    if (key == "view") view = value;
+                    else if (key == "seriesid") seriesId = value;
+                    else if (key == "seasonidx") seasonIdx = value;
+                }
+                if (view != m_CurrLView.Name || string.IsNullOrEmpty(seriesId)) return;
+
+                int id;
+                if (!int.TryParse(seriesId, out id)) return;
+                DBSeries series = Helper.getCorrespondingSeries(id);
+                if (series == null) return;
+
+                m_SelectedSeries = series;
+                m_stepSelections = new List<string[]> { new string[] { null }, new string[] { seriesId } };
+                m_stepSelectionPretty.Clear();
+                m_stepSelectionPretty.Add(series.ToString());
+                m_CurrViewStep = 1;
+                pushFieldsToSkin(m_SelectedSeries, "Series");
+
+                int idx;
+                if (!string.IsNullOrEmpty(seasonIdx) && int.TryParse(seasonIdx, out idx))
+                {
+                    DBSeason season = Helper.getCorrespondingSeason(id, idx);
+                    if (season != null)
+                    {
+                        m_SelectedSeason = season;
+                        m_stepSelections.Add(new string[] { seriesId, seasonIdx });
+                        m_stepSelectionPretty.Add(idx == 0 ? Translation.specials : Translation.Season + " " + idx);
+                        m_CurrViewStep = 2;
+                    }
+                }
+                m_stepSelection = m_stepSelections[m_CurrViewStep];
+                setNewListLevelOfCurrView(m_CurrViewStep);
+                skipSeasonIfOne_DirectionDown = false; // already where the user was - don't jump on by ourselves
+                setViewLabels();
+                MPTVSeriesLog.Write("Reopening where you were: " + series.ToString() + (m_CurrViewStep == 2 ? ", season " + seasonIdx : string.Empty));
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Could not reopen where you were: " + ex.Message);
+                try { switchView(m_CurrLView.Name); } catch { }
+            }
         }
 
         private bool switchView(string viewName)
