@@ -69,6 +69,12 @@ skin updates).
 - Searches in the import wizard also list TVmaze's matches that TMDB couldn't offer.
 - TVmaze's text is in English; specials go into season 0, in the order they aired.
 
+**Continue Watching (new in 4.8)**
+- A new **Continue Watching** view in MediaPortal: the shows you've watched in the last 60 days that still have
+  unwatched episodes, the one you watched most recently at the top. Opening a show lists only its unwatched
+  episodes, so the next one to watch is first. It appears straight after "All" and is filled in from what you've
+  already watched, so it works from the start.
+
 **TheTVDB**
 - Works with TheTVDB's current (v4) service: you enter your own subscriber PIN; the program's key is built in.
 - Shows are found by name again. If a search finds nothing, it tries again with a tidied-up name (helps names

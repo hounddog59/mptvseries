@@ -269,6 +269,7 @@ namespace WindowPlugins.GUITVSeries
 
                 #endregion
 
+                RememberSeriesPlayed(m_currentEpisode);
                 Play(timeMovieStopped);
                 return true;
             }
@@ -493,6 +494,22 @@ namespace WindowPlugins.GUITVSeries
             return result;
         }
         #endregion
+
+        /// <summary>Notes when a show was last played, for the 'Continue Watching' view.</summary>
+        static void RememberSeriesPlayed(DBEpisode episode)
+        {
+            try
+            {
+                DBSeries series = Helper.getCorrespondingSeries(episode[DBEpisode.cSeriesID]);
+                if (series == null) return;
+                series[DBOnlineSeries.cLastPlayedDate] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                series.Commit();
+            }
+            catch (Exception e)
+            {
+                MPTVSeriesLog.Write("Could not note when the show was last played: " + e.Message);
+            }
+        }
 
         #region Playback Event Handlers
         void OnPlayBackStopped(g_Player.MediaType type, int timeMovieStopped, string filename)

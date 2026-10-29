@@ -75,6 +75,7 @@ namespace WindowPlugins.GUITVSeries
 
         public const String cEpisodeCount = "EpisodeCount";
         public const String cEpisodesUnWatched = "EpisodesUnWatched";
+        public const String cLastPlayedDate = "LastPlayedDate"; // when an episode of the show was last played ("yyyy-MM-dd HH:mm:ss")
 
         public const String cFirstAired = "FirstAired";
 
@@ -134,6 +135,7 @@ namespace WindowPlugins.GUITVSeries
             s_FieldToDisplayNameMap.Add( cFirstAired, "First Aired" );
             s_FieldToDisplayNameMap.Add( cEpisodeCount, "Episodes" );
             s_FieldToDisplayNameMap.Add( cEpisodesUnWatched, "Episodes UnWatched" );
+            s_FieldToDisplayNameMap.Add( cLastPlayedDate, "Last Played" );
             s_FieldToDisplayNameMap.Add( cLastEpisodeAirDate, "Last Aired" );
             s_FieldToDisplayNameMap.Add( cLastUpdated, "Last Updated (UTC)" );
             s_FieldToDisplayNameMap.Add( cOriginalName, "English Name" );
@@ -213,6 +215,7 @@ namespace WindowPlugins.GUITVSeries
             base.AddColumn( cUnwatchedItems, new DBField( DBField.cTypeInt ) );
             base.AddColumn( cEpisodeCount, new DBField( DBField.cTypeInt ) );
             base.AddColumn( cEpisodesUnWatched, new DBField( DBField.cTypeInt ) );
+            base.AddColumn( cLastPlayedDate, new DBField( DBField.cTypeString ) );
             base.AddColumn( cRating, new DBField( DBField.cTypeString ) );
             base.AddColumn( cRatingCount, new DBField( DBField.cTypeString ) );
             base.AddColumn( cMyRating, new DBField( DBField.cTypeString ) );

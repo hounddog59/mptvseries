@@ -113,6 +113,7 @@
   <string name="CYN_Subtitle_File_Replace" Original="Subtitle File Replace">Subtitle File Replace</string>
   <string name="CYN_Old_Subtitle_Replace" Original="Old subtitle File present: overwrite?">Old subtitle File present: overwrite?</string>
   <string name="RecentlyAdded" Original="Recently Added">Recently Added</string>
+  <string name="ContinueWatching" Original="Continue Watching">Continue Watching</string>
   <string name="TVDB_ERROR_TITLE" Original="theTVDB Error">theTVDB Error</string>
   <string name="TVDB_INFO_TITLE" Original="theTVDB">theTVDB</string>
   <string name="TVDB_INFO_ACCOUNTID_1" Original="Account Identifier is not set">Account Identifier is not set</string>

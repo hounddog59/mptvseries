@@ -159,6 +159,7 @@ namespace WindowPlugins.GUITVSeries
         public static string Favourites = "Favourites";
         public static string OnlineFavourites = "Online Favourites";
         public static string RecentlyAdded = "Recently Added";
+        public static string ContinueWatching = "Continue Watching";
 		public static string ContentRating = "Content Rating";
         public static string ChangeView = "Change View";
 		public static string ViewTags = "View Tags";

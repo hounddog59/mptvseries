@@ -32,7 +32,7 @@ namespace WindowPlugins.GUITVSeries
     public class DBView : DBTable
     {
         public const String cTableName = "Views";
-        public const int cDBVersion = 5;
+        public const int cDBVersion = 6;
 
         public const String cIndex = "ID";
         public const String cEnabled = "enabled";
@@ -55,6 +55,7 @@ namespace WindowPlugins.GUITVSeries
         public const String cTranslateTokenActors = "Actors";
         public const String cTranslateTokenLatest = "Latest";
         public const String cTranslateTokenRecentlyAdded = "RecentlyAdded";
+        public const String cTranslateTokenContinueWatching = "ContinueWatching";
         public const String cTranslateTokenContinuing = "Continuing";
         public const String cTranslateTokenEnded = "Ended";
         public const String cTranslateTokenTop10User = "Top10User";
@@ -215,6 +216,65 @@ namespace WindowPlugins.GUITVSeries
             return;
         }
 
+        /// <summary>
+        /// Shows watched in the last 60 days that still have unwatched episodes, the most recently watched first.
+        /// Opening one lists only its unwatched episodes, so the next one to watch is at the top.
+        /// </summary>
+        public const string cContinueWatchingConfig =
+            @"series<;><Series.LastPlayedDate>;>=;<today-60><cond><Episode.Watched>;=;0<;><Series.LastPlayedDate>;desc<;>" +
+            "<nextStep>season<;><;><Season.seasonIndex>;asc<;>" +
+            "<nextStep>episode<;><;><Episode.EpisodeIndex>;asc<;>";
+
+        /// <summary>
+        /// Adds the 'Continue Watching' view second in the list (after 'All'), and fills in when each show was last
+        /// watched from the episodes already marked as watched, so the view isn't empty to start with.
+        /// </summary>
+        static void AddContinueWatchingView()
+        {
+            DBView[] existing = DBView.getAll(true);
+            int index = 0;
+            foreach (DBView v in existing)
+            {
+                if (v[cTransToken] == cTranslateTokenContinueWatching) return; // already there
+                index = Math.Max(index, (int)v[cIndex] + 1);
+            }
+
+            // make room for it after the first view
+            foreach (DBView v in existing)
+            {
+                if ((int)v[cSort] >= 2)
+                {
+                    v[cSort] = (int)v[cSort] + 1;
+                    v.Commit();
+                }
+            }
+
+            DBView view = new DBView();
+            view[cIndex] = index;
+            view[cEnabled] = "1";
+            view[cSort] = 2;
+            view[cTransToken] = cTranslateTokenContinueWatching;
+            view[cPrettyName] = "";
+            view[cViewConfig] = cContinueWatchingConfig;
+            view[cTaggedView] = "0";
+            view[cParentalControl] = "0";
+            view.Commit();
+
+            try
+            {
+                new DBOnlineSeries(); // makes sure the column exists
+                DBTVSeries.Execute(string.Format(
+                    "update {0} set {1} = (select max({2}) from {3} where {3}.{4} = {0}.{5} and {3}.{6} = 1 and {2} != '') " +
+                    "where ({1} is null or {1} = '')",
+                    DBOnlineSeries.cTableName, DBOnlineSeries.cLastPlayedDate, DBOnlineEpisode.cLastWatchedDate,
+                    DBOnlineEpisode.cTableName, DBOnlineEpisode.cSeriesID, DBOnlineSeries.cID, DBOnlineEpisode.cWatched));
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Continue Watching: could not fill in when shows were last watched: " + ex.Message);
+            }
+        }
+
         public static void fillDefaults()
         {
             DBView dummy = new DBView();
@@ -348,6 +408,8 @@ namespace WindowPlugins.GUITVSeries
                 view[cTaggedView] = "0";
                 view[cParentalControl] = "0";
                 view.Commit();
+
+                AddContinueWatchingView();
             }
 
             int nCurrentDBVersion = cDBVersion;
@@ -440,6 +502,12 @@ namespace WindowPlugins.GUITVSeries
                         view[cTaggedView] = "1";
                         view.Commit();                        
 
+                        nUpgradeDBVersion++;
+                        break;
+
+                    case 5:
+                        // Upgrade to version 6, new view 'Continue Watching'
+                        AddContinueWatchingView();
                         nUpgradeDBVersion++;
                         break;
 
