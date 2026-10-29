@@ -96,6 +96,7 @@ namespace WindowPlugins.GUITVSeries
             this.toolTip_Help = new System.Windows.Forms.ToolTip(this.components);
             this.linkMediaInfoUpdate = new System.Windows.Forms.LinkLabel();
             this.checkBox_ShowHidden = new System.Windows.Forms.CheckBox();
+            this.checkBox_HideWatched = new System.Windows.Forms.CheckBox();
             this.textBox_dblocation = new System.Windows.Forms.TextBox();
             this.lblClearDB = new System.Windows.Forms.LinkLabel();
             this.linkExParsingExpressions = new System.Windows.Forms.LinkLabel();
@@ -570,6 +571,23 @@ namespace WindowPlugins.GUITVSeries
             this.toolTip_Help.SetToolTip(this.checkBox_ShowHidden, "Shows the Series,Seasons and Episodes that have been hidden from view");
             this.checkBox_ShowHidden.UseVisualStyleBackColor = true;
             this.checkBox_ShowHidden.CheckedChanged += new System.EventHandler(this.checkBox_ShowHidden_CheckedChanged);
+            // 
+            // checkBox_HideWatched
+            // 
+            this.checkBox_HideWatched.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBox_HideWatched.AutoSize = true;
+            this.checkBox_HideWatched.Location = new System.Drawing.Point(9, 888);
+            this.checkBox_HideWatched.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.checkBox_HideWatched.Name = "checkBox_HideWatched";
+            this.checkBox_HideWatched.Size = new System.Drawing.Size(94, 17);
+            this.checkBox_HideWatched.TabIndex = 2;
+            this.checkBox_HideWatched.Tag = "z";
+            this.checkBox_HideWatched.Text = "Hide &Watched";
+            this.toolTip_Help.SetToolTip(this.checkBox_HideWatched, "Leaves out of this list the episodes you have watched, and the seasons and shows\r\n" +
+        "you have watched all of, so you see only what's still to watch.\r\n" +
+        "Only changes this list - nothing is hidden in MediaPortal or deleted.");
+            this.checkBox_HideWatched.UseVisualStyleBackColor = true;
+            this.checkBox_HideWatched.CheckedChanged += new System.EventHandler(this.checkBox_HideWatched_CheckedChanged);
             // 
             // textBox_dblocation
             // 
@@ -2063,6 +2081,7 @@ namespace WindowPlugins.GUITVSeries
             this.splitContainer2.Panel1.Controls.Add(this.linkMediaInfoUpdate);
             this.splitContainer2.Panel1.Controls.Add(this.treeView_Library);
             this.splitContainer2.Panel1.Controls.Add(this.checkBox_ShowHidden);
+            this.splitContainer2.Panel1.Controls.Add(this.checkBox_HideWatched);
             // 
             // splitContainer2.Panel2
             // 
@@ -2098,7 +2117,7 @@ namespace WindowPlugins.GUITVSeries
             this.treeView_Library.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.treeView_Library.MinimumSize = new System.Drawing.Size(148, 152);
             this.treeView_Library.Name = "treeView_Library";
-            this.treeView_Library.Size = new System.Drawing.Size(225, 900);
+            this.treeView_Library.Size = new System.Drawing.Size(225, 880);
             this.treeView_Library.TabIndex = 0;
             this.treeView_Library.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeView_Library_AfterExpand);
             this.treeView_Library.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_Library_AfterSelect);
@@ -4225,6 +4244,7 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.LinkLabel linkMediaInfoUpdate;
         private System.Windows.Forms.TreeView treeView_Library;
         private System.Windows.Forms.CheckBox checkBox_ShowHidden;
+        private System.Windows.Forms.CheckBox checkBox_HideWatched;
         private System.Windows.Forms.PictureBox pictureBox_SeriesPoster;
         private System.Windows.Forms.ComboBox comboBox_PosterSelection;
         private System.Windows.Forms.DataGridView dataGridView1;

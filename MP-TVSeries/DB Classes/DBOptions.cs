@@ -50,6 +50,7 @@ namespace WindowPlugins.GUITVSeries
         public const string cDBViewsVersion = "DBViewsVersion";
         public const string cDBReplacementsVersion = "DBReplacementsVersion";
         public const string cShowHiddenItems = "ShowHiddenItems";
+        public const string cHideWatchedInDetails = "HideWatchedInDetails"; // Configuration's Details tab only
         public const string cOnlineParseEnabled = "OnlineParseEnabled";
         public const string cFullSeriesRetrieval = "FullSeriesRetrieval";
         public const string cAutoChooseSeries = "AutoChooseSeries";
@@ -221,6 +222,9 @@ namespace WindowPlugins.GUITVSeries
 
             if (GetOptions(cShowHiddenItems) == null)
                 SetOptions(cShowHiddenItems, false);
+
+            if (GetOptions(cHideWatchedInDetails) == null)
+                SetOptions(cHideWatchedInDetails, false);
 
             if (GetOptions(cOnlineParseEnabled) == null)
                 SetOptions(cOnlineParseEnabled, true);

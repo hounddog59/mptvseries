@@ -267,7 +267,8 @@ namespace WindowPlugins.GUITVSeries
             ShowSourceInUse();
             chkBlankBanners.Checked = DBOption.GetOptions(DBOption.cGetBlankBanners);
             checkDownloadEpisodeSnapshots.Checked = DBOption.GetOptions(DBOption.cGetEpisodeSnapshots);
-            checkBox_ShowHidden.Checked = DBOption.GetOptions(DBOption.cShowHiddenItems);            
+            checkBox_ShowHidden.Checked = DBOption.GetOptions(DBOption.cShowHiddenItems);
+            checkBox_HideWatched.Checked = DBOption.GetOptions(DBOption.cHideWatchedInDetails);            
             checkbox_SortSpecials.Checked = DBOption.GetOptions(DBOption.cSortSpecials);
             checkBox_ScanOnStartup.Checked = DBOption.GetOptions(DBOption.cImportScanOnStartup);
             if (!checkBox_ScanOnStartup.Checked)
@@ -691,11 +692,15 @@ namespace WindowPlugins.GUITVSeries
         {
             if (series == null) return;
 
+            // "Hide Watched": a show whose episodes (on disk) have all been watched is left out
+            if (HideWatchedInTree && series[DBOnlineSeries.cEpisodeCount] > 0 && series[DBOnlineSeries.cUnwatchedItems] == 0)
+                return;
+
             string sName = (DBOption.GetOptions(DBOption.cUseSortName) ? series[DBOnlineSeries.cSortName] : series[DBOnlineSeries.cPrettyName]);
             TreeNode seriesNode = new TreeNode(System.Web.HttpUtility.HtmlDecode(sName));
             seriesNode.Name = DBSeries.cTableName;
             seriesNode.Tag = (DBSeries)series;
-            this.treeView_Library.Nodes.Insert(index, seriesNode);
+            this.treeView_Library.Nodes.Insert(Math.Min(index, this.treeView_Library.Nodes.Count), seriesNode);
             Font fontDefault = treeView_Library.Font;
 
             // set color for non-local files
@@ -736,6 +741,10 @@ namespace WindowPlugins.GUITVSeries
 
         private void CreateSeasonTree(TreeNode seriesNode, DBSeason season)
         {
+            // "Hide Watched": a season whose episodes (on disk) have all been watched is left out
+            if (HideWatchedInTree && season[DBSeason.cEpisodeCount] > 0 && season[DBSeason.cUnwatchedItems] == 0)
+                return;
+
             Font fontDefault = treeView_Library.Font;
 
             TreeNode seasonNode = null;
@@ -2231,6 +2240,10 @@ namespace WindowPlugins.GUITVSeries
 
                     foreach (DBEpisode episode in episodes)
                     {
+                        // "Hide Watched": watched episodes are left out
+                        if (HideWatchedInTree && episode[DBOnlineEpisode.cWatched] == 1)
+                            continue;
+
                         String lEpisodeName = (String)episode[DBEpisode.cEpisodeName];
                         TreeNode lEpisodeNode = null;
                         if ( lUseDVDOrder && episode[DBOnlineEpisode.cDVDEpisodeNumber] != 0 )
@@ -4125,6 +4138,18 @@ namespace WindowPlugins.GUITVSeries
         {
             DBOption.SetOptions(DBOption.cShowHiddenItems, checkBox_ShowHidden.Checked);
             LoadTree();
+        }
+
+        private void checkBox_HideWatched_CheckedChanged(object sender, EventArgs e)
+        {
+            DBOption.SetOptions(DBOption.cHideWatchedInDetails, checkBox_HideWatched.Checked);
+            LoadTree();
+        }
+
+        /// <summary>True when the Details tab is set to leave out what has been watched.</summary>
+        static bool HideWatchedInTree
+        {
+            get { return DBOption.GetOptions(DBOption.cHideWatchedInDetails); }
         }
 
         private void contextMenuStrip_DetailsTree_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
