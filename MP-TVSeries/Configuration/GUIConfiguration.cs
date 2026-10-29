@@ -376,7 +376,7 @@ namespace WindowPlugins.GUITVSeries
             dtpParentalAfter.Text = DBOption.GetOptions(DBOption.cParentalControlDisableAfter);
             dtpParentalBefore.Text = DBOption.GetOptions(DBOption.cParentalControlDisableBefore);
 
-            tabControl_Details.SelectTab(1);
+            tabControl_Details.SelectTab(tabPage_Details); // open on the Details tab (the library)
         }
 
         void Panel1_SizeChanged(object sender, EventArgs e)
