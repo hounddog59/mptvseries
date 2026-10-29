@@ -48,6 +48,7 @@
             this.grbDataSources = new System.Windows.Forms.GroupBox();
             this.lblDataSources = new System.Windows.Forms.Label();
             this.lnkTmdb = new System.Windows.Forms.LinkLabel();
+            this.lnkTvmaze = new System.Windows.Forms.LinkLabel();
             this.picTmdb = new System.Windows.Forms.PictureBox();
             this.picPayPal = new System.Windows.Forms.PictureBox();
             this.lblPayPal = new System.Windows.Forms.Label();
@@ -248,6 +249,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grbDataSources.Controls.Add(this.lblDataSources);
             this.grbDataSources.Controls.Add(this.lnkTmdb);
+            this.grbDataSources.Controls.Add(this.lnkTvmaze);
             this.grbDataSources.Controls.Add(this.picTmdb);
             this.grbDataSources.Location = new System.Drawing.Point(23, 331);
             this.grbDataSources.Name = "grbDataSources";
@@ -264,7 +266,7 @@
             this.lblDataSources.Size = new System.Drawing.Size(380, 39);
             this.lblDataSources.TabIndex = 0;
             this.lblDataSources.Text = "Show details: TheTVDB.com (with your PIN) or TMDB (free).\r\n" +
-    "Ratings: Trakt.tv. Extra artwork: fanart.tv.\r\n" +
+    "Backup for shows TMDB lacks: TVmaze.com. Ratings: Trakt.tv. Artwork: fanart.tv.\r\n" +
     "This product uses the TMDB API but is not endorsed or certified by TMDB.";
             // 
             // lnkTmdb
@@ -277,6 +279,17 @@
             this.lnkTmdb.TabStop = true;
             this.lnkTmdb.Text = "https://www.themoviedb.org";
             this.lnkTmdb.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTmdb_LinkClicked);
+            // 
+            // lnkTvmaze
+            // 
+            this.lnkTvmaze.AutoSize = true;
+            this.lnkTvmaze.Location = new System.Drawing.Point(180, 60);
+            this.lnkTvmaze.Name = "lnkTvmaze";
+            this.lnkTvmaze.Size = new System.Drawing.Size(124, 13);
+            this.lnkTvmaze.TabIndex = 3;
+            this.lnkTvmaze.TabStop = true;
+            this.lnkTvmaze.Text = "https://www.tvmaze.com";
+            this.lnkTvmaze.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkTvmaze_LinkClicked);
             // 
             // picTmdb
             // 
@@ -468,6 +481,7 @@
         private System.Windows.Forms.GroupBox grbDataSources;
         private System.Windows.Forms.Label lblDataSources;
         private System.Windows.Forms.LinkLabel lnkTmdb;
+        private System.Windows.Forms.LinkLabel lnkTvmaze;
         private System.Windows.Forms.PictureBox picTmdb;
         private System.Windows.Forms.PictureBox picPayPal;
         private System.Windows.Forms.Label lblPayPal;

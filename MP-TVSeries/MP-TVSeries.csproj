@@ -309,6 +309,8 @@
     <Compile Include="Online Parsing Classes\Tmdb\TmdbClient.cs" />
     <Compile Include="Online Parsing Classes\Tmdb\TmdbLanguages.cs" />
     <Compile Include="Online Parsing Classes\Tmdb\TmdbSeriesFetcher.cs" />
+    <Compile Include="Online Parsing Classes\Tvmaze\TvmazeClient.cs" />
+    <Compile Include="Online Parsing Classes\Tvmaze\TvmazeSeriesFetcher.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4XmlAdapter.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4SeriesFetcher.cs" />
     <Compile Include="Online Parsing Classes\V4\TvdbV4Favourites.cs" />

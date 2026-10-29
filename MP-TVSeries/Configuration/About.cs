@@ -89,6 +89,11 @@ namespace WindowPlugins.GUITVSeries
             System.Diagnostics.Process.Start( @"https://www.themoviedb.org" );
         }
 
+        private void lnkTvmaze_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
+        {
+            System.Diagnostics.Process.Start( @"https://www.tvmaze.com" );
+        }
+
         private void lnkMaintainerDonate_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
         {
             if (MaintainerDonateUrl.Length > 0)

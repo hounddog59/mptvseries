@@ -62,6 +62,13 @@ skin updates).
   wide banners from fanart.tv.
 - Downloads are paced and wait politely if TMDB asks them to slow down.
 
+**TVmaze as a backup (new in 4.8)**
+- Shows TMDB doesn't have – some documentaries, and series TMDB lists as part of another show – now come from
+  TVmaze (free, no sign-up, nothing to set up). This happens on its own when TMDB is the source.
+- Found by their TheTVDB number, or by name and year when TVmaze doesn't have the number.
+- Searches in the import wizard also list TVmaze's matches that TMDB couldn't offer.
+- TVmaze's text is in English; specials go into season 0, in the order they aired.
+
 **TheTVDB**
 - Works with TheTVDB's current (v4) service: you enter your own subscriber PIN; the program's key is built in.
 - Shows are found by name again. If a search finds nothing, it tries again with a tidied-up name (helps names
@@ -124,11 +131,12 @@ skin updates).
 
 - A few shows aren't on TMDB at all, or TMDB lists them differently – for example some documentaries, and
   series that TMDB puts together as one show (like *Cunk on Britain*, which TMDB has as part of *Cunk on...*).
-  These stay unlinked for now; TVmaze is planned as a backup for them (see below).
+  From 4.8 these come from TVmaze instead, when TVmaze has them; a few rare shows may still be on neither.
 - For a few shows TMDB numbers the seasons or episodes differently from TheTVDB.
 - Favourites are a TheTVDB feature, so they need a TheTVDB PIN.
 - This product uses the TMDB API but is not endorsed or certified by TMDB. TMDB is free to use for
   non-commercial use, with credit to TMDB (on the About tab).
+- TVmaze's information is shared under the CC BY-SA licence, with credit to TVmaze.com (on the About tab).
 
 ## Included from the official team (4.5.1.745 – 4.5.1.756)
 
@@ -170,12 +178,13 @@ Configuration (Parsing Expressions), and there's an option there to take the sho
 To go back: uninstall it in MediaPortal Configuration > Extensions, restore your database backup and install
 the official version.
 
-Versions 4.6 and 4.7 are numbered above the official 4.5.1 releases, so MediaPortal treats it as an upgrade. If the
+Versions 4.6 and later are numbered above the official 4.5.1 releases, so MediaPortal treats it as an upgrade. If the
 official team releases an update later, uninstall this version first to install theirs.
 
 ## Planned
 
-- **TVmaze as a second backup** (free, no sign-up) for shows the main source doesn't have.
+- **A guide to every feature** (wiki pages) and hover pop-ups explaining each setting in MP-TVSeries
+  Configuration.
 
 ## Credits
 
@@ -183,6 +192,6 @@ MP-TVSeries was created by the MP-TVSeries team and is maintained by the MediaPo
 (damienhaynes, andrewjswan, ltfearme and contributors). This fork builds on their work and keeps the original
 licence.
 
-Show information from TheTVDB.com and TMDB (themoviedb.org); wide banners from fanart.tv.
+Show information from TheTVDB.com, TMDB (themoviedb.org) and TVmaze.com; wide banners from fanart.tv.
 
 This community version is maintained by Mark Willmer.

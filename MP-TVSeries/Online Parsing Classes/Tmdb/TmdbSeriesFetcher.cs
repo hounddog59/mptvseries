@@ -26,6 +26,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
         static readonly Dictionary<int, int> sTmdbByTvdb = new Dictionary<int, int>();
         static readonly Dictionary<int, int> sTvdbByTmdb = new Dictionary<int, int>();
         static readonly object sIdLock = new object();
+        static readonly HashSet<string> sNamesSearched = new HashSet<string>();
 
         // picture sizes: close to TheTVDB's (posters 680x1000, episode pictures 400x225) without downloading
         // TMDB's full-size originals for every one
@@ -50,7 +51,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             var reply = JsonHelpers.AsObject(TmdbClient.Get(string.Format("/search/tv?query={0}&language={1}&include_adult=false&page=1",
                 Uri.EscapeDataString(seriesName ?? string.Empty), lang)));
             List<object> results = JsonHelpers.GetArray(reply, "results");
-            if (results == null) return root;
+            if (results == null) results = new List<object>();
 
             int used = 0;
             foreach (object item in results)
@@ -88,6 +89,9 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
                 Append(doc, series, "language", languageCode);
                 Append(doc, series, "slug", string.Empty);
             }
+
+            // shows TMDB doesn't have (or has without a TheTVDB number) may be on TVmaze
+            Tvmaze.TvmazeSeriesFetcher.AppendSearchResults(doc, root, seriesName, languageCode);
             return root;
         }
 
@@ -107,8 +111,18 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             if (tmdbId <= 0) tmdbId = FindByName(tvdbId);
             if (tmdbId <= 0)
             {
-                MPTVSeriesLog.Write(string.Format("TMDB: no show on TMDB has TheTVDB number {0}, and none matched its name - nothing downloaded for it", tvdbId));
-                return false;
+                bool tmdbAnswered;
+                lock (sIdLock) tmdbAnswered = sTmdbByTvdb.ContainsKey(tvdbId);
+                if (!tmdbAnswered)
+                {
+                    // TMDB couldn't be reached - try again next time rather than replace its information with TVmaze's
+                    MPTVSeriesLog.Write(string.Format("TMDB: could not look up TheTVDB number {0} - nothing downloaded for it this time", tvdbId));
+                    return false;
+                }
+
+                // not on TMDB: TVmaze (free, no key) is the backup
+                MPTVSeriesLog.Write(string.Format("TMDB: no show on TMDB has TheTVDB number {0}, and none matched its name - trying TVmaze", tvdbId));
+                return Tvmaze.TvmazeSeriesFetcher.FetchAndCacheSeries(tvdbId, languageCode);
             }
 
             string lang = LanguageParam(languageCode);
@@ -346,6 +360,14 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             }
 
             // wide banners: TMDB has none, fanart.tv has them by TheTVDB number
+            AppendFanartTvBanners(doc, root, tvdbId);
+
+            return root;
+        }
+
+        /// <summary>Adds fanart.tv's wide banners for a show (known by its TheTVDB number) to a banners list.</summary>
+        internal static void AppendFanartTvBanners(XmlDocument doc, XmlElement root, int tvdbId)
+        {
             try
             {
                 FanartTvAPI.FanartTvAPI.Init(Settings.UserAgent, "4fe5df4e1a4069867074458c7f9c795e", DBOption.GetOptions(DBOption.cFanartTvClientKey));
@@ -363,11 +385,9 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             {
                 MPTVSeriesLog.Write(string.Format("fanart.tv: no wide banners for TheTVDB {0}: {1}", tvdbId, ex.Message));
             }
-
-            return root;
         }
 
-        static void AppendBanner(XmlDocument doc, XmlElement root, string uniqueSource, string type, string type2, string url, string thumbUrl,
+        internal static void AppendBanner(XmlDocument doc, XmlElement root, string uniqueSource, string type, string type2, string url, string thumbUrl,
                                  string language, Dictionary<string, object> tmdbImage, string season, string rating = null, string ratingCount = null)
         {
             XmlElement banner = doc.CreateElement("Banner");
@@ -432,32 +452,14 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
         /// </summary>
         static int FindByName(int tvdbId)
         {
-            DBSeries series = null;
-            try { series = Helper.getCorrespondingSeries(tvdbId); } catch (Exception) { }
-            string hint = OnlineSource.NameHint(tvdbId); // the folder/file name, for a show not in the library yet
-            if (series == null && string.IsNullOrEmpty(hint)) return 0;
-
-            var rawNames = new List<string>();
-            if (series != null)
-                foreach (string field in new[] { DBOnlineSeries.cPrettyName, DBOnlineSeries.cOriginalName, DBSeries.cParsedName })
-                    rawNames.Add(series[field]);
-            rawNames.Add(hint);
-
-            var names = new List<string>();
-            int year = series != null ? YearOf(series[DBOnlineSeries.cFirstAired]) : 0;
-            foreach (string raw in rawNames)
-            {
-                if (year == 0)
-                {
-                    Match m = Regex.Match(raw ?? string.Empty, @"\((\d{4})\)|\b(19\d\d|20\d\d)$");
-                    if (m.Success) year = int.Parse(m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value);
-                }
-                string n = CleanName(raw);
-                if (!string.IsNullOrEmpty(n) && !names.Contains(n)) names.Add(n);
-            }
+            int year;
+            List<string> names = NamesToSearch(tvdbId, out year);
 
             foreach (string name in names)
             {
+                // each name is searched once per session - later refreshes go straight to the backup
+                lock (sIdLock) if (!sNamesSearched.Add(tvdbId + "|" + name)) continue;
+
                 var reply = JsonHelpers.AsObject(TmdbClient.Get(string.Format("/search/tv?query={0}&include_adult=false&page=1", Uri.EscapeDataString(name))));
                 List<object> results = JsonHelpers.GetArray(reply, "results");
                 if (results == null) continue;
@@ -487,8 +489,42 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             return 0;
         }
 
+        /// <summary>
+        /// The names the library knows a show by (its title, original title, the name parsed from its files, and the
+        /// folder/file name for a show not in the library yet), made searchable, and the year it started (0 if unknown).
+        /// </summary>
+        internal static List<string> NamesToSearch(int tvdbId, out int year)
+        {
+            var names = new List<string>();
+            year = 0;
+
+            DBSeries series = null;
+            try { series = Helper.getCorrespondingSeries(tvdbId); } catch (Exception) { }
+            string hint = OnlineSource.NameHint(tvdbId); // the folder/file name, for a show not in the library yet
+            if (series == null && string.IsNullOrEmpty(hint)) return names;
+
+            var rawNames = new List<string>();
+            if (series != null)
+                foreach (string field in new[] { DBOnlineSeries.cPrettyName, DBOnlineSeries.cOriginalName, DBSeries.cParsedName })
+                    rawNames.Add(series[field]);
+            rawNames.Add(hint);
+
+            year = series != null ? YearOf(series[DBOnlineSeries.cFirstAired]) : 0;
+            foreach (string raw in rawNames)
+            {
+                if (year == 0)
+                {
+                    Match m = Regex.Match(raw ?? string.Empty, @"\((\d{4})\)|\b(19\d\d|20\d\d)$");
+                    if (m.Success) year = int.Parse(m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value);
+                }
+                string n = CleanName(raw);
+                if (!string.IsNullOrEmpty(n) && !names.Contains(n)) names.Add(n);
+            }
+            return names;
+        }
+
         /// <summary>A name as the library stores it, made searchable: "Jinx, The (2015) [8.0]" becomes "The Jinx".</summary>
-        static string CleanName(string name)
+        internal static string CleanName(string name)
         {
             if (string.IsNullOrEmpty(name)) return string.Empty;
             string n = Regex.Replace(name, @"\[[^\]]*\]", " ");
@@ -501,7 +537,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
         }
 
         /// <summary>Lower case, letters and digits only, "&amp;" as "and" - so punctuation differences don't matter.</summary>
-        static string Normalize(string name)
+        internal static string Normalize(string name)
         {
             if (string.IsNullOrEmpty(name)) return string.Empty;
             var sb = new System.Text.StringBuilder();
@@ -510,7 +546,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             return sb.ToString();
         }
 
-        static int YearOf(string date)
+        internal static int YearOf(string date)
         {
             int y;
             return !string.IsNullOrEmpty(date) && date.Length >= 4 && int.TryParse(date.Substring(0, 4), out y) && y > 1900 ? y : 0;
@@ -674,7 +710,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
         /// made from the picture's address: always the same for the same picture, and in a range far above
         /// TheTVDB's own picture numbers so the two never collide.
         /// </summary>
-        static int StableId(string source)
+        internal static int StableId(string source)
         {
             unchecked
             {
@@ -688,7 +724,7 @@ namespace WindowPlugins.GUITVSeries.Online_Parsing_Classes.Tmdb
             }
         }
 
-        static void Append(XmlDocument doc, XmlElement parent, string name, string value)
+        internal static void Append(XmlDocument doc, XmlElement parent, string name, string value)
         {
             XmlElement el = doc.CreateElement(name);
             el.InnerText = value ?? string.Empty;
