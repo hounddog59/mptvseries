@@ -129,6 +129,9 @@ namespace WindowPlugins.GUITVSeries
             this.lnkTraktAuthHelp = new System.Windows.Forms.LinkLabel();
             this.checkBox_FullSeriesRetrieval = new System.Windows.Forms.CheckBox();
             this.nudRecentlyAddedDays = new System.Windows.Forms.NumericUpDown();
+            this.nudContinueWatchingDays = new System.Windows.Forms.NumericUpDown();
+            this.lblContinueWatching = new System.Windows.Forms.Label();
+            this.lblContinueWatchingDays = new System.Windows.Forms.Label();
             this.nudScanRemoteShareFrequency = new System.Windows.Forms.NumericUpDown();
             this.checkBox_scanRemoteShares = new System.Windows.Forms.CheckBox();
             this.checkboxRatingDisplayStars = new System.Windows.Forms.CheckBox();
@@ -337,6 +340,7 @@ namespace WindowPlugins.GUITVSeries
             this.contextMenuStrip_DetailsTree.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Replace)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudRecentlyAddedDays)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudContinueWatchingDays)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudScanRemoteShareFrequency)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudWatchedAfter)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudParentalControlTimeout)).BeginInit();
@@ -1057,6 +1061,54 @@ namespace WindowPlugins.GUITVSeries
             0,
             0});
             this.nudRecentlyAddedDays.ValueChanged += new System.EventHandler(this.nudRecentlyAddedDays_ValueChanged);
+            // 
+            // lblContinueWatching
+            // 
+            this.lblContinueWatching.AutoSize = true;
+            this.lblContinueWatching.Location = new System.Drawing.Point(8, 474);
+            this.lblContinueWatching.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblContinueWatching.Name = "lblContinueWatching";
+            this.lblContinueWatching.Size = new System.Drawing.Size(240, 13);
+            this.lblContinueWatching.TabIndex = 28;
+            this.lblContinueWatching.Text = "\"Continue Watching\" lists shows watched in the last";
+            this.toolTip_Help.SetToolTip(this.lblContinueWatching, "The Continue Watching view lists shows you have watched within this many days that still have\r\n" +
+        "unwatched episodes, the most recently watched first. Shows you haven't watched for longer drop off the list.");
+            // 
+            // nudContinueWatchingDays
+            // 
+            this.nudContinueWatchingDays.Location = new System.Drawing.Point(277, 470);
+            this.nudContinueWatchingDays.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.nudContinueWatchingDays.Maximum = new decimal(new int[] {
+            3650,
+            0,
+            0,
+            0});
+            this.nudContinueWatchingDays.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nudContinueWatchingDays.Name = "nudContinueWatchingDays";
+            this.nudContinueWatchingDays.Size = new System.Drawing.Size(64, 20);
+            this.nudContinueWatchingDays.TabIndex = 29;
+            this.toolTip_Help.SetToolTip(this.nudContinueWatchingDays, "How many days back the Continue Watching view looks (60 to start with).\r\n" +
+        "Shows you haven't watched within this many days drop off the list.");
+            this.nudContinueWatchingDays.Value = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
+            this.nudContinueWatchingDays.ValueChanged += new System.EventHandler(this.nudContinueWatchingDays_ValueChanged);
+            // 
+            // lblContinueWatchingDays
+            // 
+            this.lblContinueWatchingDays.AutoSize = true;
+            this.lblContinueWatchingDays.Location = new System.Drawing.Point(349, 474);
+            this.lblContinueWatchingDays.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblContinueWatchingDays.Name = "lblContinueWatchingDays";
+            this.lblContinueWatchingDays.Size = new System.Drawing.Size(31, 13);
+            this.lblContinueWatchingDays.TabIndex = 30;
+            this.lblContinueWatchingDays.Text = "days";
             // 
             // nudScanRemoteShareFrequency
             // 
@@ -3126,6 +3178,9 @@ namespace WindowPlugins.GUITVSeries
             this.groupBox1.Controls.Add(this.dbOptionCheckBox3);
             this.groupBox1.Controls.Add(this.lblRecentAddedDays);
             this.groupBox1.Controls.Add(this.nudRecentlyAddedDays);
+            this.groupBox1.Controls.Add(this.lblContinueWatching);
+            this.groupBox1.Controls.Add(this.nudContinueWatchingDays);
+            this.groupBox1.Controls.Add(this.lblContinueWatchingDays);
             this.groupBox1.Controls.Add(this.cbNewEpisodeThumbIndicator);
             this.groupBox1.Controls.Add(this.label17);
             this.groupBox1.Controls.Add(this.laOnPlaySeriesOrSeasonAction);
@@ -4064,6 +4119,7 @@ namespace WindowPlugins.GUITVSeries
             this.contextMenuStrip_DetailsTree.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Replace)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudRecentlyAddedDays)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudContinueWatchingDays)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudScanRemoteShareFrequency)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudWatchedAfter)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudParentalControlTimeout)).EndInit();
@@ -4261,6 +4317,9 @@ namespace WindowPlugins.GUITVSeries
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label lblRecentAddedDays;
         private System.Windows.Forms.NumericUpDown nudRecentlyAddedDays;
+        private System.Windows.Forms.NumericUpDown nudContinueWatchingDays;
+        private System.Windows.Forms.Label lblContinueWatching;
+        private System.Windows.Forms.Label lblContinueWatchingDays;
         private System.Windows.Forms.ComboBox cbNewEpisodeThumbIndicator;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label laOnPlaySeriesOrSeasonAction;

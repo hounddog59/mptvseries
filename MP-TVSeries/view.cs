@@ -652,7 +652,14 @@ namespace WindowPlugins.GUITVSeries
             {
                 string[] condSplit = System.Text.RegularExpressions.Regex.Split(allConditions[i], ";");
                 string condSplit2 = condSplit[2].Replace("\"", ""); //.Replace("'", ""); // DH: im not sure why this replace with empty string is here since we replace later with double '' on sql query
-                if (condSplit2.StartsWith("<today"))
+                if (condSplit2 == "<continuewatching>")
+                {
+                    // the Continue Watching view's "last so many days", set in Configuration (60 by default)
+                    int days = DBOption.GetOptions(DBOption.cContinueWatchingDays);
+                    if (days <= 0) days = 60;
+                    condSplit2 = DateTime.Now.AddDays(-days).ToString("yyyy-MM-dd");
+                }
+                else if (condSplit2.StartsWith("<today"))
                 {
                     // relative date value
                     if (condSplit2 == "<today>")

@@ -409,6 +409,8 @@ namespace WindowPlugins.GUITVSeries
             
             this.cbNewEpisodeThumbIndicator.SelectedIndex = (int)DBOption.GetOptions(DBOption.cNewEpisodeThumbType);
             this.nudRecentlyAddedDays.Value = DBOption.GetOptions(DBOption.cNewEpisodeRecentDays);
+            int continueWatchingDays = DBOption.GetOptions(DBOption.cContinueWatchingDays);
+            this.nudContinueWatchingDays.Value = Math.Max(this.nudContinueWatchingDays.Minimum, Math.Min(this.nudContinueWatchingDays.Maximum, continueWatchingDays));
 			
             // only enable days options if using a 'true' new episode type
             if ((int)DBOption.GetOptions(DBOption.cNewEpisodeThumbType) == (int)NewEpisodeIndicatorType.none ||
@@ -5570,6 +5572,11 @@ namespace WindowPlugins.GUITVSeries
         private void nudRecentlyAddedDays_ValueChanged(object sender, EventArgs e)
         {
             DBOption.SetOptions(DBOption.cNewEpisodeRecentDays, (int)nudRecentlyAddedDays.Value);
+        }
+
+        private void nudContinueWatchingDays_ValueChanged(object sender, EventArgs e)
+        {
+            DBOption.SetOptions(DBOption.cContinueWatchingDays, (int)nudContinueWatchingDays.Value);
         }
 
         private void buttonArtworkDownloadLimits_Click(object sender, EventArgs e)

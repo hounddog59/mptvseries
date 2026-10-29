@@ -162,7 +162,7 @@ namespace WindowPlugins.GUITVSeries.Configuration {
                 ViewTemplate template = new ViewTemplate();
                 template.name = DBView.cTranslateTokenContinueWatching;
                 template.prettyname = Translation.ContinueWatching;
-                template.description = "Shows you have watched in the last 60 days that still have unwatched episodes, the most recently watched first. Opening a show lists only its unwatched episodes, so the next one to watch is at the top.";
+                template.description = "Shows you have watched lately (60 days unless changed on the General tab) that still have unwatched episodes, the most recently watched first. Opening a show lists only its unwatched episodes, so the next one to watch is at the top.";
                 template.configuration = DBView.cContinueWatchingConfig;
                 templates.Add(template);
             }

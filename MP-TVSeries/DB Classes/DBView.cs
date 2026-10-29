@@ -217,11 +217,12 @@ namespace WindowPlugins.GUITVSeries
         }
 
         /// <summary>
-        /// Shows watched in the last 60 days that still have unwatched episodes, the most recently watched first.
+        /// Shows watched lately (the last 60 days unless changed in Configuration) that still have unwatched episodes,
+        /// the most recently watched first.
         /// Opening one lists only its unwatched episodes, so the next one to watch is at the top.
         /// </summary>
         public const string cContinueWatchingConfig =
-            @"series<;><Series.LastPlayedDate>;>=;<today-60><cond><Episode.Watched>;=;0<;><Series.LastPlayedDate>;desc<;>" +
+            @"series<;><Series.LastPlayedDate>;>=;<continuewatching><cond><Episode.Watched>;=;0<;><Series.LastPlayedDate>;desc<;>" +
             "<nextStep>season<;><;><Season.seasonIndex>;asc<;>" +
             "<nextStep>episode<;><;><Episode.EpisodeIndex>;asc<;>";
 
