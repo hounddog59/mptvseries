@@ -570,7 +570,7 @@ namespace WindowPlugins.GUITVSeries
 				else if (lType == typeof(DBEpisode)) {
 					fullSubCond.AddCustom(DBOnlineEpisode.Q(DBOnlineEpisode.cSeriesID), DBSeason.Q(DBSeason.cSeriesID), SQLConditionType.Equal);
                     fullSubCond.AddCustom(DBOnlineEpisode.Q(DBOnlineEpisode.cSeasonIndex), DBSeason.Q(DBSeason.cIndex), SQLConditionType.Equal);
-                    fullSubCond.AddCustom(DBEpisode.Q(tableField), condition, condtype);
+                    fullSubCond.AddCustom(DBEpisode.Q(tableField), condition, condtype, true); // a date or text value must be quoted, or every season matches
                     conds.AddCustom(" exists( " + DBEpisode.stdGetSQL(fullSubCond, false) + " )");
 				}
             }
