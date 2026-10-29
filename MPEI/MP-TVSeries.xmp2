@@ -1759,9 +1759,9 @@ public class Script
     <UpdateUrl />
     <Version>
       <Major>4</Major>
-      <Minor>7</Minor>
+      <Minor>8</Minor>
       <Build>0</Build>
-      <Revision>5</Revision>
+      <Revision>0</Revision>
     </Version>
     <ExtensionDescription>MP-TVSeries is a popular TV Series plug-in for MediaPortal. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
 
