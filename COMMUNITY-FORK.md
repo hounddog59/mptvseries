@@ -46,6 +46,19 @@ skin updates).
   Trakt allowance, so ratings can download slowly when many people are busy. "Authorize with Trakt.tv" (free
   Trakt account) gives you your own allowance. MP-TVSeries only reads ratings with it.
 
+## New in 4.7.0.6
+
+- **Recently Added lists series.** The Recently Added view now shows the series that have had episodes added
+  in the last 7 days, instead of one long list of episodes. Pick a series to see just its new episodes.
+  Existing databases are switched over automatically; if you'd changed the view yourself, it's left alone.
+- The old flat list is still available: add the **Recently Added Episodes** view from the view templates on the
+  **Views** tab of MP-TVSeries Configuration.
+- **Torrent Search is near the top of the Info menu** (it was about 15th), when the MyTorrents plugin is
+  installed and enabled.
+- Choosing a series' fanart in MediaPortal no longer gives an error.
+
+See the **[User Guide](docs/User-Guide.md)** for where to find everything.
+
 ## Improvements
 
 **Free show information from TMDB (new in 4.7)**

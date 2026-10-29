@@ -806,6 +806,14 @@ namespace WindowPlugins.GUITVSeries
                                 break;
                         }
 
+                        // community version: My Torrents first, so it is easy to reach (it used to be around 15th)
+                        if (CurrentViewLevel != Listlevel.Group && Helper.IsMyTorrentsAvailableAndEnabled)
+                        {
+                            pItem = new GUIListItem(Translation.SearchTorrent + " ...");
+                            dlg.Add(pItem);
+                            pItem.ItemId = (int)eContextItems.downloadTorrent;
+                        }
+
                         #region Top Level Menu Items - Context Sensitive
 
                         bool lArtworkChooserAvailable = File.Exists( GUIGraphicsContext.Skin + @"\TVSeries.ArtworkChooser.xml" );
@@ -978,15 +986,6 @@ namespace WindowPlugins.GUITVSeries
                         pItem = new GUIListItem("Trakt ...");
                         dlg.Add(pItem);
                         pItem.ItemId = (int)eContextItems.trakt;
-                    }
-                    #endregion
-
-                    #region My Torrents Search
-                    if (CurrentViewLevel != Listlevel.Group && Helper.IsMyTorrentsAvailableAndEnabled)
-                    {
-                        pItem = new GUIListItem(Translation.SearchTorrent + " ...");
-                        dlg.Add(pItem);
-                        pItem.ItemId = (int)eContextItems.downloadTorrent;
                     }
                     #endregion
 

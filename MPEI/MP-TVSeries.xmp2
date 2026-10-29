@@ -1761,13 +1761,14 @@ public class Script
       <Major>4</Major>
       <Minor>8</Minor>
       <Build>0</Build>
-      <Revision>0</Revision>
+      <Revision>1</Revision>
     </Version>
     <ExtensionDescription>MP-TVSeries is a popular TV Series plug-in for MediaPortal. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
 
 The MP-TVSeries plugin will scan your hard drive (including network and removable drives) for video files, it then analyzes them by their path structures to determine if they are TV Shows. If the file(s) are recognized then the plugin will go online and retrieve information about them. You can then browse, manage and play your episodes from inside MediaPortal in a nice graphical layout.</ExtensionDescription>
     <VersionDescription>Community version of MP-TVSeries - install only if you choose to; it replaces the official MP-TVSeries.
 * New in 4.7: free show information from TMDB - no subscription, nothing to sign up for.
+* New in 4.7.0.6: Recently Added lists the series with new episodes; Torrent Search is first in the Info menu.
 * Or enter your own TheTVDB subscriber PIN on the Online Data tab to use TheTVDB instead.
 * Shows matched from .tvdb / tvshow.nfo / series.xml ID files; same-named shows kept apart.
 * Trakt community ratings for series, seasons and episodes, without the Trakt plugin.
