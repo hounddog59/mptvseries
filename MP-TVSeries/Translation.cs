@@ -161,6 +161,7 @@ namespace WindowPlugins.GUITVSeries
         public static string RecentlyAdded = "Recently Added";
         public static string ContinueWatching = "Continue Watching";
         public static string RecentlyAddedEpisodes = "Recently Added Episodes";
+        public static string LatestEpisodes = "Latest Episodes";
 		public static string ContentRating = "Content Rating";
         public static string ChangeView = "Change View";
 		public static string ViewTags = "View Tags";

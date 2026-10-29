@@ -142,8 +142,8 @@ namespace WindowPlugins.GUITVSeries.Configuration {
                 ViewTemplate template = new ViewTemplate();
                 template.name = DBView.cTranslateTokenLatest;
                 template.prettyname = Translation.Latest;
-                template.description = "Filters the last 30 Days of episodes which have Aired. This view will skip Series selection and take you directly to the list of episodes. Episodes are listed in descending order.";
-                template.configuration = @"episode<;><Episode.FirstAired>;<=;<today><cond><Episode.FirstAired>;>=;<today-30><;><Episode.FirstAired>;desc<;>";
+                template.description = "Lists the series that have had episodes aired in the last 30 days. Pick a series to see just those episodes.";
+                template.configuration = DBView.cLatestSeriesConfig;
                 templates.Add(template);
             }
 
@@ -154,6 +154,16 @@ namespace WindowPlugins.GUITVSeries.Configuration {
                 template.prettyname = Translation.RecentlyAdded;
                 template.description = "Lists the series that have had episodes added to your library in the last 7 days. Pick a series to see just its new episodes.";
                 template.configuration = DBView.cRecentlyAddedSeriesConfig;
+                templates.Add(template);
+            }
+
+            // Latest Episodes (the original flat list, aired in the last 30 days)
+            if (!viewNames.Contains(DBView.cTranslateTokenLatestEpisodes)) {
+                ViewTemplate template = new ViewTemplate();
+                template.name = DBView.cTranslateTokenLatestEpisodes;
+                template.prettyname = Translation.LatestEpisodes;
+                template.description = "Filters the last 30 Days of episodes which have Aired. This view will skip Series selection and take you directly to the list of episodes. Episodes are listed in descending order.";
+                template.configuration = DBView.cLatestEpisodesConfig;
                 templates.Add(template);
             }
 

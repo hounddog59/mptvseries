@@ -32,7 +32,7 @@ namespace WindowPlugins.GUITVSeries
     public class DBView : DBTable
     {
         public const String cTableName = "Views";
-        public const int cDBVersion = 7; // 6: Recently Added lists series; 7: Continue Watching (community version)
+        public const int cDBVersion = 8; // 6: Recently Added lists series; 7: Continue Watching; 8: Latest lists series (community version)
 
         public const String cIndex = "ID";
         public const String cEnabled = "enabled";
@@ -57,6 +57,7 @@ namespace WindowPlugins.GUITVSeries
         public const String cTranslateTokenRecentlyAdded = "RecentlyAdded";
         public const String cTranslateTokenContinueWatching = "ContinueWatching";
         public const String cTranslateTokenRecentlyAddedEpisodes = "RecentlyAddedEpisodes";
+        public const String cTranslateTokenLatestEpisodes = "LatestEpisodes";
 
         /// community version: Recently Added lists the series with episodes added in the last 7 days; picking one shows
         /// just its new episodes (the episode condition is inherited by the season and episode steps)
@@ -64,6 +65,11 @@ namespace WindowPlugins.GUITVSeries
                                                           "<nextStep>season<;><;><Season.seasonIndex>;asc<;>" +
                                                           "<nextStep>episode<;><;><Episode.EpisodeIndex>;asc<;>";
         /// the original Recently Added: one flat list of episodes, newest first
+        // community version: Latest lists the series with episodes aired in the last 30 days; pick one to see those episodes
+        public const String cLatestSeriesConfig = @"series<;><Episode.FirstAired>;<=;<today><cond><Episode.FirstAired>;>=;<today-30><;><;>" +
+                                                  "<nextStep>season<;><;><Season.seasonIndex>;asc<;>" +
+                                                  "<nextStep>episode<;><;><Episode.EpisodeIndex>;asc<;>";
+        public const String cLatestEpisodesConfig = @"episode<;><Episode.FirstAired>;<=;<today><cond><Episode.FirstAired>;>=;<today-30><;><Episode.FirstAired>;desc<;>";
         public const String cRecentlyAddedEpisodesConfig = @"episode<;><Episode.FileDateCreated>;>=;<today-7><;><Episode.FileDateCreated>;desc<;>";
         public const String cTranslateTokenContinuing = "Continuing";
         public const String cTranslateTokenEnded = "Ended";
@@ -404,7 +410,7 @@ namespace WindowPlugins.GUITVSeries
                 view[cSort] = "9";
                 view[cTransToken] = cTranslateTokenLatest;
                 view[cPrettyName] = "";
-                view[cViewConfig] = @"episode<;><Episode.FirstAired>;<=;<today><cond><Episode.FirstAired>;>=;<today-30><;><Episode.FirstAired>;desc<;>";
+                view[cViewConfig] = cLatestSeriesConfig;
                 view[cTaggedView] = "0";
                 view[cParentalControl] = "0";
                 view.Commit();
@@ -534,6 +540,21 @@ namespace WindowPlugins.GUITVSeries
                     case 6:
                         // Upgrade to version 7 (community version): new view 'Continue Watching'
                         AddContinueWatchingView();
+                        nUpgradeDBVersion++;
+                        break;
+
+                    case 7:
+                        // Upgrade to version 8 (community version): Latest lists series instead of one long list of
+                        // episodes - only when it is still the original, so a view someone changed is left alone
+                        foreach (DBView v in DBView.getAll(true))
+                        {
+                            if (v[DBView.cTransToken] == cTranslateTokenLatest && v[cViewConfig] == cLatestEpisodesConfig)
+                            {
+                                v[cViewConfig] = cLatestSeriesConfig;
+                                v.Commit();
+                                MPTVSeriesLog.Write("Views: 'Latest' now lists series with newly aired episodes");
+                            }
+                        }
                         nUpgradeDBVersion++;
                         break;
 
