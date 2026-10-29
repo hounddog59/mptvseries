@@ -18,7 +18,7 @@ repl = {DLL: open(dll,'rb').read(), X86: open(exe86,'rb').read(), X64: open(exe6
 # drop the old debug-symbols file (it belongs to the official build)
 pdbzip = PDB.replace('/', '\\')
 blocks = re.findall(r'[ \t]*<FileItem [^>]*>\s*(?:(?!</FileItem>).)*?' + re.escape(pdbzip) + r'.*?</FileItem>\r?\n', xml, re.S)
-assert len(blocks) == 2, len(blocks)
+assert len(blocks) in (0, 2), len(blocks)  # 0 when the source is one of our own packages (no .pdb left)
 for b in blocks: xml = xml.replace(b, '', 1)
 
 # general info from our MP-TVSeries.xmp2
