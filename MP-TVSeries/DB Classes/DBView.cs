@@ -276,7 +276,13 @@ namespace WindowPlugins.GUITVSeries
             view[cParentalControl] = "0";
             view.Commit();
             MPTVSeriesLog.Write("Views: added 'Continue Watching'");
+            FillLastPlayedDates();
+        }
 
+        /// community version: fill in when each show was last watched (from its episodes) where it is blank -
+        /// online updates used to wipe it, which dropped shows off Continue Watching
+        public static void FillLastPlayedDates()
+        {
             try
             {
                 new DBOnlineSeries(); // makes sure the column exists
@@ -555,6 +561,7 @@ namespace WindowPlugins.GUITVSeries
                                 MPTVSeriesLog.Write("Views: 'Latest' now lists series with newly aired episodes");
                             }
                         }
+                        FillLastPlayedDates(); // put back the "last watched" dates online updates wiped
                         nUpgradeDBVersion++;
                         break;
 

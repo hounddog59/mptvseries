@@ -2836,6 +2836,9 @@ namespace WindowPlugins.GUITVSeries
 
         private void bgLoadFacade(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
+            // community version: loading what you are looking at comes before the background scans / updates
+            // (those already run at the lowest priority)
+            try { System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal; } catch { }
             //facadeLoaded = false; // reset
             PerfWatcher.GetNamedWatch("FacadeLoading BG Thread").Start();
             bgLoadFacade();
@@ -2954,7 +2957,10 @@ namespace WindowPlugins.GUITVSeries
                                 // unwatched episodes elsewhere but none in the seasons this view lists - opening it then
                                 // showed nothing, so leave such shows out too
                                 int nextStep = m_CurrViewStep + 1;
-                                if (nextStep < m_CurrLView.m_steps.Count
+                                // only the views that pick episodes by date need this (it is one look-up per show,
+                                // which made big views like Continuing / Ended very slow to open)
+                                bool datedView = m_CurrLView.Name == DBView.cTranslateTokenRecentlyAdded || m_CurrLView.Name == DBView.cTranslateTokenLatest;
+                                if (datedView && nextStep < m_CurrLView.m_steps.Count
                                     && m_CurrLView.gettypeOfStep(nextStep) == logicalViewStep.type.season
                                     && !string.IsNullOrEmpty((string)m_CurrLView.m_steps[m_CurrViewStep].conds))
                                 {

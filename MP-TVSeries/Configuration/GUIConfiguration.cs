@@ -2104,6 +2104,7 @@ namespace WindowPlugins.GUITVSeries
                                 
                                 case DBOnlineSeries.cEpisodeCount:
                                 case DBOnlineSeries.cEpisodesUnWatched:
+                                case DBOnlineSeries.cLastPlayedDate: // community version: when you last watched the show - online data must not wipe it (Continue Watching)
                                 case DBOnlineSeries.cChosenEpisodeOrder:
                                 case DBOnlineSeries.cAliasNames:
                                     // fields that can not be modified - read only

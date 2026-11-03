@@ -1151,6 +1151,7 @@ namespace WindowPlugins.GUITVSeries
                                 case DBOnlineSeries.cHasLocalFiles:
                                 case DBOnlineSeries.cHasLocalFilesTemp:
                                 case DBOnlineSeries.cEpisodesUnWatched:
+                                case DBOnlineSeries.cLastPlayedDate: // community version: when you last watched the show - online data must not wipe it (Continue Watching)
                                 case DBOnlineSeries.cEpisodeCount:
                                 case DBOnlineSeries.cIsFavourite:
                                 case DBOnlineSeries.cChosenEpisodeOrder:
