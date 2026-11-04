@@ -130,6 +130,14 @@ See the **[User Guide](docs/User-Guide.md)** for where to find everything.
 
 ## Fixes
 
+- **"Scan remote shares every … minutes" now works when it's unticked.** In earlier versions, including the
+  official one, MP-TVSeries Configuration saved this setting but MediaPortal never read it: the plugin read
+  every network folder at start and again every few minutes regardless. On a big NAS library one scan can take
+  longer than the gap, so it never stopped and MediaPortal felt sluggish. (4.8.0.6)
+- **Unticking an import folder no longer removes its episodes.** The tick next to each folder is now called
+  **Scan**: unticked folders are skipped by scans and their episodes are kept. Before, the next scan treated
+  every episode in an unticked folder as deleted. (4.8.0.5)
+
 - A show that couldn't be found in one import is looked up again in the next (by the TheTVDB number in its
   folder name or ID file).
 - A first import no longer downloads every show twice.
