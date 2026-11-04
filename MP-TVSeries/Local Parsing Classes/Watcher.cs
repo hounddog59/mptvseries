@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
@@ -614,20 +615,12 @@ namespace WindowPlugins.GUITVSeries
             
             List<PathPair> newScan = Filelister.GetFiles(scannedFolders);
 
-            List<PathPair> addedFiles = new List<PathPair>();
-            addedFiles.AddRange(newScan);
-            
-            foreach (PathPair pair in previousScan)
-            {
-                addedFiles.RemoveAll(item => item.m_sFull_FileName == pair.m_sFull_FileName);
-            }
-
-            List<PathPair> removedFiles = new List<PathPair>();
-            
-            removedFiles.AddRange(previousScan);
-            foreach (PathPair pair in newScan) {
-                removedFiles.RemoveAll(item => item.m_sFull_FileName == pair.m_sFull_FileName);
-            }
+            // 2026 (4.8.0.5): compared with a quick look-up instead of one search of the whole list per file - with
+            // tens of thousands of files on a NAS the old way kept a processor core busy for minutes every scan
+            HashSet<string> before = new HashSet<string>(previousScan.Select(item => item.m_sFull_FileName), StringComparer.Ordinal);
+            HashSet<string> now = new HashSet<string>(newScan.Select(item => item.m_sFull_FileName), StringComparer.Ordinal);
+            List<PathPair> addedFiles = newScan.Where(item => !before.Contains(item.m_sFull_FileName)).ToList();
+            List<PathPair> removedFiles = previousScan.Where(item => !now.Contains(item.m_sFull_FileName)).ToList();
 
             lock (m_modifiedFilesList)
             {

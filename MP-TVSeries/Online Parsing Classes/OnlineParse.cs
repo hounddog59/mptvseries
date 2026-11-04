@@ -40,6 +40,7 @@ namespace WindowPlugins.GUITVSeries
         LocalScan,
         List_Add,
         List_Remove,
+        List_RemoveGone, // 2026 (4.8.0.5): "Scan this folder now" - episodes of that folder whose files are gone
         MediaInfo,
         IdentifyNewSeries,
         IdentifyNewEpisodes,
@@ -125,6 +126,7 @@ namespace WindowPlugins.GUITVSeries
         public List<DBValue> m_episodes = null;
 
         public UserInputResults m_userInputResult = null;
+        public List<PathPair> m_goneFiles = null; // 2026 (4.8.0.5): for List_RemoveGone
         public Feedback.IEpisodeMatchingFeedback UserEpisodeMatcher = null;
 
         public CParsingParameters(bool bScanNew, bool bUpdateExisting)
@@ -360,6 +362,11 @@ namespace WindowPlugins.GUITVSeries
 
                     case ParsingAction.List_Add:
                         ParseActionAdd(mParsingParameters.m_files);
+                        break;
+
+                    case ParsingAction.List_RemoveGone:
+                        if (mParsingParameters.m_goneFiles != null && mParsingParameters.m_goneFiles.Count > 0)
+                            ParseActionRemove(mParsingParameters.m_goneFiles);
                         break;
 
                     case ParsingAction.NoExactMatch:
@@ -752,6 +759,7 @@ namespace WindowPlugins.GUITVSeries
                         }
                     }
                 }
+                KeepUnscannedFolders(importPathes);
 
                 // NOTE: previously tried skipping this scan when UserModifiedParsedResults was available
                 // (reusing Step 1's file list instead of re-scanning), on the assumption that list
@@ -1385,7 +1393,11 @@ namespace WindowPlugins.GUITVSeries
                 }
 
                 // Online update when needed
-                if (!bUpdateScan)
+                // 2026 (4.8.0.5): not after a few files handed over (MyTorrents, the folder watcher, "Scan this folder
+                // now") - those episodes were just looked up online above; the full online update of every continuing
+                // show (minutes on a big library) runs at its own time instead
+                bool justAFewFiles = mParsingParameters != null && !mParsingParameters.m_bLocalScan && mParsingParameters.m_actions.Contains(ParsingAction.List_Add);
+                if (!bUpdateScan && !justAFewFiles)
                     mOnlineUpdateNeeded = true;
             }
             mWorker.ReportProgress(0, new ParsingProgress(ParsingAction.IdentifyNewEpisodes, epCount));
@@ -3035,6 +3047,41 @@ namespace WindowPlugins.GUITVSeries
             return int.MaxValue;
         }
         #endregion
+
+        /// <summary>
+        /// 2026 (4.8.0.5): an import folder with "Scan" unticked is skipped by scans, and its episodes are kept as they
+        /// are. (Before, unticking a folder made the next scan think every episode in it had been deleted, and it
+        /// removed them from the library.) Marks them as found, so the clean-up after the scan leaves them alone.
+        /// </summary>
+        private static void KeepUnscannedFolders(DBImportPath[] importPathes)
+        {
+            if (importPathes == null) return;
+            bool any = false;
+            foreach (DBImportPath importPath in importPathes)
+            {
+                if (importPath[DBImportPath.cEnabled] != 0) continue;
+                string path = ((string)importPath[DBImportPath.cPath] ?? "").TrimEnd('\\', '/');
+                if (path.Length == 0) continue;
+                string start = path + "\\";
+                SQLCondition cond = new SQLCondition();
+                cond.AddCustom("lower(substr(" + DBEpisode.Q(DBEpisode.cFilename) + ", 1, " + start.Length + ")) = lower('" + start.Replace("'", "''") + "')");
+                DBEpisode.GlobalSet(DBEpisode.cImportProcessed, 1, cond);
+                DBEpisode.GlobalSet(DBEpisode.cIsAvailable, 1, cond);
+                MPTVSeriesLog.Write("Import path '" + path + "' has Scan unticked - not scanned, its episodes are kept as they are");
+                any = true;
+            }
+            if (!any) return;
+            SQLCondition condSeason = new SQLCondition();
+            condSeason.AddCustom(" exists( select " + DBEpisode.Q(DBEpisode.cFilename) + " from " + DBEpisode.cTableName
+                            + " where " + DBEpisode.cSeriesID + " = " + DBSeason.Q(DBSeason.cSeriesID) + " and "
+                            + DBEpisode.cSeasonIndex + " = " + DBSeason.Q(DBSeason.cIndex) + " and " + DBEpisode.Q(DBEpisode.cImportProcessed) + " = 1 " + ")");
+            DBSeason.GlobalSet(DBSeason.cHasLocalFilesTemp, true, condSeason);
+            SQLCondition condSeries = new SQLCondition();
+            condSeries.AddCustom(" exists( select " + DBEpisode.Q(DBEpisode.cFilename) + " from " + DBEpisode.cTableName
+                            + " where " + DBEpisode.cSeriesID + " = " + DBOnlineSeries.Q(DBOnlineSeries.cID) +
+                            " and " + DBEpisode.Q(DBEpisode.cImportProcessed) + " = 1 " + ")");
+            DBSeries.GlobalSet(DBOnlineSeries.cHasLocalFilesTemp, true, condSeries);
+        }
 
         #region ParseLocal
         /// <summary>

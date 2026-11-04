@@ -486,6 +486,11 @@ namespace WindowPlugins.GUITVSeries
             {
                 DataGridViewCheckBoxColumn columnEnabled = new DataGridViewCheckBoxColumn();
                 columnEnabled.Name = "enabled";
+                // 2026 (4.8.0.5): "Scan" - unticked folders are skipped by scans and their episodes are kept
+                columnEnabled.HeaderText = "Scan";
+                columnEnabled.ToolTipText = "Ticked: this folder is scanned for new, changed and deleted episodes.\r\n" +
+                    "Unticked: scans skip it (faster) - its episodes stay in your library exactly as they are.\r\n" +
+                    "Right-click a folder to scan just that one now, or to remove it from MP-TVSeries.";
                 columnEnabled.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
                 dataGridView_ImportPathes.Columns.Add(columnEnabled);
 
@@ -493,6 +498,7 @@ namespace WindowPlugins.GUITVSeries
                 columnPath.Name = DBImportPath.cPath;
                 columnPath.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 dataGridView_ImportPathes.Columns.Add(columnPath);
+                SetUpImportPathMenu();
             }
 
             DBImportPath[] importPathes = DBImportPath.GetAll();
@@ -860,7 +866,8 @@ namespace WindowPlugins.GUITVSeries
 
             DataGridViewCell cell = dataGridView_ImportPathes.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
-            // Allow user to delete the row when disabling the 'enabled' checkbox
+            // 2026 (4.8.0.5): the tick is "Scan" - unticking no longer offers to remove the folder (that's on the
+            // right-click menu now) and no longer loses its episodes at the next scan
             if (e.ColumnIndex == dataGridView_ImportPathes.Columns[DBImportPath.cEnabled].Index)
             {
                 // check if cell belongs to newly added row
@@ -869,11 +876,16 @@ namespace WindowPlugins.GUITVSeries
                     string sEnabled = cell.Value.ToString();
                     if (sEnabled == "True")
                     {
-                        // Set value so that when checkbox is re-enabled prompt to delete will not show
                         dataGridView_ImportPathes.Rows[e.RowIndex].Cells[DBImportPath.cEnabled].Value = false;
-                        // Prompt to delete the selected 'Import Path'
-                        if (MessageBox.Show("Do you want to remove this Import Path?", "Import Paths", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
-                            dataGridView_ImportPathes.Rows.RemoveAt(e.RowIndex);
+                        object explained = DBOption.GetOptions("ScanUntickedExplained");
+                        if (explained == null || explained.ToString() != "1")
+                        {
+                            DBOption.SetOptions("ScanUntickedExplained", 1);
+                            MessageBox.Show("This folder won't be scanned any more - scans get faster.\r\n\r\n" +
+                                "Its episodes stay in your library exactly as they are, and new episodes MyTorrents puts there are still added straight away.\r\n\r\n" +
+                                "Tick it again any time, or right-click it and choose \"Scan this folder now\" after you've changed things in it by hand.",
+                                "Scan", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
                     }
                     else
                         dataGridView_ImportPathes.Rows[e.RowIndex].Cells[DBImportPath.cEnabled].Value = true;
@@ -942,6 +954,11 @@ namespace WindowPlugins.GUITVSeries
                 // Set Path value in cell
                 dataGridView_ImportPathes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = importPathPopup.SelectedPath;
 
+                // 2026 (4.8.0.5): scan just the new folder, so its shows appear without a full scan
+                if (bNewRow && MessageBox.Show("Scan this folder now?\r\n\r\n" + importPathPopup.SelectedPath + "\r\n\r\nOnly this folder is scanned - its shows appear in your library when it's done.",
+                    "Import Path", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    ScanFolderNow(importPathPopup.SelectedPath);
+
                 // Update Parsing Test
                 //TestParsing_Start(true);
             }
@@ -979,6 +996,76 @@ namespace WindowPlugins.GUITVSeries
         private void dataGridView_ImportPathes_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
         {
             SaveAllImportPathes();
+        }
+
+        // 2026 (4.8.0.5): right-click a folder - scan just it now, or remove it (asks first)
+        private void SetUpImportPathMenu()
+        {
+            ContextMenuStrip menu = new ContextMenuStrip();
+            ToolStripMenuItem scan = new ToolStripMenuItem("Scan this folder now");
+            ToolStripMenuItem remove = new ToolStripMenuItem("Remove this folder from MP-TVSeries...");
+            menu.Items.Add(scan);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(remove);
+            int menuRow = -1;
+            dataGridView_ImportPathes.CellMouseDown += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Right || e.RowIndex < 0 || e.RowIndex == dataGridView_ImportPathes.NewRowIndex) return;
+                menuRow = e.RowIndex;
+                dataGridView_ImportPathes.ClearSelection();
+                dataGridView_ImportPathes.Rows[e.RowIndex].Selected = true;
+                menu.Show(Cursor.Position);
+            };
+            scan.Click += (s, e) =>
+            {
+                if (menuRow < 0 || menuRow >= dataGridView_ImportPathes.Rows.Count) return;
+                object path = dataGridView_ImportPathes.Rows[menuRow].Cells[DBImportPath.cPath].Value;
+                if (path != null && path.ToString().Length > 0) ScanFolderNow(path.ToString());
+            };
+            remove.Click += (s, e) =>
+            {
+                if (menuRow < 0 || menuRow >= dataGridView_ImportPathes.Rows.Count) return;
+                object path = dataGridView_ImportPathes.Rows[menuRow].Cells[DBImportPath.cPath].Value;
+                if (MessageBox.Show("Remove this folder from MP-TVSeries?\r\n\r\n" + path + "\r\n\r\nNo files are deleted. Its episodes leave your library at the next full scan.\r\n" +
+                    "(To just stop scanning it, untick Scan instead - its episodes then stay.)", "Import Paths", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    dataGridView_ImportPathes.Rows.RemoveAt(menuRow);
+            };
+            dataGridView_ImportPathes.UserDeletingRow += (s, e) =>
+            {
+                object path = e.Row.Cells[DBImportPath.cPath].Value;
+                if (MessageBox.Show("Remove this folder from MP-TVSeries?\r\n\r\n" + path + "\r\n\r\nNo files are deleted. Its episodes leave your library at the next full scan.",
+                    "Import Paths", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    e.Cancel = true;
+            };
+        }
+
+        /// 2026 (4.8.0.5): scan one folder - new files are added, files that are gone are taken out.
+        private void ScanFolderNow(string folder)
+        {
+            if (mParser != null)
+            {
+                MessageBox.Show("An import is already running - try again when it has finished.", "Scan this folder now", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (!Directory.Exists(folder))
+            {
+                MessageBox.Show("Can't reach this folder right now:\r\n\r\n" + folder, "Scan this folder now", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            Cursor = Cursors.WaitCursor;
+            List<PathPair> files = Filelister.GetFiles(new List<string> { folder });
+            HashSet<string> found = new HashSet<string>(files.Select(f => f.m_sFull_FileName), StringComparer.OrdinalIgnoreCase);
+            string start = folder.TrimEnd('\\', '/') + "\\";
+            SQLCondition cond = new SQLCondition();
+            cond.AddCustom("lower(substr(" + DBEpisode.Q(DBEpisode.cFilename) + ", 1, " + start.Length + ")) = lower('" + start.Replace("'", "''") + "')");
+            List<PathPair> gone = DBEpisode.Get(cond).Select(ep => (string)ep[DBEpisode.cFilename]).Where(f => !found.Contains(f) && !File.Exists(f))
+                .Select(f => new PathPair(f.Substring(start.Length), f)).ToList();
+            MPTVSeriesLog.Write("Scan this folder now: '" + folder + "' - " + files.Count + " files, " + gone.Count + " gone");
+            CParsingParameters p = new CParsingParameters(ParsingAction.List_Add, files, false, false);
+            p.m_goneFiles = gone;
+            p.m_actions.Insert(0, ParsingAction.List_RemoveGone);
+            mTimingStart = DateTime.Now;
+            Parsing_Start(p);
         }
         #endregion
 
