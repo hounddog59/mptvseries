@@ -651,8 +651,14 @@ namespace WindowPlugins.GUITVSeries
             MPTVSeriesLog.Write("File Watcher: Starting File System Watcher Background Task", MPTVSeriesLog.LogLevel.Normal);
             setUpWatches();
 
+            // 2026 (4.8.0.6): "Scan remote shares every ... minutes" was never read - the share scan ran even when
+            // unticked. Now it only runs (including the first full read of the shares) when it is ticked.
+            bool scanShares = DBOption.GetOptions(DBOption.cImportScanRemoteShare);
+            if (!scanShares)
+                MPTVSeriesLog.Write("File Watcher: \"Scan remote shares\" is off - shares are not read every few minutes", MPTVSeriesLog.LogLevel.Normal);
+
             // do the initial scan
-            m_PreviousScan = Filelister.GetFiles(m_ScannedFolders);
+            m_PreviousScan = scanShares ? Filelister.GetFiles(m_ScannedFolders) : new List<PathPair>();
             m_PreviousScanRemovable = Filelister.GetFiles(GetDeviceManagerWatchedFolders());
 
             DateTime timeLastScan = DateTime.Now;
@@ -661,7 +667,7 @@ namespace WindowPlugins.GUITVSeries
             while (!worker.CancellationPending)
             {               
                TimeSpan tsUpdate = DateTime.Now - timeLastScan;
-                if ((int)tsUpdate.TotalMinutes >= m_nScanLapse) 
+                if (scanShares && (int)tsUpdate.TotalMinutes >= m_nScanLapse) 
                 {
                     timeLastScan = DateTime.Now;
                     DoFileScan();
