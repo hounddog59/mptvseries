@@ -505,6 +505,16 @@ namespace WindowPlugins.GUITVSeries.Configuration
             var openItem = contextMenuStripChangeCell.Items.Add("Open File Location");
             openItem.Tag = new object[] { "openfilelocation", origpr.full_filename };
 
+            // look the show up on TheTVDB / TMDb - handy when a file wasn't matched (community fork, Mark)
+            string showName = ShowNameFor(origpr);
+            if (showName.Length > 0)
+            {
+                var tvdbItem = contextMenuStripChangeCell.Items.Add("Look up \"" + ShortenForMenu(showName) + "\" on TheTVDB");
+                tvdbItem.Tag = new object[] { "lookup", "https://thetvdb.com/search?query=" + Uri.EscapeDataString(showName) };
+                var tmdbItem = contextMenuStripChangeCell.Items.Add("Look up \"" + ShortenForMenu(showName) + "\" on TMDb");
+                tmdbItem.Tag = new object[] { "lookup", "https://www.themoviedb.org/search/tv?query=" + Uri.EscapeDataString(showName) };
+            }
+
             string expression = origpr.parser.RegexpMatched ?? string.Empty;
             var expressionItem = contextMenuStripChangeCell.Items.Add(string.Format("Matched using expression [{0}]: {1}", origpr.parser.RegexpMatchedIndex, ShortenForMenu(expression)));
             expressionItem.ToolTipText = expression;
@@ -536,6 +546,25 @@ namespace WindowPlugins.GUITVSeries.Configuration
             changeItem.Tag = new object[] { cell, orig, cellValue };
         }
 
+        // the show's name: what the parser found, otherwise the show's folder ("Full Circle with Michael Palin (1997) [7.5][...]"
+        // -> "Full Circle with Michael Palin"), otherwise the file name up to SxxEyy
+        private static string ShowNameFor(parseResult pr)
+        {
+            string name = null;
+            if (pr.parser != null && pr.parser.Matches != null) pr.parser.Matches.TryGetValue(DBSeries.cParsedName, out name);
+            if (string.IsNullOrEmpty(name))
+            {
+                string rel = (pr.match_filename ?? pr.full_filename ?? string.Empty).Replace('/', '\\');
+                string[] parts = rel.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                name = parts.Length > 1 ? parts[0] : System.IO.Path.GetFileNameWithoutExtension(rel);
+                if (System.Text.RegularExpressions.Regex.IsMatch(name, @"^(season|series|staffel)\s*\d+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase) && parts.Length > 0)
+                    name = System.IO.Path.GetFileNameWithoutExtension(parts[parts.Length - 1]);
+                name = System.Text.RegularExpressions.Regex.Replace(name, @"[\s._-]+S\d{1,2}E\d{1,3}.*$", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            }
+            name = System.Text.RegularExpressions.Regex.Replace(name ?? string.Empty, @"\s*[\(\[].*$", "");
+            return name.Replace('.', ' ').Replace('_', ' ').Trim();
+        }
+
         // keeps right-click menu lines to a readable width
         private static string ShortenForMenu(string text)
         {
@@ -550,6 +579,12 @@ namespace WindowPlugins.GUITVSeries.Configuration
             if (args != null && args.Length == 2 && args[0] as string == "openfilelocation")
             {
                 OpenFileLocation(args[1] as string);
+                return;
+            }
+            if (args != null && args.Length == 2 && args[0] as string == "lookup")
+            {
+                try { System.Diagnostics.Process.Start(args[1] as string); }
+                catch (Exception ex) { MPTVSeriesLog.Write("Could not open the web page: " + ex.Message); }
                 return;
             }
 
