@@ -122,6 +122,7 @@ namespace WindowPlugins.GUITVSeries
             LoadReplacements();
             
             mInitLoading = false;
+            OnlineParsing.RemoveEmptyUnmatchedSeries(); // community fork 4.8.0.9: no empty leftover shows in the list
             LoadTree();
 
             // Push Translated Strings to skin

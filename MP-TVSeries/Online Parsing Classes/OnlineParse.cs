@@ -712,6 +712,38 @@ namespace WindowPlugins.GUITVSeries
             // and copy the HasLocalFileTemp value into the real one
             DBSeries.GlobalSet(DBOnlineSeries.cHasLocalFiles, DBOnlineSeries.cHasLocalFilesTemp);
             DBSeason.GlobalSet(DBSeason.cHasLocalFiles, DBSeason.cHasLocalFilesTemp);
+
+            RemoveEmptyUnmatchedSeries();
+        }
+
+        /// <summary>
+        /// community fork 4.8.0.9: a show that was never matched online (negative ID) and has no files left is removed.
+        /// Before, files whose names were once read wrongly ("Magoo Adventures - E07 (Mr Magoo's Three Musketeers" as a
+        /// show name) left an empty show behind after the files were renamed - greyed in the Details tab, and asked
+        /// about again at every import (laptop, 7 Nov). Shows matched online are never touched here.
+        /// </summary>
+        public static int RemoveEmptyUnmatchedSeries()
+        {
+            int removed = 0;
+            try
+            {
+                SQLCondition unmatched = new SQLCondition();
+                unmatched.Add(new DBSeries(), DBSeries.cID, 0, SQLConditionType.LessThan);
+                foreach (DBSeries series in DBSeries.Get(unmatched, false, false))
+                {
+                    SQLCondition files = new SQLCondition();
+                    files.Add(new DBEpisode(), DBEpisode.cSeriesID, series[DBSeries.cID], SQLConditionType.Equal);
+                    if (DBEpisode.Get(files, false).Any(ep => !string.IsNullOrEmpty((string)ep[DBEpisode.cFilename]))) continue;
+                    MPTVSeriesLog.Write("Removing \"" + series[DBSeries.cParsedName] + "\" - never matched online and none of its files are left");
+                    series.deleteSeries(TVSeriesPlugin.DeleteMenuItems.database);
+                    removed++;
+                }
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Could not tidy up empty unmatched shows: " + ex.Message);
+            }
+            return removed;
         }
 
         private void ParseActionAdd(List<PathPair> files) {
@@ -839,6 +871,7 @@ namespace WindowPlugins.GUITVSeries
         private void GetSeries(BackgroundWorker worker, bool bNoExactMatch, Dictionary<string, UserInputResultSeriesActionPair> preChosenSeriesPairs)
         {
             MPTVSeriesLog.Write(bigLogMessage("Identifying Unknown Series Online"), MPTVSeriesLog.LogLevel.Debug);
+            RemoveEmptyUnmatchedSeries(); // community fork 4.8.0.9: don't ask about shows whose files have all gone
 
             SQLCondition condition = null;
 
