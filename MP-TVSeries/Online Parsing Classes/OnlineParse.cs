@@ -1272,6 +1272,7 @@ namespace WindowPlugins.GUITVSeries
         private void GetEpisodes(bool bUpdateScan, bool bFullSeriesRetrieval)
         {
             MPTVSeriesLog.Write(bigLogMessage("Get Episodes"));
+            RestoreMissingOnlineEpisodes();
             SQLCondition condition = null;
             if (bUpdateScan) 
             {
@@ -2882,6 +2883,39 @@ namespace WindowPlugins.GUITVSeries
                     MPTVSeriesLog.Write("Parsed Episode Index: Episode " + episodeId);
                     MPTVSeriesLog.Write("Confirm the entry exists in the online database: http://thetvdb.com/");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Community fork: a file whose empty "not matched yet" online record has gone missing (removed by a clean-up)
+        /// was never tried again - 293 MythBusters files on Mark's HTPC sat unmatched for months. Put those records back
+        /// so the matching below picks the files up again.
+        /// </summary>
+        static void RestoreMissingOnlineEpisodes()
+        {
+            try
+            {
+                SQLite.NET.SQLiteResultSet rs = DBTVSeries.Execute(
+                    "select l.SeriesID, l.SeasonIndex, l.EpisodeIndex from local_episodes l " +
+                    "left join online_episodes o on o.CompositeID = l.CompositeID " +
+                    "where o.CompositeID is null and l.EpisodeFilename != '' and l.SeriesID > 0 and l.SeasonIndex >= 0 and l.EpisodeIndex > 0");
+                if (rs == null || rs.Rows.Count == 0) return;
+                int restored = 0;
+                HashSet<string> done = new HashSet<string>();
+                for (int i = 0; i < rs.Rows.Count; i++)
+                {
+                    int seriesId, season, episode;
+                    if (!int.TryParse(rs.Rows[i].fields[0], out seriesId) || !int.TryParse(rs.Rows[i].fields[1], out season) || !int.TryParse(rs.Rows[i].fields[2], out episode)) continue;
+                    if (!done.Add(seriesId + "_" + season + "x" + episode)) continue;
+                    DBOnlineEpisode placeholder = new DBOnlineEpisode(new DBValue(seriesId), new DBValue(season), new DBValue(episode));
+                    if (placeholder.Commit()) restored++;
+                }
+                if (restored > 0)
+                    MPTVSeriesLog.Write(string.Format("{0} file(s) had lost their \"not matched yet\" record - put back so they are matched again", restored));
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Couldn't check for files that lost their online record: " + ex.Message);
             }
         }
 
