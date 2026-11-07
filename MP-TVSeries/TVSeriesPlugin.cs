@@ -5943,6 +5943,14 @@ namespace WindowPlugins.GUITVSeries
         private CItem m_selected;
         public ReturnCode ChooseFromSelection(ChooseFromSelectionDescriptor descriptor, out CItem selected)
         {
+            // community fork 4.8.0.8: a scan running in MediaPortal doesn't pop up a "choose" box on the TV for each
+            // show it can't match - they're kept for Configuration's "Needs your help" list instead
+            if (descriptor != null && descriptor.m_sItemToMatchLabel == Translation.CFS_Local_Series)
+            {
+                WindowPlugins.GUITVSeries.Configuration.NeedsHelpDialog.AddPending(descriptor.m_sItemToMatch);
+                selected = null;
+                return ReturnCode.Cancel;
+            }
             if (this.m_Facade == null)
             {
                 selected = null;

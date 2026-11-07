@@ -181,6 +181,46 @@ namespace WindowPlugins.GUITVSeries.Configuration
 
         // ---- the skipped list (kept in the TV Series database's options)
 
+        public const string PendingOption = "CommunityFork_NeedsHelp";
+
+        /// shows a scan in MediaPortal couldn't match - Configuration asks about them when it opens
+        public static void AddPending(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return;
+            try
+            {
+                if (SkippedNames().Contains(name)) return;
+                HashSet<string> set = PendingNames();
+                if (set.Add(name.Trim()))
+                {
+                    DBOption.SetOptions(PendingOption, string.Join("|", set.Select(n => n.Replace("|", " ")).OrderBy(n => n).ToArray()));
+                    MPTVSeriesLog.Write("\"" + name + "\" couldn't be matched by itself - Configuration will ask about it ('Needs your help')");
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        public static HashSet<string> PendingNames()
+        {
+            HashSet<string> set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                string v = DBOption.GetOptions(PendingOption);
+                if (!string.IsNullOrEmpty(v)) foreach (string n in v.Split('|')) if (n.Trim().Length > 0) set.Add(n.Trim());
+            }
+            catch
+            {
+            }
+            return set;
+        }
+
+        public static void ClearPending()
+        {
+            DBOption.SetOptions(PendingOption, "");
+        }
+
         public static HashSet<string> SkippedNames()
         {
             HashSet<string> set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

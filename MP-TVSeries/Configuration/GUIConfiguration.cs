@@ -156,6 +156,15 @@ namespace WindowPlugins.GUITVSeries
             if (mLoadDisplay != null) mLoadDisplay.Close();
             mInstance = this;
 
+            // community fork 4.8.0.8: shows a scan in MediaPortal couldn't match are asked about here, together
+            int pending = NeedsHelpDialog.PendingNames().Count;
+            if (pending > 0)
+                Shown += (s, e) =>
+                {
+                    if (MessageBox.Show(this, pending + " show" + (pending == 1 ? "" : "s") + " from an earlier scan couldn't be matched by themselves.\r\n\r\nLook at them now?",
+                        "Needs your help", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) ShowNeedsHelp();
+                };
+
             this.aboutScreen.setUpMPInfo(Settings.Version.ToString(), Settings.BuildDate);
             this.aboutScreen.setUpPaths();
         }
@@ -4339,6 +4348,11 @@ namespace WindowPlugins.GUITVSeries
                 items = mNeedsHelp.ToList();
                 mNeedsHelp.Clear();
             }
+            // and any a scan in MediaPortal left for us
+            foreach (string name in NeedsHelpDialog.PendingNames())
+                if (!items.Any(i => string.Equals(i.Name, name, StringComparison.OrdinalIgnoreCase)))
+                    items.Add(new NeedsHelpDialog.Item { Name = name });
+            NeedsHelpDialog.ClearPending();
             if (items.Count == 0) return;
             using (NeedsHelpDialog dlg = new NeedsHelpDialog(items))
             {

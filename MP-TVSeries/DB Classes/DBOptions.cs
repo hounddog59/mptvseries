@@ -408,8 +408,10 @@ namespace WindowPlugins.GUITVSeries
 			if (GetOptions(cPlaylistAutoShuffle) == null)
 				SetOptions(cPlaylistAutoShuffle, false);
 
+            // community fork 4.8.0.8: off for new installs - a full scan every time MediaPortal starts isn't needed
+            // (the file watcher and Import cover new files), and on a first run it popped up a "choose" box per show
             if (GetOptions(cImportScanOnStartup) == null)
-                SetOptions(cImportScanOnStartup, true);
+                SetOptions(cImportScanOnStartup, false);
 
             if (GetOptions(cAutoDownloadMissingArtwork) == null)
                 SetOptions(cAutoDownloadMissingArtwork, true);
