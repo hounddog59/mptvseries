@@ -72,6 +72,12 @@ namespace WindowPlugins.GUITVSeries
         /// Loads and compile Parsing Expressions and also String Replacements
         /// </summary>
         /// <returns></returns>
+        private static readonly string EpisodeOnlyRule =
+            @"^(?!.*(?:s\d{1,3}[ ._-]*e\d|(?<![\d])\d{1,2}x\d{2}(?!\d)|season[ ._-]*\d+[ ._-]*e(?:p|pisode)?[ ._-]*\d))" +
+            @"(?:(?=(?:.*\\)?(?:season|series|staffel)[ ._-]*(?<" + DBEpisode.cSeasonIndex + @">\d{1,2})\\[^\\]*$))?(?:.*\\)?" +
+            @"(?<" + DBSeries.cParsedName + @">[^\\]*?)[ ._-]*\b(?:e|ep|episode)[ ._-]?(?<" + DBEpisode.cEpisodeIndex + @">\d{1,3})(?!\d)" +
+            @"[ ._\-\(\[]*(?<" + DBEpisode.cEpisodeName + @">[^\\]*?)[ ._\)\]]*\.(?<ext>[^.\\]*)$";
+
         public static bool reLoadExpressions()
         {
             // build a list of all the regular expressions to apply
@@ -83,6 +89,11 @@ namespace WindowPlugins.GUITVSeries
                 regularExpressions.Clear();
                 replacementRegexAfter.Clear();
                 replacementRegexBefore.Clear();
+                // community fork 4.8.0.8: episode number with no season ("Magoo Adventures - E03 (Mr Magoo's
+                // Treasure Island)", Batfink, Dick Tracy) - the season comes from a "Season 2" folder, otherwise 1.
+                // Checked first, and only for names with no season in them (S01E03, 1x03 still go to the rules below)
+                regularExpressions.Add(new Regex(EpisodeOnlyRule, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+                sExpressions.Add(EpisodeOnlyRule);
                 DBExpression[] expressions = DBExpression.GetAll();
                 foreach (DBExpression expression in expressions)
                 {
@@ -232,6 +243,13 @@ namespace WindowPlugins.GUITVSeries
                                 GroupValue = GroupValue.Trim();
                                 m_Matches.Add(GroupName, GroupValue);
                             }
+                        }
+
+                        // community fork 4.8.0.8: an episode number with no season - season 1 unless a "Season 2" folder said otherwise
+                        if (index == 0 && sExpressions[0] == EpisodeOnlyRule)
+                        {
+                            if (!m_Matches.ContainsKey(DBEpisode.cSeasonIndex)) m_Matches.Add(DBEpisode.cSeasonIndex, "1");
+                            if (m_Matches.ContainsKey(DBSeries.cParsedName) && m_Matches[DBSeries.cParsedName].Length == 0) m_Matches.Remove(DBSeries.cParsedName);
                         }
 
                         // try get the series name from the folder

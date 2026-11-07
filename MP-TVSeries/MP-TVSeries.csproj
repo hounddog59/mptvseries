@@ -188,6 +188,9 @@
     <Compile Include="Configuration\About.designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
+    <Compile Include="Configuration\NeedsHelpDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Configuration\ChooseFromSelection.cs">
       <SubType>Form</SubType>
     </Compile>

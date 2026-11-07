@@ -86,6 +86,13 @@ namespace WindowPlugins.GUITVSeries
 
             InitializeComponent();
             toolTip_Help.AutoPopDelay = 30000; // keep help on screen long enough to read (default is 5 seconds)
+
+            // community fork 4.8.0.8: on a smaller screen or with Windows' text size above 100% the tabs got
+            // squashed - the Formatting tab's rules list shrank to a thin empty bar under overlapping labels
+            // (laptop, 7 Nov). Every tab scrolls instead of squashing, and the Formatting rules keep a usable size.
+            float scale = CurrentAutoScaleDimensions.Height / 13F;
+            foreach (TabPage page in tabControl_Details.TabPages) page.AutoScroll = true;
+            tabFormattingRules.AutoScrollMinSize = new Size((int)(760 * scale), (int)(560 * scale));
             
             MPTVSeriesLog.AddNotifier(ref listBox_Log);
 
@@ -1606,6 +1613,7 @@ namespace WindowPlugins.GUITVSeries
                 // refresh regex and replacements
                 FilenameParser.reLoadExpressions();
 
+                mDeferChoices = true; // community fork 4.8.0.8
                 mParser = new OnlineParsing(this);
                 mParser.Start(parsingParams);
             }
@@ -1618,6 +1626,13 @@ namespace WindowPlugins.GUITVSeries
             this.Cursor = System.Windows.Forms.Cursors.Default; // in case a wait cursor was set (e.g. a manual Online Series ID correction)
             mParser = null;
             ImportWizardParseParams = null;
+            if (mDeferChoices)
+            {
+                mDeferChoices = false;
+                bool any;
+                lock (mNeedsHelp) any = mNeedsHelp.Count > 0;
+                if (any) BeginInvoke((MethodInvoker)ShowNeedsHelp);
+            }
             DBOption.SetOptions(DBOption.cImportOnlineUpdateScanLastTime, DateTime.Now.ToString());
 
             if (mNodeEditedForLightweightRefresh != null)
@@ -4287,8 +4302,69 @@ namespace WindowPlugins.GUITVSeries
         private delegate ReturnCode ChooseFromSelectionDelegate(ChooseFromSelectionDescriptor descriptor);
         private CItem m_selected;
 
+        // community fork 4.8.0.8: while a scan runs (not the Import Wizard), shows it can't match aren't asked
+        // about one pop-up at a time - they're collected and shown together at the end ("Needs your help")
+        private bool mDeferChoices;
+        private readonly List<NeedsHelpDialog.Item> mNeedsHelp = new List<NeedsHelpDialog.Item>();
+        private readonly Dictionary<string, DBOnlineSeries> mPickedSeries = new Dictionary<string, DBOnlineSeries>(StringComparer.OrdinalIgnoreCase);
+
+        private bool Deferred(Feedback.ChooseFromSelectionDescriptor descriptor, out Feedback.ReturnCode code, out Feedback.CItem selected)
+        {
+            code = Feedback.ReturnCode.Cancel;
+            selected = null;
+            if (!mDeferChoices || descriptor == null || descriptor.m_sItemToMatchLabel != Translation.CFS_Local_Series) return false;
+            string name = descriptor.m_sItemToMatch ?? string.Empty;
+            DBOnlineSeries picked;
+            if (mPickedSeries.TryGetValue(name, out picked))
+            {
+                selected = new Feedback.CItem(name, string.Empty, picked); // same name, so it's taken as the answer
+                code = Feedback.ReturnCode.OK;
+                return true;
+            }
+            if (NeedsHelpDialog.SkippedNames().Contains(name)) return true;
+            lock (mNeedsHelp)
+            {
+                if (!mNeedsHelp.Any(i => string.Equals(i.Name, name, StringComparison.OrdinalIgnoreCase)))
+                    mNeedsHelp.Add(new NeedsHelpDialog.Item { Name = name, Descriptor = descriptor });
+            }
+            MPTVSeriesLog.Write("\"" + name + "\" couldn't be matched by itself - added to 'Needs your help' for the end of the scan");
+            return true;
+        }
+
+        private void ShowNeedsHelp()
+        {
+            List<NeedsHelpDialog.Item> items;
+            lock (mNeedsHelp)
+            {
+                items = mNeedsHelp.ToList();
+                mNeedsHelp.Clear();
+            }
+            if (items.Count == 0) return;
+            using (NeedsHelpDialog dlg = new NeedsHelpDialog(items))
+            {
+                dlg.ShowDialog(this);
+            }
+            HashSet<string> skipped = NeedsHelpDialog.SkippedNames();
+            bool changed = false;
+            foreach (NeedsHelpDialog.Item it in items)
+            {
+                if (it.Picked != null) { mPickedSeries[it.Name] = it.Picked; changed |= skipped.Remove(it.Name); }
+                else if (it.Skipped) changed |= skipped.Add(it.Name);
+            }
+            if (changed) NeedsHelpDialog.SaveSkipped(skipped);
+            if (items.Any(i => i.Picked != null))
+            {
+                // match the picked ones now (and their episodes) - no disk scan needed, their files are already listed
+                MPTVSeriesLog.Write("Needs your help: adding " + items.Count(i => i.Picked != null) + " picked show(s)");
+                mTimingStart = DateTime.Now;
+                Parsing_Start(new CParsingParameters(new List<ParsingAction> { ParsingAction.IdentifyNewSeries, ParsingAction.IdentifyNewEpisodes, ParsingAction.UpdateEpisodeCounts }, null, null));
+            }
+        }
+
         public ReturnCode ChooseFromSelection(Feedback.ChooseFromSelectionDescriptor descriptor, out Feedback.CItem selected)
         {
+            Feedback.ReturnCode deferredCode;
+            if (Deferred(descriptor, out deferredCode, out selected)) return deferredCode;
             Feedback.ReturnCode returnCode;
             if (mLocalControlForInvoke.InvokeRequired)
             {
