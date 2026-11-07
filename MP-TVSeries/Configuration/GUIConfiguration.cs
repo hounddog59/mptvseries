@@ -92,6 +92,21 @@ namespace WindowPlugins.GUITVSeries
             // (laptop, 7 Nov). Every tab scrolls instead of squashing, and the Formatting rules keep a usable size.
             float scale = CurrentAutoScaleDimensions.Height / 13F;
             foreach (TabPage page in tabControl_Details.TabPages) page.AutoScroll = true;
+
+            // community fork 4.8.0.9: tick several shows / seasons / episodes in the Details list and delete them together
+            mTickSeveral = new CheckBox { Text = "Tick several", AutoSize = true, Anchor = AnchorStyles.Bottom | AnchorStyles.Left, Tag = "z" };
+            mDeleteTicked = new LinkLabel { Text = "Delete ticked...", AutoSize = true, Anchor = AnchorStyles.Bottom | AnchorStyles.Left, Visible = false };
+            checkBox_HideWatched.Parent.Controls.Add(mTickSeveral);
+            checkBox_HideWatched.Parent.Controls.Add(mDeleteTicked);
+            mTickSeveral.Location = new Point(checkBox_HideWatched.Right + (int)(24 * scale), checkBox_HideWatched.Top);
+            mDeleteTicked.Location = new Point(mTickSeveral.Left + (int)(96 * scale), checkBox_HideWatched.Top + (int)(1 * scale));
+            toolTip_Help.SetToolTip(mTickSeveral, "Puts a tick box by every show, season and episode, so you can tick several and delete them together");
+            mTickSeveral.CheckedChanged += (s, e) =>
+            {
+                treeView_Library.CheckBoxes = mTickSeveral.Checked;
+                mDeleteTicked.Visible = mTickSeveral.Checked;
+            };
+            mDeleteTicked.LinkClicked += (s, e) => DeleteTicked();
             tabFormattingRules.AutoScrollMinSize = new Size((int)(760 * scale), (int)(560 * scale));
             
             MPTVSeriesLog.AddNotifier(ref listBox_Log);
@@ -3510,6 +3525,64 @@ namespace WindowPlugins.GUITVSeries
                     break;
             }
             UpdateMediaInfoASync(episodes);
+        }
+
+        private CheckBox mTickSeveral;
+        private LinkLabel mDeleteTicked;
+
+        // community fork 4.8.0.9: everything ticked in the Details list (a ticked show or season takes its own episodes with it)
+        private void DeleteTicked()
+        {
+            List<TreeNode> ticked = new List<TreeNode>();
+            Action<TreeNodeCollection> walk = null;
+            walk = nodes =>
+            {
+                foreach (TreeNode n in nodes)
+                {
+                    if (n.Checked) { ticked.Add(n); continue; } // its children go with it
+                    walk(n.Nodes);
+                }
+            };
+            walk(treeView_Library.Nodes);
+            if (ticked.Count == 0)
+            {
+                MessageBox.Show(this, "Nothing is ticked yet - tick the shows, seasons or episodes to delete.", "Delete ticked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            bool anyFiles = false;
+            foreach (TreeNode n in ticked)
+            {
+                if (n.Name == DBSeries.cTableName) anyFiles |= (bool)((DBSeries)n.Tag)[DBOnlineSeries.cHasLocalFiles];
+                else if (n.Name == DBSeason.cTableName) anyFiles |= (bool)((DBSeason)n.Tag)[DBSeason.cHasLocalFiles];
+                else if (n.Name == DBEpisode.cTableName) anyFiles |= !string.IsNullOrEmpty((string)((DBEpisode)n.Tag)[DBEpisode.cFilename]);
+            }
+            DeleteDialog deleteDialog = new DeleteDialog(false, false, anyFiles);
+            deleteDialog.Text = "Delete " + ticked.Count + " ticked item" + (ticked.Count == 1 ? "" : "s");
+            if (deleteDialog.ShowDialog(this) != DialogResult.OK || deleteDialog.DeleteMode == TVSeriesPlugin.DeleteMenuItems.subtitles) return;
+            TVSeriesPlugin.DeleteMenuItems mode = deleteDialog.DeleteMode;
+            Cursor = Cursors.WaitCursor;
+            List<string> problems = new List<string>();
+            foreach (TreeNode n in ticked)
+            {
+                try
+                {
+                    List<string> r = null;
+                    if (n.Name == DBSeries.cTableName) r = ((DBSeries)n.Tag).deleteSeries(mode);
+                    else if (n.Name == DBSeason.cTableName) r = ((DBSeason)n.Tag).deleteSeason(mode);
+                    else if (n.Name == DBEpisode.cTableName) r = ((DBEpisode)n.Tag).deleteEpisode(mode);
+                    if (r != null) problems.AddRange(r);
+                }
+                catch (Exception ex)
+                {
+                    problems.Add(n.Text + ": " + ex.Message);
+                }
+            }
+            MPTVSeriesLog.Write("Delete ticked: " + ticked.Count + " item(s), " + mode + ", " + problems.Count + " problem(s)");
+            Cursor = Cursors.Default;
+            mTickSeveral.Checked = false;
+            LoadTree();
+            if (problems.Count > 0)
+                MessageBox.Show(this, "Some couldn't be deleted:\r\n\r\n" + string.Join("\r\n", problems.Take(15).ToArray()), "Delete ticked", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         // community fork 4.8.0.9: tick any number of episodes of a show / season and remove them in one go
