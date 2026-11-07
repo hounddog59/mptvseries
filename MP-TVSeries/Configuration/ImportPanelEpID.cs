@@ -20,6 +20,8 @@ namespace WindowPlugins.GUITVSeries.Configuration
         List<KeyValuePair<DBSeries, List<KeyValuePair<DBEpisode, DBOnlineEpisode>>>> matches = new List<KeyValuePair<DBSeries, List<KeyValuePair<DBEpisode, DBOnlineEpisode>>>>();
         List<DBEpisode> displayedEps = new List<DBEpisode>();
         List<DBOnlineEpisode> displayedOEps = new List<DBOnlineEpisode>();
+        // community fork: best guesses with no title in the file name to confirm them - always shown so you can check them
+        HashSet<DBEpisode> guessed = new HashSet<DBEpisode>();
 
         delegate void MatchEpisodesForSeriesDelegate(DBSeries series, List<DBEpisode> localEpisodes, List<DBOnlineEpisode> onlineCandidates);
         delegate List<KeyValuePair<DBSeries, List<KeyValuePair<DBEpisode, DBOnlineEpisode>>>> GetResultDelegate(bool showonly);
@@ -83,7 +85,7 @@ namespace WindowPlugins.GUITVSeries.Configuration
 
         private bool seriesHasAllEpsMatched(DBSeries series)
         {
-            int unMatchedCount = matches.Single(s => s.Key == series).Value.Count(p => p.Value == null);
+            int unMatchedCount = matches.Single(s => s.Key == series).Value.Count(p => p.Value == null || guessed.Contains(p.Key));
             return unMatchedCount == 0;
         }
 
@@ -169,9 +171,21 @@ namespace WindowPlugins.GUITVSeries.Configuration
                 var bestMatchVal = from oe in onlineeps.Single(s => s.Key == series).Value
                                    select new { Episode = oe, MatchValue = OnlineParsing.matchOnlineToLocalEpisode(series, localEp, oe, orderingOption) };
                 var matchedEp = bestMatchVal.OrderBy(me => me.MatchValue).FirstOrDefault(me => me.MatchValue < int.MaxValue);
+                guessed.Remove(localEp);
                 if (matchedEp != null)
                     newseriesMatches.Add(new KeyValuePair<DBEpisode, DBOnlineEpisode>(localEp, matchedEp.Episode));
-                else newseriesMatches.Add(new KeyValuePair<DBEpisode, DBOnlineEpisode>(localEp, null));
+                else
+                {
+                    // community fork: E66 in "Season 01" carrying on into season 2, MythBusters S01 = 2003, or a matching title
+                    DBOnlineEpisode guess = null;
+                    if (OnlineParsing.IsAiredOrder(series, orderingOption))
+                    {
+                        bool needsCheck;
+                        guess = OnlineParsing.CommunityGuess(localEp, onlineeps.Single(s => s.Key == series).Value, localEps, out needsCheck);
+                        if (guess != null && needsCheck) guessed.Add(localEp);
+                    }
+                    newseriesMatches.Add(new KeyValuePair<DBEpisode, DBOnlineEpisode>(localEp, guess));
+                }
 
             }
             if (seriesMatches.Key != null)
@@ -256,11 +270,11 @@ namespace WindowPlugins.GUITVSeries.Configuration
                 {
                     // only display those we couldnt match
                     var pair = matches.Single(s => s.Key == listBoxSeries.SelectedItem as DBSeries).Value.SingleOrDefault(e => e.Key == local);
-                    if (pair.Value != null)
+                    if (pair.Value != null && !guessed.Contains(local))
                         continue;
                 }
                 displayedEps.Add(local);
-                listBoxLocal.Items.Add(local[DBEpisode.cFilenameWOPath]);
+                listBoxLocal.Items.Add((guessed.Contains(local) ? "[best guess - please check] " : string.Empty) + local[DBEpisode.cFilenameWOPath]);
                 //listBoxLocal.Items.Add(getDisplayString(local));                
             }
 

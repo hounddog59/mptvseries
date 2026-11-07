@@ -2849,6 +2849,23 @@ namespace WindowPlugins.GUITVSeries
                         }
                     }
                 }
+                // community fork: numbers that don't line up with TheTVDB (E66 in "Season 01" when season 1 has 65,
+                // MythBusters S01 = 2003, or a title that matches) - only taken here when the title in the file name confirms it
+                if (!bMatchFound && !string.IsNullOrEmpty(localEpisode[DBEpisode.cFilename]) && IsAiredOrder(series, orderOption))
+                {
+                    bool needsCheck;
+                    DBOnlineEpisode guess = CommunityGuess(localEpisode, episodesParser.Results, episodesList, out needsCheck);
+                    if (guess != null && !needsCheck)
+                    {
+                        bool isSecondPart = !string.IsNullOrEmpty(localEpisode[DBEpisode.cCompositeID2]) && localEpisode[DBEpisode.cEpisodeIndex] == localEpisode[DBEpisode.cEpisodeIndex2];
+                        MPTVSeriesLog.Write(string.Format("Matched \"{0}\" to {1}x{2} \"{3}\" (by its title - the numbers in the file name don't line up with TheTVDB)",
+                            localEpisode[DBEpisode.cFilenameWOPath], guess[DBOnlineEpisode.cSeasonIndex], guess[DBOnlineEpisode.cEpisodeIndex], guess[DBOnlineEpisode.cEpisodeName]));
+                        localEpisode.ChangeIndexes(guess[DBOnlineEpisode.cSeasonIndex], guess[DBOnlineEpisode.cEpisodeIndex], isSecondPart);
+                        commitOnlineToLocalEpisodeMatch(series, localEpisode, guess);
+                        bMatchFound = true;
+                    }
+                }
+
                 // if a local filename failed to find a match, log parsing result
                 if (!bMatchFound && !string.IsNullOrEmpty(localEpisode[DBEpisode.cFilename]))
                 {
@@ -2867,6 +2884,139 @@ namespace WindowPlugins.GUITVSeries
                 }
             }
         }
+
+        #region Community fork: episodes whose numbers don't line up with TheTVDB
+
+        public static bool IsAiredOrder(DBSeries series, string orderOption)
+        {
+            string order = orderOption ?? (string)series[DBOnlineSeries.cChosenEpisodeOrder];
+            return string.IsNullOrEmpty(order) || order == "Aired";
+        }
+
+        /// <summary>
+        /// Best guess for a file that didn't match by its season / episode numbers:
+        ///  - shows numbered straight through: "E66" in a Season 01 folder when TheTVDB's season 1 has 65 -> 2x1
+        ///  - shows whose seasons are years on TheTVDB (MythBusters 2003..., Looney Tunes 1929...): S01 = the first year
+        ///  - otherwise, the title in the file name if it matches exactly one episode
+        /// needsCheck is true when there was no title in the file name to confirm the guess - those are only offered
+        /// in the import wizard for you to look over, never taken automatically.
+        /// </summary>
+        public static DBOnlineEpisode CommunityGuess(DBEpisode localEp, IList<DBOnlineEpisode> online, IList<DBEpisode> localList, out bool needsCheck)
+        {
+            needsCheck = false;
+            try
+            {
+                if (localEp == null || online == null || online.Count == 0) return null;
+                int s = localEp[DBEpisode.cSeasonIndex];
+                int e = localEp[DBEpisode.cEpisodeIndex];
+                if (s < 1 || e < 1) return null;
+                int e2 = localEp[DBEpisode.cEpisodeIndex2];
+                if (e2 > 0 && e2 != e) return null; // double episodes: leave those to you
+
+                List<DBOnlineEpisode> regular = online
+                    .Where(o => (int)o[DBOnlineEpisode.cSeasonIndex] > 0 && (int)o[DBOnlineEpisode.cEpisodeIndex] > 0)
+                    .OrderBy(o => (int)o[DBOnlineEpisode.cSeasonIndex]).ThenBy(o => (int)o[DBOnlineEpisode.cEpisodeIndex]).ToList();
+                if (regular.Count == 0) return null;
+                List<int> seasons = regular.Select(o => (int)o[DBOnlineEpisode.cSeasonIndex]).Distinct().ToList();
+                string title = CleanTitle(localEp[DBEpisode.cRawEpisodeName]);
+                DBOnlineEpisode candidate = null;
+
+                // seasons are years on TheTVDB, but the file says S01, S02...
+                if (s < 1900 && seasons.All(x => x >= 1900 && x <= 2100))
+                {
+                    if (s > seasons.Count) return title.Length > 0 ? FindByTitle(title, regular) : null;
+                    int year = seasons[s - 1];
+                    List<DBOnlineEpisode> inYear = regular.Where(o => (int)o[DBOnlineEpisode.cSeasonIndex] == year).ToList();
+                    candidate = inYear.FirstOrDefault(o => (int)o[DBOnlineEpisode.cEpisodeIndex] == e);
+                    if (title.Length > 0)
+                        return candidate != null && SameTitle(title, candidate) ? candidate : FindByTitle(title, regular);
+
+                    // no title to check: only when you have exactly as many files for that season as TheTVDB has for that year
+                    if (candidate == null || localList == null) return null;
+                    // (and no two files with the same number - then the numbering itself is scrambled)
+                    List<int> localNumbers = localList.Where(l => (int)l[DBEpisode.cSeasonIndex] == s)
+                                                      .Select(l => (int)l[DBEpisode.cEpisodeIndex]).ToList();
+                    if (localNumbers.Count != inYear.Count || localNumbers.Distinct().Count() != localNumbers.Count) return null;
+                    needsCheck = true;
+                    return candidate;
+                }
+
+                // numbered straight through the show: carry on into the next seasons
+                int si = seasons.IndexOf(s);
+                if (si >= 0)
+                {
+                    List<DBOnlineEpisode> thisSeason = regular.Where(o => (int)o[DBOnlineEpisode.cSeasonIndex] == s).ToList();
+                    int maxEp = thisSeason.Max(o => (int)o[DBOnlineEpisode.cEpisodeIndex]);
+                    if (e > maxEp)
+                    {
+                        int rem = e - thisSeason.Count;
+                        for (int k = si + 1; k < seasons.Count && candidate == null && rem > 0; k++)
+                        {
+                            List<DBOnlineEpisode> next = regular.Where(o => (int)o[DBOnlineEpisode.cSeasonIndex] == seasons[k]).ToList();
+                            if (rem <= next.Count) candidate = next[rem - 1];
+                            else rem -= next.Count;
+                        }
+                    }
+                }
+
+                if (title.Length > 0)
+                {
+                    if (candidate != null && SameTitle(title, candidate)) return candidate;
+                    return FindByTitle(title, regular);
+                }
+                if (candidate != null) { needsCheck = true; return candidate; }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Couldn't work out a best guess for an episode: " + ex.Message);
+                needsCheck = false;
+                return null;
+            }
+        }
+
+        // letters and digits only, lower case, without [tags] and MCM's "(un-fetched episode)"
+        static string CleanTitle(string t)
+        {
+            if (string.IsNullOrEmpty(t)) return string.Empty;
+            t = System.Text.RegularExpressions.Regex.Replace(t, @"\[[^\]]*\]", " ");
+            if (t.IndexOf("un-fetched", StringComparison.OrdinalIgnoreCase) >= 0 || t.IndexOf("unfetched", StringComparison.OrdinalIgnoreCase) >= 0)
+                return string.Empty;
+            string n = Normalise(t);
+            return n.Length >= 3 ? n : string.Empty;
+        }
+
+        static string Normalise(string t)
+        {
+            if (string.IsNullOrEmpty(t)) return string.Empty;
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in t.ToLowerInvariant())
+                if (char.IsLetterOrDigit(c)) sb.Append(c);
+            return sb.ToString();
+        }
+
+        static bool SameTitle(string cleanLocal, DBOnlineEpisode o)
+        {
+            string n = Normalise(o[DBOnlineEpisode.cEpisodeName]);
+            if (n.Length < 3 || cleanLocal.Length < 3) return false;
+            if (n == cleanLocal) return true;
+            int shorter = Math.Min(n.Length, cleanLocal.Length);
+            if (shorter >= 10 && (n.Contains(cleanLocal) || cleanLocal.Contains(n))) return true;
+            int allowed = Math.Max(1, (int)(shorter * 0.15));
+            return MediaPortal.Util.Levenshtein.Match(n, cleanLocal) <= allowed;
+        }
+
+        // only when exactly one episode of the show has that title (an exact match wins over a near one)
+        static DBOnlineEpisode FindByTitle(string cleanLocal, List<DBOnlineEpisode> regular)
+        {
+            List<DBOnlineEpisode> exact = regular.Where(o => Normalise(o[DBOnlineEpisode.cEpisodeName]) == cleanLocal).ToList();
+            if (exact.Count == 1) return exact[0];
+            if (exact.Count > 1) return null;
+            List<DBOnlineEpisode> near = regular.Where(o => SameTitle(cleanLocal, o)).ToList();
+            return near.Count == 1 ? near[0] : null;
+        }
+
+        #endregion
 
         private static void commitOnlineToLocalEpisodeMatch(DBSeries series, DBEpisode localEpisode, DBOnlineEpisode onlineEpisode)
         {
