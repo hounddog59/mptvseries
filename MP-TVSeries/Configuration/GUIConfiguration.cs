@@ -3511,6 +3511,60 @@ namespace WindowPlugins.GUITVSeries
             UpdateMediaInfoASync(episodes);
         }
 
+        // community fork 4.8.0.9: tick any number of episodes of a show / season and remove them in one go
+        private void DeleteSeveral(TreeNode node)
+        {
+            if (node == null || node.Name == DBEpisode.cTableName) return;
+            TreeNode seriesNode = node.Name == DBSeries.cTableName ? node : node.Parent;
+            DBSeries series = seriesNode?.Tag as DBSeries;
+            if (series == null) return;
+            DBSeason season = node.Name == DBSeason.cTableName ? node.Tag as DBSeason : null;
+            SQLCondition conditions = new SQLCondition();
+            conditions.Add(new DBOnlineEpisode(), DBOnlineEpisode.cSeriesID, series[DBSeries.cID], SQLConditionType.Equal);
+            if (season != null) conditions.Add(new DBOnlineEpisode(), DBOnlineEpisode.cSeasonIndex, season[DBSeason.cIndex], SQLConditionType.Equal);
+            List<DBEpisode> episodes = DBEpisode.Get(conditions, false);
+            if (episodes.Count == 0) return;
+            string heading = series.ToString() + (season != null ? " - season " + (int)season[DBSeason.cIndex] : "");
+            using (DeleteSeveralDialog dlg = new DeleteSeveralDialog(heading, episodes))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK || dlg.Ticked == null || dlg.Ticked.Count == 0) return;
+                Cursor = Cursors.WaitCursor;
+                List<string> problems = new List<string>();
+                foreach (DBEpisode ep in dlg.Ticked)
+                {
+                    try
+                    {
+                        // a file that has gone can only come out of the library
+                        TVSeriesPlugin.DeleteMenuItems mode = dlg.AlsoFiles && !DeleteSeveralDialog.FileGone(ep) && !string.IsNullOrEmpty((string)ep[DBEpisode.cFilename])
+                            ? TVSeriesPlugin.DeleteMenuItems.diskdatabase : TVSeriesPlugin.DeleteMenuItems.database;
+                        List<string> r = ep.deleteEpisode(mode);
+                        if (r != null) problems.AddRange(r);
+                    }
+                    catch (Exception ex)
+                    {
+                        problems.Add(ex.Message);
+                    }
+                }
+                MPTVSeriesLog.Write("Delete several: " + heading + " - " + dlg.Ticked.Count + " episode(s)" + (dlg.AlsoFiles ? " and their files" : "") + ", " + problems.Count + " problem(s)");
+                // rebuild the show's node
+                int index = treeView_Library.Nodes.IndexOf(seriesNode);
+                treeView_Library.Nodes.Remove(seriesNode);
+                DBSeries fresh = DBSeries.Get(series[DBSeries.cID], false);
+                if (fresh != null && index >= 0)
+                {
+                    CreateSeriesNode(fresh, null, index);
+                    if (index < treeView_Library.Nodes.Count)
+                    {
+                        treeView_Library.Nodes[index].Expand();
+                        treeView_Library.SelectedNode = treeView_Library.Nodes[index];
+                    }
+                }
+                Cursor = Cursors.Default;
+                if (problems.Count > 0)
+                    MessageBox.Show(this, "Some couldn't be removed:\r\n\r\n" + string.Join("\r\n", problems.Take(15).ToArray()), "Delete several", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void DeleteNode(TreeNode nodeDeleted)
         {
             if (nodeDeleted != null) {
@@ -4285,6 +4339,10 @@ namespace WindowPlugins.GUITVSeries
                     DeleteNode(clickedNode);
                     break;
 
+                case "deleteseveral":
+                    DeleteSeveral(clickedNode);
+                    break;
+
                 case "update":
                     UpdateNode(clickedNode);
                     break;
@@ -4502,6 +4560,15 @@ namespace WindowPlugins.GUITVSeries
                 return;
 
             bool bHidden = false;
+
+            // community fork 4.8.0.9: "Delete several..." for a show or a season
+            if (!contextMenuStrip_DetailsTree.Items.ContainsKey("deleteSeveralToolStripMenuItem"))
+            {
+                ToolStripMenuItem several = new ToolStripMenuItem("Delete several...") { Name = "deleteSeveralToolStripMenuItem", Tag = "deleteseveral" };
+                int at = contextMenuStrip_DetailsTree.Items.IndexOfKey("deleteToolStripMenuItem");
+                contextMenuStrip_DetailsTree.Items.Insert(at >= 0 ? at + 1 : contextMenuStrip_DetailsTree.Items.Count, several);
+            }
+            contextMenuStrip_DetailsTree.Items["deleteSeveralToolStripMenuItem"].Visible = node.Name != DBEpisode.cTableName;
 
             //NOTE: use names to access the menu items in case the order get altered in the future
             switch ( node.Name )
