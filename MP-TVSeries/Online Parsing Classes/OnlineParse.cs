@@ -1756,6 +1756,13 @@ namespace WindowPlugins.GUITVSeries
                                                    e[DBOnlineEpisode.cSeasonIndex] == seasonIdx)) ||
                                                    (cleanEpisodeZero && episodeIdx == 0))
                     {
+                        // community fork: a file still on disk that is only waiting to be matched (its online record is
+                        // the empty "not matched yet" one) is not an episode that vanished from TheTVDB - leave it, or the
+                        // file drops out of matching (MythBusters S02E05 when TheTVDB's seasons are years: 210 files)
+                        string waitingFile = episode[DBEpisode.cFilename];
+                        if ((int)episode[DBOnlineEpisode.cID] == 0 && !string.IsNullOrEmpty(waitingFile) && File.Exists(waitingFile))
+                            continue;
+
                         string message = string.Format("{0} - Removing episode {1}x{2}, episode no longer exists online or is invalid", seriesName, seasonIdx, episodeIdx);
                         mWorker.ReportProgress(0, new ParsingProgress(ParsingAction.CleanupEpisodes, message, i, mOnlineEpisodes.Keys.Count));
 

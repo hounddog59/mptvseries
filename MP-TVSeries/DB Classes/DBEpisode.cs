@@ -444,11 +444,28 @@ namespace WindowPlugins.GUITVSeries
             {
                 string compositeID = isSecondPart ? currentComposite2 : currentComposite;
 
+                // community fork: another file with the same number (e.g. two "S02E16" files) still needs that record
+                if (OtherFilesUse(compositeID, base[cFilename])) return;
+
                 SQLCondition condition = new SQLCondition();
                 condition.Add(new DBOnlineEpisode(), DBOnlineEpisode.cCompositeID, compositeID, SQLConditionType.Equal);
                 condition.Add(new DBOnlineEpisode(), DBOnlineEpisode.cID, 0, SQLConditionType.Equal);
                 DBOnlineEpisode.Clear(condition);
             }
+        }
+
+        static bool OtherFilesUse(string compositeID, string myFile)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(compositeID)) return false;
+                SQLite.NET.SQLiteResultSet rs = DBTVSeries.Execute(string.Format(
+                    "select count(*) from local_episodes where (CompositeID = '{0}' or CompositeID2 = '{0}') and EpisodeFilename != '{1}'",
+                    compositeID.Replace("'", "''"), (myFile ?? string.Empty).Replace("'", "''")));
+                int n;
+                return rs != null && rs.Rows.Count > 0 && int.TryParse(rs.Rows[0].fields[0], out n) && n > 0;
+            }
+            catch { return false; }
         }
 
         public void ChangeSeriesID(int nSeriesID)
