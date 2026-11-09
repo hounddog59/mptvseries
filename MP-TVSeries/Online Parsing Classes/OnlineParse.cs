@@ -1321,6 +1321,10 @@ namespace WindowPlugins.GUITVSeries
                     episodesList = DBEpisode.Get(conditions, false);
                 }
 
+                // community fork: files you chose "Skip for now" for stay out until you bring them back
+                if (SkippedFiles.Count > 0)
+                    episodesList = episodesList.Where(ep => !SkippedFiles.Contains(ep[DBEpisode.cFilename])).ToList();
+
                 epCount += episodesList.Count;
                                 
                 if (bFullSeriesRetrieval || episodesList.Count > 0) 
@@ -3711,5 +3715,89 @@ namespace WindowPlugins.GUITVSeries
             return b.ToString();
         }
         #endregion
+    }
+}
+
+namespace WindowPlugins.GUITVSeries
+{
+    /// <summary>
+    /// Community fork: files you chose "Skip for now" for in the import wizard - not offered again until you
+    /// bring them back (Details tab: right-click a show, or the wizard's "Bring back skipped files").
+    /// Kept in MP-TVSeries.skipped.txt next to MediaPortal's other settings, one file name per line.
+    /// </summary>
+    public static class SkippedFiles
+    {
+        static readonly object _lock = new object();
+        static HashSet<string> _cache;
+
+        static string FilePath
+        {
+            get { return MediaPortal.Configuration.Config.GetFile(MediaPortal.Configuration.Config.Dir.Config, "MP-TVSeries.skipped.txt"); }
+        }
+
+        static HashSet<string> Load()
+        {
+            if (_cache != null) return _cache;
+            _cache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                if (System.IO.File.Exists(FilePath))
+                    foreach (string l in System.IO.File.ReadAllLines(FilePath))
+                        if (l.Trim().Length > 0) _cache.Add(l.Trim());
+            }
+            catch (Exception ex) { MPTVSeriesLog.Write("Couldn't read the skipped files list: " + ex.Message); }
+            return _cache;
+        }
+
+        static void Save()
+        {
+            try { System.IO.File.WriteAllLines(FilePath, _cache.OrderBy(x => x).ToArray()); }
+            catch (Exception ex) { MPTVSeriesLog.Write("Couldn't save the skipped files list: " + ex.Message); }
+        }
+
+        public static bool Contains(string file)
+        {
+            if (string.IsNullOrEmpty(file)) return false;
+            lock (_lock) return Load().Contains(file);
+        }
+
+        public static int Count { get { lock (_lock) return Load().Count; } }
+
+        public static void Add(IEnumerable<string> files)
+        {
+            lock (_lock)
+            {
+                Load();
+                foreach (string f in files) if (!string.IsNullOrEmpty(f)) _cache.Add(f);
+                Save();
+            }
+        }
+
+        /// <summary>Bring back these skipped files (e.g. one show's). Returns how many were skipped.</summary>
+        public static int BringBack(IEnumerable<string> files)
+        {
+            lock (_lock)
+            {
+                Load();
+                int n = 0;
+                foreach (string f in files) if (!string.IsNullOrEmpty(f) && _cache.Remove(f)) n++;
+                if (n > 0) Save();
+                return n;
+            }
+        }
+
+        /// <summary>Bring back the skipped files that start with this folder (all of them when null). Returns how many.</summary>
+        public static int BringBack(string folder)
+        {
+            lock (_lock)
+            {
+                Load();
+                List<string> gone = folder == null ? _cache.ToList()
+                    : _cache.Where(f => f.StartsWith(folder.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase)).ToList();
+                foreach (string f in gone) _cache.Remove(f);
+                if (gone.Count > 0) Save();
+                return gone.Count;
+            }
+        }
     }
 }

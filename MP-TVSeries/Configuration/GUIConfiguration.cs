@@ -3586,6 +3586,53 @@ namespace WindowPlugins.GUITVSeries
         }
 
         // community fork 4.8.0.9: tick any number of episodes of a show / season and remove them in one go
+        /// <summary>Community fork: the renamer for a show or a season - or every show, one by one, starting with this one.</summary>
+        private void RenameFiles(TreeNode node, bool allShows)
+        {
+            if (node == null || node.Name == DBEpisode.cTableName) return;
+            TreeNode seriesNode = node.Name == DBSeries.cTableName ? node : node.Parent;
+            DBSeries series = seriesNode?.Tag as DBSeries;
+            if (series == null) return;
+            List<DBSeries> shows = new List<DBSeries>();
+            int season = -1;
+            if (allShows)
+            {
+                bool started = false;
+                foreach (TreeNode n in treeView_Library.Nodes)
+                {
+                    if (n == seriesNode) started = true;
+                    if (started && n.Name == DBSeries.cTableName && n.Tag is DBSeries) shows.Add((DBSeries)n.Tag);
+                }
+            }
+            else
+            {
+                shows.Add(series);
+                DBSeason s = node.Name == DBSeason.cTableName ? node.Tag as DBSeason : null;
+                if (s != null) season = s[DBSeason.cIndex];
+            }
+            using (RenameDialog dlg = new RenameDialog(shows, season))
+            {
+                dlg.ShowDialog(this);
+                if (dlg.Renamed) LoadTree();
+            }
+        }
+
+        private void BringBackSkipped(TreeNode node)
+        {
+            DBSeries series = node?.Tag as DBSeries;
+            if (series == null) return;
+            List<string> files = new List<string>();
+            try
+            {
+                SQLite.NET.SQLiteResultSet rs = DBTVSeries.Execute("select EpisodeFilename from local_episodes where SeriesID = " + (int)series[DBSeries.cID]);
+                for (int i = 0; i < rs.Rows.Count; i++) files.Add(rs.Rows[i].fields[0]);
+            }
+            catch { }
+            int n = SkippedFiles.BringBack(files);
+            MessageBox.Show(this, n == 0 ? "None of " + series + "'s files were skipped." : n + " skipped file(s) of " + series + " will be offered again at the next import.",
+                "Bring back skipped files", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         private void DeleteSeveral(TreeNode node)
         {
             if (node == null || node.Name == DBEpisode.cTableName) return;
@@ -4417,6 +4464,18 @@ namespace WindowPlugins.GUITVSeries
                     DeleteSeveral(clickedNode);
                     break;
 
+                case "renamefiles":
+                    RenameFiles(clickedNode, false);
+                    break;
+
+                case "renameall":
+                    RenameFiles(clickedNode, true);
+                    break;
+
+                case "bringback":
+                    BringBackSkipped(clickedNode);
+                    break;
+
                 case "update":
                     UpdateNode(clickedNode);
                     break;
@@ -4643,6 +4702,19 @@ namespace WindowPlugins.GUITVSeries
                 contextMenuStrip_DetailsTree.Items.Insert(at >= 0 ? at + 1 : contextMenuStrip_DetailsTree.Items.Count, several);
             }
             contextMenuStrip_DetailsTree.Items["deleteSeveralToolStripMenuItem"].Visible = node.Name != DBEpisode.cTableName;
+
+            // community fork 4.8.2: the renamer, and bringing back files skipped in the import wizard
+            if (!contextMenuStrip_DetailsTree.Items.ContainsKey("renameFilesToolStripMenuItem"))
+            {
+                int at = contextMenuStrip_DetailsTree.Items.IndexOfKey("deleteSeveralToolStripMenuItem");
+                at = at >= 0 ? at + 1 : contextMenuStrip_DetailsTree.Items.Count;
+                contextMenuStrip_DetailsTree.Items.Insert(at, new ToolStripMenuItem("Rename files...") { Name = "renameFilesToolStripMenuItem", Tag = "renamefiles" });
+                contextMenuStrip_DetailsTree.Items.Insert(at + 1, new ToolStripMenuItem("Rename files of all shows, one by one...") { Name = "renameAllToolStripMenuItem", Tag = "renameall" });
+                contextMenuStrip_DetailsTree.Items.Insert(at + 2, new ToolStripMenuItem("Bring back skipped files") { Name = "bringBackToolStripMenuItem", Tag = "bringback" });
+            }
+            contextMenuStrip_DetailsTree.Items["renameFilesToolStripMenuItem"].Visible = node.Name != DBEpisode.cTableName;
+            contextMenuStrip_DetailsTree.Items["renameAllToolStripMenuItem"].Visible = node.Name == DBSeries.cTableName;
+            contextMenuStrip_DetailsTree.Items["bringBackToolStripMenuItem"].Visible = node.Name == DBSeries.cTableName && SkippedFiles.Count > 0;
 
             //NOTE: use names to access the menu items in case the order get altered in the future
             switch ( node.Name )

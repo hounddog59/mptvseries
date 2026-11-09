@@ -36,6 +36,60 @@ namespace WindowPlugins.GUITVSeries.Configuration
                 checkBoxFilter.Checked = true;
             }
             checkBoxFilter.CheckedChanged += new EventHandler( checkBoxFilter_CheckedChanged );
+
+            // community fork: "Skip for now" - files you don't want to sort out yet stop being offered at every import
+            buttonSkipFile.Text = "Skip this file for now";
+            buttonSkipShow.Text = "Skip this show's files for now";
+            buttonBringBack.Text = "Bring back skipped files...";
+            foreach (Button b in new[] { buttonSkipFile, buttonSkipShow, buttonBringBack }) { b.AutoSize = true; b.Height = 23; }
+            buttonSkipFile.Location = new Point(258, 498);
+            buttonSkipShow.Location = new Point(400, 498);
+            buttonBringBack.Location = new Point(590, 498);
+            toolTipLocalEpisode.SetToolTip(buttonSkipFile, "Not offered again at the next imports - until you bring it back.\nNothing happens to the file itself.");
+            toolTipLocalEpisode.SetToolTip(buttonSkipShow, "Every file of this show listed here - not offered again until you bring them back.\nNothing happens to the files themselves.");
+            toolTipLocalEpisode.SetToolTip(buttonBringBack, "Offer the files you skipped again, at the next import.");
+            buttonSkipFile.Click += (s, e) => SkipFiles(false);
+            buttonSkipShow.Click += (s, e) => SkipFiles(true);
+            buttonBringBack.Click += (s, e) => BringBackSkipped();
+            Controls.AddRange(new Control[] { buttonSkipFile, buttonSkipShow, buttonBringBack });
+            ToolStripMenuItem skipItem = new ToolStripMenuItem("Skip this file for now");
+            skipItem.Click += (s, e) => SkipFiles(false);
+            contextMenuStripLocalEpisodes.Items.Add(skipItem);
+        }
+
+        readonly Button buttonSkipFile = new Button();
+        readonly Button buttonSkipShow = new Button();
+        readonly Button buttonBringBack = new Button();
+
+        void SkipFiles(bool wholeShow)
+        {
+            DBSeries series = listBoxSeries.SelectedItem as DBSeries;
+            if (series == null) return;
+            List<DBEpisode> skip = wholeShow ? displayedEps.ToList()
+                : listBoxLocal.SelectedIndex >= 0 && listBoxLocal.SelectedIndex < displayedEps.Count ? new List<DBEpisode> { displayedEps[listBoxLocal.SelectedIndex] } : new List<DBEpisode>();
+            if (skip.Count == 0) return;
+            if (wholeShow && MessageBox.Show(this, string.Format("Skip these {0} file(s) of {1} for now?\n\nThey won't be offered again until you bring them back. Nothing happens to the files themselves.", skip.Count, series),
+                "Skip for now", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+            SkippedFiles.Add(skip.Select(ep => (string)ep[DBEpisode.cFilename]));
+            var pairs = matches.Single(m => m.Key == series).Value;
+            pairs.RemoveAll(p => skip.Contains(p.Key));
+            if (localeps.ContainsKey(series)) localeps[series].RemoveAll(ep => skip.Contains(ep));
+            foreach (DBEpisode ep in skip) guessed.Remove(ep);
+            MPTVSeriesLog.Write(string.Format("Skipped {0} file(s) of {1} for now", skip.Count, series));
+
+            int keepIndex = listBoxSeries.SelectedIndex;
+            FillSeriesList();
+            if (keepIndex >= 0 && keepIndex < listBoxSeries.Items.Count) listBoxSeries.SelectedIndex = keepIndex;
+        }
+
+        void BringBackSkipped()
+        {
+            int n = SkippedFiles.Count;
+            if (n == 0) { MessageBox.Show(this, "You haven't skipped any files.", "Bring back skipped files", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+            if (MessageBox.Show(this, string.Format("Bring back all {0} skipped file(s)?\n\nThey'll be offered again at the next import.", n),
+                "Bring back skipped files", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            SkippedFiles.BringBack((string)null);
         }
 
         public void MatchEpisodesForSeries(DBSeries series, List<DBEpisode> localEpisodes, List<DBOnlineEpisode> onlineCandidates)
