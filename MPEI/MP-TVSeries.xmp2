@@ -1455,29 +1455,53 @@ public class Script
               </Params>
               <ExecuteLocation>AfterPanelShow</ExecuteLocation>
             </ActionItem>
-            <ActionItem Name="Creating Configuration Desktop Shortcut" ActionType="CreateShortCut" ConditionGroup="Main" Condition="None">
+            <ActionItem Name="Creating Configuration Desktop Shortcut" ActionType="Script" ConditionGroup="Main" Condition="None">
               <Params>
                 <Items>
-                  <SectionParam Name="ShortCut location">
-                    <Value>%Desktop%\MP-TVSeries Configuration.lnk</Value>
-                    <ValueType>Template</ValueType>
-                    <Description>Location of shortcut</Description>
+                  <SectionParam Name="Script">
+                    <Value>//css_reference "MpeCore.dll";
+using MpeCore.Classes;
+using MpeCore;
+public class Script
+{
+  public static void Main(PackageClass packageClass, ActionItem actionItem)
+  {
+    try
+    {
+      string mine = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory), "MP-TVSeries Configuration.lnk");
+      string all = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonDesktopDirectory), "MP-TVSeries Configuration.lnk");
+      if (System.IO.File.Exists(mine) || System.IO.File.Exists(all)) return;
+      string exe = System.IO.Path.Combine(MediaPortal.Configuration.Config.GetFolder(MediaPortal.Configuration.Config.Dir.Base), "MP-TVSeries-Configuration.exe");
+      System.Type t = System.Type.GetTypeFromProgID("WScript.Shell");
+      object shell = System.Activator.CreateInstance(t);
+      object sc = t.InvokeMember("CreateShortcut", System.Reflection.BindingFlags.InvokeMethod, null, shell, new object[] { mine });
+      System.Type st = sc.GetType();
+      st.InvokeMember("TargetPath", System.Reflection.BindingFlags.SetProperty, null, sc, new object[] { exe });
+      st.InvokeMember("WorkingDirectory", System.Reflection.BindingFlags.SetProperty, null, sc, new object[] { System.IO.Path.GetDirectoryName(exe) });
+      st.InvokeMember("Description", System.Reflection.BindingFlags.SetProperty, null, sc, new object[] { "MP-TVSeries settings" });
+      st.InvokeMember("Save", System.Reflection.BindingFlags.InvokeMethod, null, sc, null);
+    }
+    catch { }
+  }
+}
+</Value>
+                    <ValueType>Script</ValueType>
+                    <Description />
                   </SectionParam>
-                  <SectionParam Name="ShortCut target">
-                    <Value>%Base%\MP-TVSeries-Configuration.exe</Value>
-                    <ValueType>Template</ValueType>
-                    <Description>Target of short cut</Description>
-                  </SectionParam>
-                  <SectionParam Name="Description">
-                    <Value>MP-TVSeries Configuration</Value>
-                    <ValueType>String</ValueType>
-                    <Description>Description tooltip text </Description>
-                  </SectionParam>
-                  <SectionParam Name="Icon of the shortcut">
-                    <Value />
-                    <ValueType>Template</ValueType>
-                    <Description>Icon of the shortcut, 
- if is empty the icon of the target will be used</Description>
+                  <SectionParam Name="Uninstall Script">
+                    <Value>//css_reference "MpeCore.dll";
+using MpeCore.Classes;
+using MpeCore;
+public class Script
+{
+    public static void Main(PackageClass packageClass, UnInstallItem item)
+    {
+        return;
+    }
+}
+</Value>
+                    <ValueType>Script</ValueType>
+                    <Description />
                   </SectionParam>
                 </Items>
               </Params>
@@ -1865,7 +1889,7 @@ public class Script
       <Major>4</Major>
       <Minor>8</Minor>
       <Build>2</Build>
-      <Revision>0</Revision>
+      <Revision>1</Revision>
     </Version>
     <ExtensionDescription>MP-TVSeries is a popular TV Series plug-in for MediaPortal. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
 
@@ -1876,6 +1900,7 @@ The MP-TVSeries plugin will scan your hard drive (including network and removabl
 * New in 4.8: TVmaze as a backup for shows TMDB doesn't have, and a Continue Watching view.
 * 4.8.0.2: Configuration opens on the Details tab, a Hide Watched box there, and Recently Added only shows seasons with new episodes.
 * 4.8.0.3: Continue Watching lists the show you watched last first; MediaPortal reopens the show and season you were in; Recently Added (with Unwatched only on) leaves out shows that have nothing unwatched to show.
+* 4.8.2.1: the desktop icon stays where you put it - updates no longer delete it and make a new one (Windows put the new one in the next free spot); it's only made when it's missing.
 * 4.8.2.0: the TV renamer - Details tab, right-click a show (or season): "Rename files...", or "Rename files of all shows, one by one...". The show folder first (type over it if you like), then the season folders and episode files with ticks; titles from the online data; subtitles, .nfo and thumbnails go with their episode; the database follows (no rescan); "Undo the last rename". Naming styles start out the same as MyTorrents' When finished settings. Import wizard: "Skip this file / this show's files for now" - not offered again until you bring them back (wizard, or right-click the show).
 * 4.8.1.2: files waiting to be matched keep their "not matched yet" record - the clean-up after an import no longer removes it when the episode number doesn't exist on TheTVDB (MythBusters S02E05 when its seasons are years), and matching one of two files with the same number no longer takes the record away from the other.
 * 4.8.1.1: files that had lost their "not matched yet" record (after a clean-up) were never tried again - 421 files on the HTPC, 293 of them MythBusters; each import now puts those records back first so the files are matched again.
