@@ -48,18 +48,31 @@ namespace WindowPlugins.GUITVSeries.Configuration
             new[] { "Show (Year)", "{show} ({year})" },
             new[] { "Show (Year) [7.9]", "{show} ({year}) [{rating}]" },
             new[] { "Show (Year) [7.9][Genre]", "{show} ({year}) [{rating}][{genre}]" },
+            new[] { "Show, The (Year) [Genre]  (no rating - it changes)", "{sorttitle} ({year}) [{genre}]" },
             new[] { "Show, The (Year) [7.9][Genre]  (like Media Center Master)", "{sorttitle} ({year}) [{rating}][{genre}]" },
         };
 
         const string OptEpisode = "CommunityFork_RenameEpisode", OptSeason = "CommunityFork_RenameSeason", OptShow = "CommunityFork_RenameShow";
 
-        static string Saved(string option, string myTorrentsKey, string fallback)
+        /// 4.8.2.4: MyTorrents' styles (When finished tab) always win when they're set, so the renamer and MyTorrents name
+        /// things the same and you only set them in one place; otherwise your last choice here, otherwise the default.
+        static string Saved(string option, string myTorrentsKey, string fallback, out bool fromMyTorrents)
         {
+            string mt = FromMyTorrents(myTorrentsKey);
+            fromMyTorrents = !string.IsNullOrEmpty(mt);
+            if (fromMyTorrents) return mt;
             string v = DBOption.GetOptions(option);
             if (!string.IsNullOrEmpty(v)) return v == "-" ? "" : v;
-            // first time: the same naming as MyTorrents' "When finished" settings, so both name things alike
-            string mt = MyTorrentsSetting(myTorrentsKey);
-            return string.IsNullOrEmpty(mt) ? fallback : mt;
+            return fallback;
+        }
+
+        /// MyTorrents' style in the renamer's words: in its show-folder styles the show's name is "{title}"
+        static string FromMyTorrents(string key)
+        {
+            string mt = MyTorrentsSetting(key);
+            if (string.IsNullOrEmpty(mt)) return null;
+            if (key == "Finished.ShowFolderPattern") mt = mt.Replace("{title}", "{show}");
+            return mt;
         }
 
         static string MyTorrentsSetting(string key)
@@ -208,9 +221,15 @@ namespace WindowPlugins.GUITVSeries.Configuration
             Fill(_epStyle, EpisodeStyles);
             Fill(_seasonStyle, SeasonStyles);
             Fill(_showStyle, ShowStyles);
-            _epPattern.Text = Saved(OptEpisode, "Finished.NamePattern", EpisodeStyles[0][1]);
-            _seasonPattern.Text = Saved(OptSeason, "Finished.SeasonPattern", SeasonStyles[1][1]);
-            _showPattern.Text = Saved(OptShow, "Finished.ShowFolderPattern", ShowStyles[0][1]);
+            bool mtEp, mtSeason, mtShow;
+            _epPattern.Text = Saved(OptEpisode, "Finished.NamePattern", EpisodeStyles[0][1], out mtEp);
+            _seasonPattern.Text = Saved(OptSeason, "Finished.SeasonPattern", SeasonStyles[1][1], out mtSeason);
+            _showPattern.Text = Saved(OptShow, "Finished.ShowFolderPattern", ShowStyles[0][1], out mtShow);
+            // the ones that come from MyTorrents are changed there, not here (one place for both)
+            foreach (var row in new[] { Tuple.Create(mtEp, _epStyle, _epPattern), Tuple.Create(mtSeason, _seasonStyle, _seasonPattern), Tuple.Create(mtShow, _showStyle, _showPattern) })
+                if (row.Item1) { row.Item2.Enabled = false; row.Item3.ReadOnly = true; }
+            if (mtEp || mtSeason || mtShow)
+                _pieces.Text = "Greyed styles come from MyTorrents Configuration > When finished - change them there, so MyTorrents and this renamer always name things the same.";
             Pick(_epStyle, EpisodeStyles, _epPattern.Text);
             Pick(_seasonStyle, SeasonStyles, _seasonPattern.Text);
             Pick(_showStyle, ShowStyles, _showPattern.Text);
@@ -577,9 +596,10 @@ namespace WindowPlugins.GUITVSeries.Configuration
 
         void SavePatterns()
         {
-            DBOption.SetOptions(OptEpisode, _epPattern.Text.Length == 0 ? "-" : _epPattern.Text);
-            DBOption.SetOptions(OptSeason, _seasonPattern.Text.Length == 0 ? "-" : _seasonPattern.Text);
-            DBOption.SetOptions(OptShow, _showPattern.Text.Length == 0 ? "-" : _showPattern.Text);
+            // only the ones you can change here (MyTorrents' own are kept in MyTorrents)
+            if (!_epPattern.ReadOnly) DBOption.SetOptions(OptEpisode, _epPattern.Text.Length == 0 ? "-" : _epPattern.Text);
+            if (!_seasonPattern.ReadOnly) DBOption.SetOptions(OptSeason, _seasonPattern.Text.Length == 0 ? "-" : _seasonPattern.Text);
+            if (!_showPattern.ReadOnly) DBOption.SetOptions(OptShow, _showPattern.Text.Length == 0 ? "-" : _showPattern.Text);
         }
 
         static string MoveFile(string from, string to)
