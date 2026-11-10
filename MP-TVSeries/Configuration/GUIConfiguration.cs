@@ -108,6 +108,31 @@ namespace WindowPlugins.GUITVSeries
             };
             mDeleteTicked.LinkClicked += (s, e) => DeleteTicked();
             tabFormattingRules.AutoScrollMinSize = new Size((int)(760 * scale), (int)(560 * scale));
+
+            // community fork 4.8.2.3: Save / Save and close at the bottom, like MyTorrents (Mark: "it's user friendly to have one").
+            // Settings are still saved as you change them - these make sure (and say so).
+            Panel savePanel = new Panel { Dock = DockStyle.Bottom, Height = (int)(40 * scale) };
+            Button saveButton = new Button { Text = "Save", AutoSize = true, Anchor = AnchorStyles.Right | AnchorStyles.Top };
+            Button saveCloseButton = new Button { Text = "Save and close", AutoSize = true, Anchor = AnchorStyles.Right | AnchorStyles.Top };
+            Label saveNote = new Label { AutoSize = true, ForeColor = Color.DimGray, Anchor = AnchorStyles.Left | AnchorStyles.Top,
+                                         Text = "Your changes are saved as you make them." };
+            savePanel.Controls.AddRange(new Control[] { saveNote, saveButton, saveCloseButton });
+            Controls.Add(savePanel);
+            splitMain_Log.BringToFront(); // the main area fills what's left above the buttons
+            savePanel.Layout += (s, e) =>
+            {
+                int pad = (int)(10 * scale), top = (savePanel.Height - saveCloseButton.Height) / 2;
+                saveCloseButton.Location = new Point(savePanel.ClientSize.Width - pad - saveCloseButton.Width, top);
+                saveButton.Location = new Point(saveCloseButton.Left - (int)(6 * scale) - saveButton.Width, top);
+                saveNote.Location = new Point(pad, top + (saveButton.Height - saveNote.Height) / 2);
+            };
+            saveButton.Click += (s, e) =>
+            {
+                SaveEverything();
+                saveNote.ForeColor = Color.DarkGreen;
+                saveNote.Text = "Saved \u2713   (" + DateTime.Now.ToString("h:mm tt") + ")";
+            };
+            saveCloseButton.Click += (s, e) => { SaveEverything(); Close(); };
             
             MPTVSeriesLog.AddNotifier(ref listBox_Log);
 
@@ -115,14 +140,18 @@ namespace WindowPlugins.GUITVSeries
 
             Translation.Init();
 
-            // set height/width
+            // community fork 4.8.2.3: the window can be made much smaller (it couldn't go below 1219 x 1038 - taller than a
+            // laptop screen, so the bottom was off the screen). The tabs scroll when it's small. It always opens on the
+            // screen: the size you left it at, but never bigger than the screen.
+            this.MinimumSize = new Size((int)(760 * scale), (int)(520 * scale));
+            Rectangle screen = Screen.FromPoint(Cursor.Position).WorkingArea;
             int height = DBOption.GetOptions(DBOption.cConfigSizeHeight);
             int width = DBOption.GetOptions(DBOption.cConfigSizeWidth);
-            if (height > this.MinimumSize.Height && width > this.MinimumSize.Width)
-            {
-                Size s = new Size(width, height);
-                this.Size = s;
-            }
+            Size wanted = (height >= this.MinimumSize.Height && width >= this.MinimumSize.Width) ? new Size(width, height) : this.Size;
+            wanted = new Size(Math.Min(wanted.Width, screen.Width), Math.Min(wanted.Height, screen.Height));
+            this.Size = wanted;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new Point(screen.Left + (screen.Width - wanted.Width) / 2, screen.Top + (screen.Height - wanted.Height) / 2);
             this.Resize += new EventHandler(ConfigurationForm_Resize);            
 
             mLoadDisplay = new loadingDisplay();
@@ -131,6 +160,7 @@ namespace WindowPlugins.GUITVSeries
             
             InitSettingsTreeAndPanes();
             InitExtraTreeAndPanes();
+            ScrollWhenSmall(this); // community fork 4.8.2.3
             
             LoadImportPathes();
             LoadExpressions();
@@ -6004,6 +6034,36 @@ namespace WindowPlugins.GUITVSeries
         private void nudParentalControlTimeout_ValueChanged(object sender, EventArgs e)
         {
             DBOption.SetOptions(DBOption.cParentalControlResetInterval, (int)nudParentalControlTimeout.Value);
+        }
+
+        /// <summary>
+        /// community fork 4.8.2.3: every panel inside the window scrolls when the window is made small, instead of cutting
+        /// its contents off (a panel whose contents fill it never shows a scroll bar, so nothing changes at normal sizes).
+        /// </summary>
+        private static void ScrollWhenSmall(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                if (c is SplitterPanel || (c is Panel && !(c is FlowLayoutPanel) && !(c is TableLayoutPanel)) || c is TabPage)
+                    ((ScrollableControl)c).AutoScroll = true;
+                if (c.HasChildren) ScrollWhenSmall(c);
+            }
+        }
+
+        /// <summary>community fork: finish any edit in progress (a box you're still typing in) and save the window size.</summary>
+        private void SaveEverything()
+        {
+            try
+            {
+                ValidateChildren(); // commits a text box / grid cell that still has the cursor in it
+                DBOption.SetOptions(DBOption.cConfigSizeHeight, this.Size.Height);
+                DBOption.SetOptions(DBOption.cConfigSizeWidth, this.Size.Width);
+                MPTVSeriesLog.Write("Configuration: saved");
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Configuration: couldn't save - " + ex.Message);
+            }
         }
 
         private void ConfigurationForm_FormClosing(object sender, FormClosingEventArgs e)

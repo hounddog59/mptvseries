@@ -1903,7 +1903,7 @@ public class Script
       <Major>4</Major>
       <Minor>8</Minor>
       <Build>2</Build>
-      <Revision>2</Revision>
+      <Revision>3</Revision>
     </Version>
     <ExtensionDescription>MP-TVSeries is a popular TV Series plug-in for MediaPortal. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
 
@@ -1914,6 +1914,7 @@ The MP-TVSeries plugin will scan your hard drive (including network and removabl
 * New in 4.8: TVmaze as a backup for shows TMDB doesn't have, and a Continue Watching view.
 * 4.8.0.2: Configuration opens on the Details tab, a Hide Watched box there, and Recently Added only shows seasons with new episodes.
 * 4.8.0.3: Continue Watching lists the show you watched last first; MediaPortal reopens the show and season you were in; Recently Added (with Unwatched only on) leaves out shows that have nothing unwatched to show.
+* 4.8.2.3: Save and Save and close along the bottom of Configuration, on every tab (changes are still saved as you make them - these make sure, and say so); the window can be made much smaller (it couldn't go below 1219 x 1038, taller than a laptop screen), always opens on the screen, and its tabs and panels scroll instead of cutting things off.
 * 4.8.2.2: the desktop icon step finds the MediaPortal folder from the installer's own location (more reliable).
 * 4.8.2.1: the desktop icon stays where you put it - updates no longer delete it and make a new one (Windows put the new one in the next free spot); it's only made when it's missing.
 * 4.8.2.0: the TV renamer - Details tab, right-click a show (or season): "Rename files...", or "Rename files of all shows, one by one...". The show folder first (type over it if you like), then the season folders and episode files with ticks; titles from the online data; subtitles, .nfo and thumbnails go with their episode; the database follows (no rescan); "Undo the last rename". Naming styles start out the same as MyTorrents' When finished settings. Import wizard: "Skip this file / this show's files for now" - not offered again until you bring them back (wizard, or right-click the show).
