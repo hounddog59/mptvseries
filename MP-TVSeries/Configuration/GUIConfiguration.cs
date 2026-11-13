@@ -440,6 +440,15 @@ namespace WindowPlugins.GUITVSeries
             dtpParentalBefore.Text = DBOption.GetOptions(DBOption.cParentalControlDisableBefore);
 
             tabControl_Details.SelectTab(tabPage_Details); // open on the Details tab (the library)
+            // 2026 (4.8.2.5): ...or on the tab you were on last time
+            object lastTab = DBOption.GetOptions("ConfigLastTab");
+            if (lastTab != null)
+                foreach (TabPage page in tabControl_Details.TabPages)
+                    if (page.Name == lastTab.ToString()) tabControl_Details.SelectTab(page);
+            tabControl_Details.SelectedIndexChanged += (s, e) =>
+            {
+                if (tabControl_Details.SelectedTab != null) DBOption.SetOptions("ConfigLastTab", tabControl_Details.SelectedTab.Name);
+            };
         }
 
         void Panel1_SizeChanged(object sender, EventArgs e)
