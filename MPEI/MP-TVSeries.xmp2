@@ -1938,7 +1938,7 @@ This product uses the TMDB API but is not endorsed or certified by TMDB.
 Includes the official 4.5.1.756 fixes. Back up your database before installing.
 If you don't like it, simply uninstall it and go back to the original MP-TVSeries you had before.</VersionDescription>
     <DevelopmentStatus>Stable</DevelopmentStatus>
-    <OnlineLocation>https://github.com/hounddog59/mptvseries/releases/download/v4.8.2.6/MP-TVSeries-4.8.2.6.mpe1</OnlineLocation>
+    <OnlineLocation>https://github.com/hounddog59/mptvseries/releases/download/v.4.8.2.6/MP-TVSeries-4.8.2.6.mpe1</OnlineLocation>
     <ReleaseDate>2026-10-17T21:30:00</ReleaseDate>
     <Tags>tvseries,tv,mp-tvseries,videos,thetvdb,tmdb</Tags>
     <PlatformCompatibility>AnyCPU</PlatformCompatibility>
