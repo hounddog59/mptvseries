@@ -850,6 +850,10 @@ namespace WindowPlugins.GUITVSeries
                     }
                 }
 
+                // community fork 4.8.2.6: a renamed file is not a new file - copy what MediaInfo already read for the
+                // old name across to the new one, so the import doesn't read thousands of files again after a rename
+                CarryOverMediaInfo(localepisodes);
+
                 // clear local database references for files that dont exist anymore
                 foreach (DBEpisode localepisode in localepisodes)
                 {
@@ -865,6 +869,68 @@ namespace WindowPlugins.GUITVSeries
                 // and copy the HasLocalFileTemp value into the real one
                 DBSeries.GlobalSet(DBOnlineSeries.cHasLocalFiles, DBOnlineSeries.cHasLocalFilesTemp);
                 DBSeason.GlobalSet(DBSeason.cHasLocalFiles, DBSeason.cHasLocalFilesTemp);
+            }
+        }
+
+        // community fork 4.8.2.6: fields MediaInfo fills in (plus the dates and size), copied from a file's old name
+        private static readonly string[] MediaInfoFields = {
+            DBEpisode.cAudioCodec, DBEpisode.cAudioFormat, DBEpisode.cAudioFormatProfile, DBEpisode.cAudioBitrate, DBEpisode.cAudioChannels,
+            DBEpisode.cAudioTracks, DBEpisode.cAudioLanguage, DBEpisode.cTextCount, DBEpisode.cVideoWidth, DBEpisode.cVideoHeight,
+            DBEpisode.cVideoBitRate, DBEpisode.cVideoFrameRate, DBEpisode.cVideoAspectRatio, DBEpisode.cVideoCodec, DBEpisode.cVideoFormat,
+            DBEpisode.cVideoFormatProfile, DBEpisode.cVideoColourPrimaries, DBEpisode.cVideoFormatCommercial,
+            DBEpisode.cLocalPlaytime, DBEpisode.cPrettyPlaytime, DBEpisode.cFileSize, DBEpisode.cFileSizeBytes,
+            DBEpisode.cFileDateCreated, DBEpisode.cFileDateAdded };
+
+        /// <summary>
+        /// Files about to be removed because they're gone (old names) are matched with files found this time that
+        /// haven't been read by MediaInfo yet (new names): same episode and, when known, the same size - the file was
+        /// only renamed or moved. MediaInfo's details, and the date it was added, go across to the new name.
+        /// </summary>
+        private static void CarryOverMediaInfo(List<DBEpisode> gone)
+        {
+            try
+            {
+                List<DBEpisode> old = gone.Where(e => !String.IsNullOrEmpty(e[DBEpisode.cCompositeID]) && (int)e[DBEpisode.cVideoWidth] > 0).ToList();
+                if (old.Count == 0) return;
+                SQLCondition cond = new SQLCondition();
+                cond.Add(new DBEpisode(), DBEpisode.cVideoWidth, "0", SQLConditionType.Equal);
+                cond.Add(new DBEpisode(), DBEpisode.cImportProcessed, 2, SQLConditionType.NotEqual);
+                List<DBEpisode> fresh = DBEpisode.Get(cond, false).Where(e => !String.IsNullOrEmpty(e[DBEpisode.cCompositeID])).ToList();
+                if (fresh.Count == 0) return;
+                Dictionary<string, List<DBEpisode>> byEpisode = new Dictionary<string, List<DBEpisode>>(StringComparer.OrdinalIgnoreCase);
+                foreach (DBEpisode e in fresh)
+                {
+                    string key = e[DBEpisode.cCompositeID];
+                    if (!byEpisode.ContainsKey(key)) byEpisode[key] = new List<DBEpisode>();
+                    byEpisode[key].Add(e);
+                }
+                int copied = 0;
+                foreach (DBEpisode o in old)
+                {
+                    List<DBEpisode> candidates;
+                    if (!byEpisode.TryGetValue(o[DBEpisode.cCompositeID], out candidates) || candidates.Count == 0) continue;
+                    long oldSize = 0;
+                    long.TryParse(o[DBEpisode.cFileSizeBytes], out oldSize);
+                    DBEpisode match = null;
+                    foreach (DBEpisode c in candidates)
+                    {
+                        long size = -1;
+                        try { size = new FileInfo(c[DBEpisode.cFilename]).Length; } catch { }
+                        if (oldSize > 0 ? size == oldSize : candidates.Count == 1) { match = c; break; }
+                    }
+                    if (match == null) continue;
+                    foreach (string f in MediaInfoFields)
+                        match[f] = o[f];
+                    match.Commit();
+                    candidates.Remove(match);
+                    copied++;
+                }
+                if (copied > 0)
+                    MPTVSeriesLog.Write(string.Format("{0} renamed or moved file(s): kept the details MediaInfo had already read - they won't be read again", copied));
+            }
+            catch (Exception ex)
+            {
+                MPTVSeriesLog.Write("Couldn't carry MediaInfo details over to renamed files: " + ex.Message);
             }
         }
 
