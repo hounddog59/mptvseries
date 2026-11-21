@@ -1911,7 +1911,7 @@ The MP-TVSeries plugin will scan your hard drive (including network and removabl
     <VersionDescription>Community version of MP-TVSeries - install only if you choose to; it replaces the official MP-TVSeries.
 * New in 4.7: free show information from TMDB - no subscription, nothing to sign up for.
 * New in 4.7.0.6: Recently Added lists the series with new episodes; Torrent Search is first in the Info menu.
-* New in 4.8: TVmaze as a backup for shows TMDB doesn't have, and a Continue Watching view.
+* New in 4.8: a Continue Watching view.
 * 4.8.0.2: Configuration opens on the Details tab, a Hide Watched box there, and Recently Added only shows seasons with new episodes.
 * 4.8.0.3: Continue Watching lists the show you watched last first; MediaPortal reopens the show and season you were in; Recently Added (with Unwatched only on) leaves out shows that have nothing unwatched to show.
 * 4.8.2.6: renamed or moved files keep the details MediaInfo already read - a big rename no longer means reading every file again at the next import.

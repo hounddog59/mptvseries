@@ -189,7 +189,7 @@ its own settings and guide.
 
 | Problem | What to try |
 |---|---|
-| A show isn't found | Check the folder and file name, and try a `.tvdb` ID file. With TMDB, some documentaries aren't listed – these come from TVmaze when it has them, or enter a TheTVDB PIN. If it's in **Needs your help**, use **Search** there. |
+| A show isn't found | Check the folder and file name, and try a `.tvdb` ID file. With TMDB, some documentaries aren't listed – enter a TheTVDB PIN for those. If it's in **Needs your help**, use **Search** there. |
 | An episode keeps coming back as "new" | Usually a special TheTVDB doesn't list. Correct its number on the Details tab. |
 | Pictures are wrong or missing | **Info** > **Fanart** or **Cycle Poster** in MediaPortal, or the pictures on the Details tab. Run an import to replace missing ones. |
 | Settings don't stick | Close MediaPortal before changing settings in Configuration. |

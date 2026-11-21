@@ -91,13 +91,6 @@ page. See the **[User Guide](docs/User-Guide.md)** for where to find everything.
   wide banners from fanart.tv.
 - Downloads are paced and wait politely if TMDB asks them to slow down.
 
-**TVmaze as a backup (new in 4.8)**
-- Shows TMDB doesn't have – some documentaries, and series TMDB lists as part of another show – now come from
-  TVmaze (free, no sign-up, nothing to set up). This happens on its own when TMDB is the source.
-- Found by their TheTVDB number, or by name and year when TVmaze doesn't have the number.
-- Searches in the import wizard also list TVmaze's matches that TMDB couldn't offer.
-- TVmaze's text is in English; specials go into season 0, in the order they aired.
-
 **Continue Watching (new in 4.8)**
 - A new **Continue Watching** view in MediaPortal: the shows you've watched lately (the last 60 days – change
   it on the **General** tab of MP-TVSeries Configuration) that still have unwatched episodes, the one you watched most recently at the top. Opening a show lists only its unwatched
@@ -174,12 +167,11 @@ page. See the **[User Guide](docs/User-Guide.md)** for where to find everything.
 
 - A few shows aren't on TMDB at all, or TMDB lists them differently – for example some documentaries, and
   series that TMDB puts together as one show (like *Cunk on Britain*, which TMDB has as part of *Cunk on...*).
-  From 4.8 these come from TVmaze instead, when TVmaze has them; a few rare shows may still be on neither.
+  For those, enter a TheTVDB PIN, or use **Search** in the Needs your help list to pick another match.
 - For a few shows TMDB numbers the seasons or episodes differently from TheTVDB.
 - Favourites are a TheTVDB feature, so they need a TheTVDB PIN.
 - This product uses the TMDB API but is not endorsed or certified by TMDB. TMDB is free to use for
   non-commercial use, with credit to TMDB (on the About tab).
-- TVmaze's information is shared under the CC BY-SA licence, with credit to TVmaze.com (on the About tab).
 
 ## Included from the official team (4.5.1.745 – 4.5.1.756)
 
@@ -226,7 +218,7 @@ official team releases an update later, uninstall this version first to install 
 
 ## Planned
 
-- More testing of the TVmaze backup.
+- **TVmaze as a backup** for shows TMDB doesn't have – being tested; it will be described here once it's ready.
 
 ## Credits
 
@@ -234,6 +226,6 @@ MP-TVSeries was created by the MP-TVSeries team and is maintained by the MediaPo
 (damienhaynes, andrewjswan, ltfearme and contributors). This fork builds on their work and keeps the original
 licence.
 
-Show information from TheTVDB.com, TMDB (themoviedb.org) and TVmaze.com; wide banners from fanart.tv.
+Show information from TheTVDB.com and TMDB (themoviedb.org); wide banners from fanart.tv.
 
 This community version is maintained by Mark Willmer.
