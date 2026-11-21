@@ -10,11 +10,9 @@
 
 # What is MP-TVSeries #
 
-[![MP AnyCPU](https://img.shields.io/badge/MP-AnyCPU-blue?logo=windows&logoColor=white)](https://github.com/Mediaportal-Plugin-Team/mptvseries/releases)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Mediaportal-Plugin-Team/mptvseries/build.yml?logo=github)](https://github.com/Mediaportal-Plugin-Team/mptvseries/actions)
-[![GitHub](https://img.shields.io/github/license/Mediaportal-Plugin-Team/mptvseries?color=blue)](https://github.com/Mediaportal-Plugin-Team/mptvseries/blob/master/LICENSE)
-[![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/Mediaportal-Plugin-Team/mptvseries?include_prereleases)](https://github.com/Mediaportal-Plugin-Team/mptvseries/releases)
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/downloads-pre/Mediaportal-Plugin-Team/mptvseries/latest/total?label=release@downloads)](https://github.com/Mediaportal-Plugin-Team/mptvseries/releases)
+[![MP AnyCPU](https://img.shields.io/badge/MP-AnyCPU-blue?logo=windows&logoColor=white)](https://github.com/hounddog59/mptvseries/releases)
+[![GitHub](https://img.shields.io/github/license/hounddog59/mptvseries?color=blue)](https://github.com/hounddog59/mptvseries/blob/4.8/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/hounddog59/mptvseries?label=community%20version)](https://github.com/hounddog59/mptvseries/releases)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
 MP-TVSeries is a popular TV Series plug-in for MediaPortal, an open-source media center application. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
@@ -28,16 +26,13 @@ This Plugin does not play Live TV
 
 # Questions, Suggestions & Bug Reports #
 
-There are 3 ways you can receive support for the plugin, Submitting log files and or Screenshots is recommended
+There are 2 ways you can receive support for the plugin, Submitting log files and or Screenshots is recommended
 
 > ## Mediaportal Forum ##
-MP-TVSeries has a dedicated [sub-forum](http://forum.team-mediaportal.com/my-tvseries-162/), try searching as you question may have been answered, if not please create a new thread
+MP-TVSeries has a dedicated [sub-forum](https://forum.team-mediaportal.com/forums/my-tvseries.162/), try searching as you question may have been answered, if not please create a new thread
 
 > ## Issue Tracker ##
-MP-TVSeries has a issue tracker [here](https://github.com/damienhaynes/mptvseries/issues). Recommended if you have a re-producible bug or enhancement request
-
-> ## IRC ##
-Join the #mp-tvseries IRC channel on Freenode
+MP-TVSeries has an issue tracker [here](https://github.com/hounddog59/mptvseries/issues). Recommended if you have a re-producible bug or enhancement request
 
 > ## Submitting Useful Log Files ##
 If you require assitance its smart to include the log files with your post, you will likely find the community will more often look at your issue if you provide all the necessary information. Instructions are below.
@@ -53,15 +48,15 @@ If you require assitance its smart to include the log files with your post, you 
 
 # Integration with Social Media Websites #
 
-MP-TVSeries optionally integrates with the [trakt.tv](http://trakt.tv) website, which are built around sharing with your friends what shows and movies you are into and watching.
+MP-TVSeries optionally integrates with the [trakt.tv](https://trakt.tv) website, which are built around sharing with your friends what shows and movies you are into and watching.
 
-One of the advantages of  beeing connected to [trakt.tv](http://trakt.tv) is the syncronisation of your watch flags and ratings, which we recommend. This is very useful if you have multiple HTPC's, or if you need to start your tv series database from scratch.
+One of the advantages of  beeing connected to [trakt.tv](https://trakt.tv) is the syncronisation of your watch flags and ratings, which we recommend. This is very useful if you have multiple HTPC's, or if you need to start your tv series database from scratch.
 
 You can use any or all of the sites at the same time.
 
 ## Trakt.tv ##
 
-  * From version 2.8.1+, the Trakt.tv support will be moved to its own plugin called [Trakt for Mediaportal](https://trakt.tv/a/mediaportal). This plugin will be included with the MP-TVSeries installer should you wish to install it or you can download MPEI package at any time.
+  * From version 2.8.1+, the Trakt.tv support will be moved to its own plugin called [Trakt for Mediaportal](https://github.com/trakt/Trakt-for-Mediaportal). This plugin will be included with the MP-TVSeries installer should you wish to install it or you can download MPEI package at any time.
 
 > ### Configuration After Install ###
 
@@ -85,12 +80,12 @@ Here are a few random examples which will parse.
   * _Alias 01x01.mkv_
 
 > ## Series with Specials ##
-Specials need to be labeled as Season 0, Lets take _Top Gear Polar Special_ for example, find _Top Gear_ on thetvdb and click on [Specials](http://www.thetvdb.com/?tab=season&seriesid=74608&seasonid=22070&lid=7). We can see in the Specials list, its labeled as Episode 49, so a filename for that could be
-  * _Top Gear - S00E49 - Polar Special.avi_
-  * _Top Gear - 0x49.mkv_
+Specials need to be labeled as Season 0, Lets take _Top Gear Polar Challenge_ for example, find _Top Gear_ on thetvdb and click on [Specials](https://thetvdb.com/series/top-gear/seasons/official/0). We can see in the Specials list, its labeled as Episode 155, so a filename for that could be
+  * _Top Gear - S00E155 - Polar Challenge.avi_
+  * _Top Gear - 0x155.mkv_
 
 > ## Original Series And Remakes ##
-If you have a series which has been rebooted, lets take _Battlestar Galatica_ for example, there is the Original, a 1980's version and a 2003 version, How do you name these? go to [thetvdb.com](http://www.thetvdb.com), search _Battlestar Galatica_. We need to name our files the same way. note each series has a different show id comfirming they are all different series
+If you have a series which has been rebooted, lets take _Battlestar Galatica_ for example, there is the Original, a 1980's version and a 2003 version, How do you name these? go to [thetvdb.com](https://thetvdb.com), search _Battlestar Galatica_. We need to name our files the same way. note each series has a different show id comfirming they are all different series
 
   * _Battlestar Galactica  - S01E01.avi  (match as original series)_
   * _Battlestar Galactica (1980) - S01E01.avi  (match as 1980's series)_
@@ -101,7 +96,7 @@ If a series was already imported incorrectly in Mediaportal, highlight the serie
 > ## Mini-Series ##
 A standalone Mini Series, like _Dune_, will usually have the _part 1_, _part 2_ etc listed at _Season 1_, _Episode 1_, _Episode 2_ etc on TheTVDB. If for example, the Mini Series lead to a TV Show, such as _BattleStar Galactica (2003)_ that Mini Series may be listed in _Specials / Season 0_.
 
-The Solution is to check the Mini-Series on [thetvdb.com](http://thetvdb.com), match your files names to their syntax. Examples:
+The Solution is to check the Mini-Series on [thetvdb.com](https://thetvdb.com), match your files names to their syntax. Examples:
 
   * _Frank Herbert's Dune - S01E01.avi_
   * _Frank Herbert's Dune - S01E02.avi_
@@ -128,7 +123,7 @@ MP-TVSeries is does not currently support combining multiple files into a single
 We recommend in this scenario to join the files together, Click the following links for example programs for [AVI files](http://www.alexander-noe.com/video/amg/) and for [MKV files](http://www.bunkus.org/videotools/mkvtoolnix/).
 
 > ## Episodes with Air Date ##
-MP-TVSeries now supports AirDate parsing, matched up from episodes listed at [thetvdb.com](http://thetvdb.com)
+MP-TVSeries now supports AirDate parsing, matched up from episodes listed at [thetvdb.com](https://thetvdb.com)
 Some examples below are episodes which will now parse by default - Note: requires atleast v2.9.3 for MP 1.1 or v3.0.5 for MP 1.2B
 
   * _Conan.(2010).2010.11.08.Baa.Baa.Blackmail.mkv_
@@ -136,7 +131,7 @@ Some examples below are episodes which will now parse by default - Note: require
   * _The.Colbert.Report.2011.07.27.Dr.Missy.Cummings.mkv_
 
 > ## Auto Renaming of Files ##
-MP-TVSeries does not currently support the auto renaming of your files. However their are free 3rd party tools such as [TheRenamer](http://www.theRenamer.com), [Tv Rename](http://www.tvrename.com), [Media Centre Master](http://www.mediacentermaster.com) which you could use to organise/rename the files in your collection.
+From version 4.8.2.0, MP-TVSeries can rename your files itself: in MP-TVSeries Configuration, right-click a show or season on the Details tab and choose "Rename files...". Free tools such as [TV Rename](https://www.tvrename.com) and [Media Center Master](https://www.mediacentermaster.com) can also organise and rename the files in your collection.
 
 > ## Folder Structure ##
 There are many variations you could use, below is a way that works well with the renaming tools above.
@@ -188,13 +183,13 @@ To download all the available information for your Series, including Episodes yo
   * Click _OPTIONS_
   * Change __SHOW ALL EPISODES__ to __ON__
 
-You will now see all episodes for a Series, Depending on Skin, those episodes may show in a different colour, e.g. _Orange_ in _Blue3Wide_ & _StreamedMP_. If a Season only shows a partial amount of all the expected episodes, then those episodes havent been added yet on [thetvdb.com](http://thetvdb.com).
+You will now see all episodes for a Series, Depending on Skin, those episodes may show in a different colour, e.g. _Orange_ in _Blue3Wide_ & _StreamedMP_. If a Season only shows a partial amount of all the expected episodes, then those episodes havent been added yet on [thetvdb.com](https://thetvdb.com).
 ---
 
 # Importing #
 
 > ## Imported Episode Image is Incorrect ##
-If you find a episode which has a incorrect episode image, it may be been incorrectly uploaded at [thetvdb.com](http://thetvdb.com). When the image is replaced with a correct version, MP-TVSeries will not automatically download this, however you can do this manually.
+If you find a episode which has a incorrect episode image, it may be been incorrectly uploaded at [thetvdb.com](https://thetvdb.com). When the image is replaced with a correct version, MP-TVSeries will not automatically download this, however you can do this manually.
 
 _Note: MP-TVSeries v2.7+ will show a FanArt episode image if there is no episode image available, which will be updated automatically, and not to be confused with an Incorrect Episode Image._
 
@@ -205,7 +200,7 @@ _Note: MP-TVSeries v2.7+ will show a FanArt episode image if there is no episode
   * Click __UPDATE__
 
 > ## Importing Videos Not At TheTVDB ##
-MP-TVSeries is not intended for this scenario, but there is a solution you can use. If you have videos that you want to show in MP-TVSeries, and its not appropriate to create it at [thetvdb.com](http://thetvdb.com), such as personal movies recorded on video cameras etc, you can try the following - Recommend that you use MP-TVSeries v2.9 or higher.
+MP-TVSeries is not intended for this scenario, but there is a solution you can use. If you have videos that you want to show in MP-TVSeries, and its not appropriate to create it at [thetvdb.com](https://thetvdb.com), such as personal movies recorded on video cameras etc, you can try the following - Recommend that you use MP-TVSeries v2.9 or higher.
 
   * Create proper filenames with season and episode syntax e.g.
     * _My Trip to Fiji - S01E01.avi_
@@ -225,7 +220,7 @@ By default MP-TVSeries will automatically generate episode titles if they dont e
 ---
 
 # Custom Artwork #
-Typically if you are importing videos not available on [theTVDB.com](http://thetvdb.com) such as sports videos, then you will most likely want to add some artwork. Follow these instructions to get custom artwork in tvseries:
+Typically if you are importing videos not available on [theTVDB.com](https://thetvdb.com) such as sports videos, then you will most likely want to add some artwork. Follow these instructions to get custom artwork in tvseries:
 
   * In your thumbs\MPTVSeriesBanners\ folder create the **Show Name** if it doesnt already exist (this should match your series name, replace invalid filename characters with underscore).
   * In the **episodes** folder create artwork in the following format: custom-{seasonindex}x{episodeindex}.jpg e.g. **custom-2001x1.jpg**
@@ -237,10 +232,10 @@ Now in Configuration, select the series and pick the **custom** artwork from the
 ---
 
 # Subtitle Support #
-MP-TVSeries suppors the [SubCentral](http://forum.team-mediaportal.com/forums/subcentral.544/) Plugin.
+MP-TVSeries suppors the [SubCentral](https://forum.team-mediaportal.com/forums/subcentral.544/) Plugin.
 
 > ## Installation ##
-  * [Download](http://www.team-mediaportal.com/extensions/movies-videos/subcentral) the SubCentral Plugin
+  * [Download](https://www.team-mediaportal.com/extensions/movies-videos/subcentral) the SubCentral Plugin
   * Check SubCentral Plugin is enabled in MP Configuration, Plugins
   * in MP-TVSeries Configuration, Click General tab
   * (Optional) Tick _Offer to download subtitles before playing (SubCentral)_ if you want to perform an automatic subtitle search before playing an episode that does not have any subtitles.
@@ -295,7 +290,7 @@ This directory contains all the language files, in XML format that can be used i
 | Vista, Win7 & Win10 |  C:\ProgramData\Team MediaPortal\Mediaportal\language\MP-TVSeries\                      |
 
 > ## Series Cache (Files) ##
-From MP-TVSeries v2.9+, there will be caching of the files downloaded from [theTVDB.com](http://thetvdb.com) to speed up your import time. Cached series are only removed if the online API reports newer information is available.
+From MP-TVSeries v2.9+, there will be caching of the files downloaded from [theTVDB.com](https://thetvdb.com) to speed up your import time. Cached series are only removed if the online API reports newer information is available.
 
 | XP |  C:\Documents and Settings\All Users\Application Data\Team MediaPortal\Mediaportal\MP-TVSeries\Cache\ |
 |:---|:------------------------------------------------------------------------------------------------------|
@@ -323,7 +318,7 @@ __Note:__ you could just copy the entire 'thumbs' folder (recommend), especially
 
 # Multiple HTPCs and MP-TVSeries #
 
-Mediaportal 1 does not have native support for sharing its databases across multiple clients, this is something scheduled for Mediaportal 2. There are options, the first, is the [multi-seat](http://wiki.team-mediaportal.com/UserGuides/CentralisedDatabases) Approach (not recommended/supported). The Second option, is below
+Mediaportal 1 does not have native support for sharing its databases across multiple clients, this is something scheduled for Mediaportal 2. There are options, the first, is the [multi-seat](https://www.team-mediaportal.com/wiki/x/-omf) Approach (not recommended/supported). The Second option, is below
 
 > ## Main HTPC ##
 
@@ -369,18 +364,18 @@ MP-TVSeries supports multiple languages, and you are welcome to contribute by up
   * Right click on the Series name and choose _update_
 
 > ## Update Language ##
-If you find a language has incorrect spelling, or missing some translation fields, you can update the appropriate .xml file in the [Language Folder](#Language.XML_(Files)). Please submit the updated file on the [forum](http://forum.team-mediaportal.com/my-tvseries-162/)
+If you find a language has incorrect spelling, or missing some translation fields, you can update the appropriate .xml file in the [Language Folder](#Language.XML_(Files)). Please submit the updated file on the [forum](https://forum.team-mediaportal.com/forums/my-tvseries.162/)
 
 > ## Add New Language ##
-  * Download the latest English XML [here](https://github.com/damienhaynes/mptvseries/tree/master/MP-TVSeries/Resources/Languages/en(us).xml)
-  * Rename en(us).xml to yourlanguage.xml
+  * Download the latest English XML [here](https://github.com/hounddog59/mptvseries/blob/4.8/MP-TVSeries/Resources/Languages/en-US.xml)
+  * Rename en-US.xml to yourlanguage.xml
   * Update All Fields Possible
-  * Submit the new xml to the [forum](http://forum.team-mediaportal.com/my-tvseries-162/) to be included in an upcoming build
+  * Submit the new xml to the [forum](https://forum.team-mediaportal.com/forums/my-tvseries.162/) to be included in an upcoming build
 ---
 
 # Edit Database #
 
-If you need to edit the MP-TVSeries database directly,you can download a SQLite tool, such as [sqlitebrowser](http://sqlitebrowser.org) and open the [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3) file.
+If you need to edit the MP-TVSeries database directly,you can download a SQLite tool, such as [sqlitebrowser](https://sqlitebrowser.org) and open the [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3) file.
 ---
 
 # Database Corruption #
@@ -392,7 +387,7 @@ The MP-TVSeries.log file will usually contain multiple events like the following
   * SQLiteClient:  cmd:sqlite3\_finalize err:CORRUPT detailed:database disk image is malformed query
 
 > ## Causes ##
-  * If you are using Mediaportal/MP-TVSeries in (unsupported and not recommended) [multi-seat mode](http://wiki.team-mediaportal.com/UserGuides/CentralisedDatabases), this will likely lead to database corruption if multiple clients write to the database at the same time
+  * If you are using Mediaportal/MP-TVSeries in (unsupported and not recommended) [multi-seat mode](https://www.team-mediaportal.com/wiki/x/-omf), this will likely lead to database corruption if multiple clients write to the database at the same time
   * Hard Shutdown of PC while MP-TVSeries is preforming a database operation, (i.e Power Loss)
   * PC Crash / Lockup / BSOD
   * Your just unlucky!
@@ -434,7 +429,7 @@ MP-TVSeries by default shows episode dates in YYYY-MM-DD format. To change this 
 
 
 > ## Use "String Replacements" To Resolve Weird filenames ##
-You might have made a typo in the filenames, are using cryptic/acronym based filenames or using a different language then what [thetvdb.com](http://thetvdb.com) uses to identify the TV Show. Instead of renaming a lot of files, you can simply use the _String Replacements_ system to fix these problems. You can find this in the _Import_ tab in MP-TVSeries plugin configuration.
+You might have made a typo in the filenames, are using cryptic/acronym based filenames or using a different language then what [thetvdb.com](https://thetvdb.com) uses to identify the TV Show. Instead of renaming a lot of files, you can simply use the _String Replacements_ system to fix these problems. You can find this in the _Import_ tab in MP-TVSeries plugin configuration.
 
 
 > ## Fan Art - View Disable Download ##
@@ -459,7 +454,7 @@ To change these views so it only shows episodes currently unwatched, you can [ed
 
 
 > ## Speed Up Import - Ignore Old Series ##
-If you have a large collection and notice it takes a while for the import process to run, you could tell MP-TVSeries to ignore some of your collection. You should only do this on old shows that are well and truley finished and are unlikely to be edited/changed at the [thetvdb.com](http://thetvdb.com)
+If you have a large collection and notice it takes a while for the import process to run, you could tell MP-TVSeries to ignore some of your collection. You should only do this on old shows that are well and truley finished and are unlikely to be edited/changed at the [thetvdb.com](https://thetvdb.com)
   * Load MP-TVSeries plugin Configuration
   * Click on the _Details_ Tab
   * Right Click an Old Series
