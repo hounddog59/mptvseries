@@ -1,6 +1,6 @@
 # MP-TVSeries community version – User Guide
 
-This guide covers the community version of MP-TVSeries for MediaPortal 1 (4.7.0.6). It explains what the plugin
+This guide covers the community version of MP-TVSeries for MediaPortal 1 (4.8.2.6). It explains what the plugin
 does and where to find each feature. Each section is short, so you can jump straight to the part you need.
 
 - [Getting started](#getting-started)
@@ -11,7 +11,11 @@ does and where to find each feature. Each section is short, so you can jump stra
 - [The Info menu](#the-info-menu)
 - [MP-TVSeries Configuration, tab by tab](#mp-tvseries-configuration-tab-by-tab)
 - [Fixing a wrongly matched show or episode](#fixing-a-wrongly-matched-show-or-episode)
-- [Trakt ratings](#trakt-ratings)
+- [Renaming your files](#renaming-your-files)
+- ["Needs your help" – shows a scan couldn't match](#needs-your-help--shows-a-scan-couldnt-match)
+- [Deleting several at once](#deleting-several-at-once)
+- [Trakt](#trakt)
+- [Updates](#updates)
 - [Torrent Search (with MyTorrents)](#torrent-search-with-mytorrents)
 - [Troubleshooting](#troubleshooting)
 - [Going back to the official version](#going-back-to-the-official-version)
@@ -78,7 +82,8 @@ ready-made views, click **Templates...**. To change one, click **Edit**.
 | All | Every series in your library. |
 | Favourites | Series you've marked as favourites. |
 | Unwatched | Series that still have episodes you haven't watched. |
-| **Recently Added** | **New in 4.7.0.6:** the series that have had episodes added in the last 7 days. Pick one to see just its new episodes. |
+| **Continue Watching** | Shows you've watched lately (the last 60 days – change it on the **General** tab) that still have unwatched episodes, the one you watched last at the top. |
+| **Recently Added** | The series that have had episodes added in the last 7 days. Pick one to see just its new episodes. |
 | Recently Added Episodes | The old style: one list of every episode added in the last 7 days. |
 | Latest | Episodes that have aired in the last 30 days. |
 | Continuing / Ended | Shows still being made, or shows that have finished. |
@@ -138,11 +143,41 @@ is handy when you're asking for help.
 - **To stop it happening again:** put a `<id>.tvdb` file in the show's folder (see
   [Naming your files](#naming-your-files)).
 
-## Trakt ratings
+## Renaming your files
 
-Community ratings for series, seasons and episodes come from Trakt. You don't need the Trakt plugin or a Trakt
-account. If ratings download slowly (everyone shares one allowance), use **Authorize with Trakt.tv (optional)...**
-on the Online Data tab to get your own. You can remove it at any time.
+In MP-TVSeries Configuration, right-click a show or season on the **Details** tab > **Rename files...** (or rename
+all your shows one by one). The show folder comes first, then the season folders and episode files, each with a
+tick box. Titles come from the online data; subtitles, `.nfo` files and thumbnails go with their episode, and the
+database is updated straight away – no rescan. **Undo the last rename** puts things back. Files MP-TVSeries hasn't
+matched are left alone. If you use MyTorrents, its naming styles are used, so both programs name things the same.
+
+## "Needs your help" – shows a scan couldn't match
+
+When an import can't match a show, it goes into the **Needs your help** list instead of a pop-up for each one.
+For each show: **Pick** one of the suggestions, **Search** with your own words, or **Skip** it for now (skipped
+files aren't offered again until you bring them back). Scans that run in MediaPortal save these for
+Configuration, so nothing pops up on the TV.
+
+## Deleting several at once
+
+On the **Details** tab, click **Tick several**, tick the shows, seasons or episodes, then **Delete ticked...**.
+**Delete several...** can tick the ones whose files are gone for you. Unmatched shows with no files left are
+removed automatically.
+
+## Trakt
+
+- **Ratings (built in):** community ratings for series, seasons and episodes come from Trakt. You don't need the
+  Trakt plugin or a Trakt account. If ratings download slowly (everyone shares one allowance), use
+  **Authorize with Trakt.tv (optional)...** on the Online Data tab to get your own. You can remove it at any time.
+- **Syncing watched flags (plugin):** to keep watched flags and ratings in step with Trakt (and across several
+  HTPCs), install **Trakt for MediaPortal** – the MP-TVSeries installer offers it as **Trakt Plugin**. Set it up
+  in MediaPortal: **Trakt** > **Settings** > **Account Settings** > **Authorize Application**, enter the code on
+  the Trakt website, then tick **MP-TVSeries** under the plugin's **Plugins** settings.
+
+## Updates
+
+From 4.8.2.6, MediaPortal's extension manager (**MediaPortal Configuration > Extensions**, or MPEInstaller) tells
+you when a newer version of MP-TVSeries is out, and can install it.
 
 ## Torrent Search (with MyTorrents)
 
@@ -154,7 +189,7 @@ its own settings and guide.
 
 | Problem | What to try |
 |---|---|
-| A show isn't found | Check the folder and file name, and try a `.tvdb` ID file. With TMDB, some documentaries aren't listed; enter a TheTVDB PIN or wait for the planned TVmaze backup. |
+| A show isn't found | Check the folder and file name, and try a `.tvdb` ID file. With TMDB, some documentaries aren't listed – these come from TVmaze when it has them, or enter a TheTVDB PIN. If it's in **Needs your help**, use **Search** there. |
 | An episode keeps coming back as "new" | Usually a special TheTVDB doesn't list. Correct its number on the Details tab. |
 | Pictures are wrong or missing | **Info** > **Fanart** or **Cycle Poster** in MediaPortal, or the pictures on the Details tab. Run an import to replace missing ones. |
 | Settings don't stick | Close MediaPortal before changing settings in Configuration. |

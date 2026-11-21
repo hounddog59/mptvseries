@@ -17,7 +17,7 @@
 
 MP-TVSeries is a popular TV Series plug-in for MediaPortal, an open-source media center application. It focuses on managing the user's TV Series library with minimal user interaction, allowing for a more user friendly and ease of use experience.
 
-The MP-TVSeries plugin will scan your hard drive (including network and removable drives) for video files, it then analyzes them by their path structures to determine if they are TV Shows. If the file(s) are recognized then the plugin will go online to thetvdb.com and retrieve information about them. You can then browse, manage and play your episodes from inside MediaPortal in a nice graphical layout.
+The MP-TVSeries plugin will scan your hard drive (including network and removable drives) for video files, it then analyzes them by their path structures to determine if they are TV Shows. If the file(s) are recognized then the plugin will go online and get information about them – free from TMDB with nothing to sign up for, or from TheTVDB if you have a TheTVDB subscriber PIN. You can then browse, manage and play your episodes from inside MediaPortal in a nice graphical layout.
 
 This Plugin does not play Live TV
 
@@ -44,32 +44,28 @@ If you require assitance its smart to include the log files with your post, you 
   * **Reproduce the issue** in MP-TVSeries, do what is needed to show the problem, reproduce the issue only
   * Close MediaPortal
   * A **MediaPortalLogs\_Date\_Time.zip** file will be automatically created on your desktop. Attach this file to your thread/post
+
+For a problem in MP-TVSeries Configuration (importing, renaming, settings), just attach **MP-TVSeries.log** from `C:\ProgramData\Team MediaPortal\MediaPortal\log`.
 ---
 
-# Integration with Social Media Websites #
+# Trakt.tv #
 
-MP-TVSeries optionally integrates with the [trakt.tv](https://trakt.tv) website, which are built around sharing with your friends what shows and movies you are into and watching.
+[Trakt.tv](https://trakt.tv) keeps a record of the shows you watch and can keep your watched flags and ratings in step across several HTPCs – handy if you have more than one, or need to start your database again. There are two separate parts, and you can use either or both.
 
-One of the advantages of  beeing connected to [trakt.tv](https://trakt.tv) is the syncronisation of your watch flags and ratings, which we recommend. This is very useful if you have multiple HTPC's, or if you need to start your tv series database from scratch.
+> ## Trakt ratings (built in) ##
+MP-TVSeries shows Trakt's community ratings for series, seasons and episodes by itself – you don't need the Trakt plugin or a Trakt account.
+  * Everyone using this version shares one Trakt allowance, so ratings can come in slowly when lots of people are busy.
+  * To get your own allowance: MP-TVSeries Configuration > **Online Data** tab > **Authorize with Trakt.tv (optional)...**, sign in to your free Trakt account on the page that opens and enter the code shown. You only do it once, and you can remove it any time. MP-TVSeries only reads ratings with it.
 
-You can use any or all of the sites at the same time.
-
-## Trakt.tv ##
-
-  * From version 2.8.1+, the Trakt.tv support will be moved to its own plugin called [Trakt for Mediaportal](https://github.com/trakt/Trakt-for-Mediaportal). This plugin will be included with the MP-TVSeries installer should you wish to install it or you can download MPEI package at any time.
-
-> ### Configuration After Install ###
-
-  * Load Mediaportal Configuration, Plugins.
-  * Load _Trakt_ which is under _Windows Plugins_
-  * Type in your trakt.tv username and password
-  * Check the box for MP-TVSeries and any optional plugin
-  * Click OK
-  <img src="https://cloud.githubusercontent.com/assets/16772925/20227301/1dde1de6-a84c-11e6-98ba-632cc61a3cfe.jpg" with="400" height="400">
+> ## Trakt for MediaPortal (plugin, optional) ##
+To sync your watched flags, ratings and collection with Trakt, and have what you watch recorded there, use the separate [Trakt for MediaPortal](https://github.com/trakt/Trakt-for-Mediaportal) plugin.
+  * The MP-TVSeries installer offers it as **Trakt Plugin** (ticked) and downloads it for you. You can also install it on its own from MediaPortal's extension list.
+  * To set it up: in MediaPortal open **Trakt** from the home screen > **Settings** > **Account Settings** > **Authorize Application**. Go to the address shown (or scan the QR code), sign in to Trakt and enter the code. There's no user name or password to type in.
+  * Then, under the plugin's **Plugins** settings, tick **MP-TVSeries** (and any other plugins you want synced).
 ---
 
 # File Naming Conventions #
-MP-TVSeries supports various naming conventions, if you want a perfect match without any user interaction, it's best to name the Series as it is shown on thetvdb.com. If the Show contains a : such as CSI: Miami you could use: _CSI Miami_ or _CSI- Miami_
+MP-TVSeries supports various naming conventions, if you want a perfect match without any user interaction, it's best to name the Series as it is shown on TheTVDB or TMDB. If the Show contains a : such as CSI: Miami you could use: _CSI Miami_ or _CSI- Miami_
 
 > ## Examples Of Supported Filenames ##
 Here are a few random examples which will parse.
@@ -91,7 +87,7 @@ If you have a series which has been rebooted, lets take _Battlestar Galatica_ fo
   * _Battlestar Galactica (1980) - S01E01.avi  (match as 1980's series)_
   * _Battlestar Galactica (2003) - S01E01.avi  (match as 2003 series)_
 
-If a series was already imported incorrectly in Mediaportal, highlight the series, press _F9_ or _Info_ on remote, then press _Force new online lookup for series_. This will prompt you to select a series or manually enter a search term.
+If a series was already imported incorrectly in Mediaportal, highlight the series, press _F9_ or _Info_ on remote, then press _Force new online lookup for series_. This will prompt you to select a series or manually enter a search term. Or, in MP-TVSeries Configuration, pick the show on the _Details_ tab and type the correct TVDB ID.
 
 > ## Mini-Series ##
 A standalone Mini Series, like _Dune_, will usually have the _part 1_, _part 2_ etc listed at _Season 1_, _Episode 1_, _Episode 2_ etc on TheTVDB. If for example, the Mini Series lead to a TV Show, such as _BattleStar Galactica (2003)_ that Mini Series may be listed in _Specials / Season 0_.
@@ -124,7 +120,7 @@ We recommend in this scenario to join the files together, Click the following li
 
 > ## Episodes with Air Date ##
 MP-TVSeries now supports AirDate parsing, matched up from episodes listed at [thetvdb.com](https://thetvdb.com)
-Some examples below are episodes which will now parse by default - Note: requires atleast v2.9.3 for MP 1.1 or v3.0.5 for MP 1.2B
+Some examples below are episodes which will parse by default
 
   * _Conan.(2010).2010.11.08.Baa.Baa.Blackmail.mkv_
   * _Conan.(2010).2011.07.20.Hell.Hath.No.Cell.Phone.Reception.mkv_
@@ -166,8 +162,8 @@ To download all the available information for your Series, including Episodes yo
 
 > ## Option 1: Enable in Configuration ##
   * Load MP-TVSeries Plugin Configuration
-  * _OnlineData Tab_
-  * Check the box __Download Episode Information for the whole Series__
+  * _Online Data_ tab
+  * Tick __Download Episode information for the whole series__
   * The next import may take a while as it downloads all the available information for all your imported Series_
   <img src="https://cloud.githubusercontent.com/assets/16772925/20229406/7df7986a-a856-11e6-8c7d-26cedd030d13.jpg" with="150" height="100">
 
@@ -200,7 +196,7 @@ _Note: MP-TVSeries v2.7+ will show a FanArt episode image if there is no episode
   * Click __UPDATE__
 
 > ## Importing Videos Not At TheTVDB ##
-MP-TVSeries is not intended for this scenario, but there is a solution you can use. If you have videos that you want to show in MP-TVSeries, and its not appropriate to create it at [thetvdb.com](https://thetvdb.com), such as personal movies recorded on video cameras etc, you can try the following - Recommend that you use MP-TVSeries v2.9 or higher.
+MP-TVSeries is not intended for this scenario, but there is a solution you can use. If you have videos that you want to show in MP-TVSeries, and its not appropriate to create it at [thetvdb.com](https://thetvdb.com), such as personal movies recorded on video cameras etc, you can try the following.
 
   * Create proper filenames with season and episode syntax e.g.
     * _My Trip to Fiji - S01E01.avi_
@@ -208,8 +204,8 @@ MP-TVSeries is not intended for this scenario, but there is a solution you can u
     * _My Trip to Fiji - S01E03.avi_
     * _My Trip to Fiji - S01E04.avi_
 
-  * Load Media Portal Configuration, MP-TVSeries plugin.
-  * Start the Import Wizard, and select Skip when no match is found for the _My Trip to Fiji_
+  * Load MP-TVSeries Configuration.
+  * Run an import. _My Trip to Fiji_ can't be matched, so it goes into the **Needs your help** list - choose **Skip** for it
   * Finish Import
   * Select _Details_ tab.
   * Find your Series, Enter Series and Episode info (This will create USEREDIT fields in database)
@@ -261,40 +257,35 @@ The following are the locations of the files and folders used by MP-TVSeries, sh
 
 > ## MP-TVSeries.dll ##
 This is the plugin itself which is used by Mediaportal, located in
-| x86 | C:\Program Files \Team MediaPortal\MediaPortal\plugins\Windows |
+| 64-bit MediaPortal (1.39 and later) | C:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows |
 |:----|:---------------------------------------------------------------|
-| x64 | C:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows |
+| 32-bit MediaPortal | C:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows |
 
 > ## TVSeriesDatabase4.db3 ##
 This is the database file, where your MP-TVSeries data is stored. its recommended to backup this file incase you experience database corruption.
-| XP |  C:\Documents and Settings\All Users\Application Data\Team MediaPortal\MediaPortal\database |
-|:---|:--------------------------------------------------------------------------------------------|
-| Vista, Win7 & Win10 |  C:\ProgramData\Team MediaPortal\MediaPortal\database                      |
+| Windows | C:\ProgramData\Team MediaPortal\MediaPortal\database |
+|:---|:---|
 
 > ## MPTVSeriesBanners and Fan Art (Folders) ##
 These two folders inside the thumbs folder are where the artwork is stored.
-| XP |  C:\Documents and Settings\All Users\Application Data\Team MediaPortal\MediaPortal\thumbs |
-|:---|:------------------------------------------------------------------------------------------|
-| Vista, Win7 & Win10 |  C:\ProgramData\Team MediaPortal\MediaPortal\thumbs                      |
+| Windows | C:\ProgramData\Team MediaPortal\MediaPortal\thumbs |
+|:---|:---|
 
 > ## MP-TVSeries.log ##
 This file contains a log of activities in the MP-TVSeries plugin, which is useful for diagnostic purposes
-| XP |  C:\Documents and Settings\All Users\Application Data\Team MediaPortal\MediaPortal\log |
-|:---|:---------------------------------------------------------------------------------------|
-| Vista, Win7 & Win10 |  C:\ProgramData\Team MediaPortal\MediaPortal\log                      |
+| Windows | C:\ProgramData\Team MediaPortal\MediaPortal\log |
+|:---|:---|
 
 > ## Language.XML (Files) ##
 This directory contains all the language files, in XML format that can be used in MP-TVSeries
-| XP |  C:\Documents and Settings\All Users\Application Data\Team MediaPortal\Mediaportal\language\MP-TVSeries\ |
-|:---|:---------------------------------------------------------------------------------------------------------|
-| Vista, Win7 & Win10 |  C:\ProgramData\Team MediaPortal\Mediaportal\language\MP-TVSeries\                      |
+| Windows | C:\ProgramData\Team MediaPortal\Mediaportal\language\MP-TVSeries\ |
+|:---|:---|
 
 > ## Series Cache (Files) ##
-From MP-TVSeries v2.9+, there will be caching of the files downloaded from [theTVDB.com](https://thetvdb.com) to speed up your import time. Cached series are only removed if the online API reports newer information is available.
+MP-TVSeries keeps a cache of the show information it downloads, to speed up imports. Cached series are only replaced when the online source reports newer information.
 
-| XP |  C:\Documents and Settings\All Users\Application Data\Team MediaPortal\Mediaportal\MP-TVSeries\Cache\ |
-|:---|:------------------------------------------------------------------------------------------------------|
-| Vista, Win7 & Win10 |  C:\ProgramData\Team MediaPortal\Mediaportal\MP-TVSeries\Cache\                      |
+| Windows | C:\ProgramData\Team MediaPortal\Mediaportal\MP-TVSeries\Cache\ |
+|:---|:---|
 
 # MP-TVSeries Registry Location #
 
@@ -310,15 +301,15 @@ __Note:__ if you are using the default path, this will be empty.
 
 If you want to backup your MP-TVSeries data, or migrate it to a new computer you need to backup/restore the following.
 
-  * Backup [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3)
-  * Backup [MPTVSeriesBanners and Fan Art (Folders)](#MPTVSeriesBanners and Fan Art (Folders)). 
+  * Backup [TVSeriesDatabase4.db3](#tvseriesdatabase4db3)
+  * Backup [MPTVSeriesBanners and Fan Art (Folders)](#mptvseriesbanners-and-fan-art-folders). 
 
 __Note:__ you could just copy the entire 'thumbs' folder (recommend), especially if you have ClearART etc are doing the same process with MovingPictures.
 ---
 
 # Multiple HTPCs and MP-TVSeries #
 
-Mediaportal 1 does not have native support for sharing its databases across multiple clients, this is something scheduled for Mediaportal 2. There are options, the first, is the [multi-seat](https://www.team-mediaportal.com/wiki/x/-omf) Approach (not recommended/supported). The Second option, is below
+Mediaportal 1 does not have native support for sharing its databases across multiple clients. There are options, the first, is the [multi-seat](https://www.team-mediaportal.com/wiki/x/-omf) Approach (not recommended/supported). The Second option, is below
 
 > ## Main HTPC ##
 
@@ -333,8 +324,8 @@ Mediaportal 1 does not have native support for sharing its databases across mult
 Its recommeded to have the same version of the MP-TVSeries plugin as your Main HTPC
 
   * Close Mediaporal
-  * From the main HTPC, copy its [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3) to your additional HTPCs, overwriting.
-  * From the main HTPC, copy its [MPTVSeriesBanners and Fan Art (Folders)](#MPTVSeriesBanners_and_Fan_Art_(Folders)) to your additional HTPCs, overwriting. Note you could just copy the entire thumbs folder (recommend), especially if you are doing the same process with MovingPictures etc.
+  * From the main HTPC, copy its [TVSeriesDatabase4.db3](#tvseriesdatabase4db3) to your additional HTPCs, overwriting.
+  * From the main HTPC, copy its [MPTVSeriesBanners and Fan Art (Folders)](#mptvseriesbanners-and-fan-art-folders) to your additional HTPCs, overwriting. Note you could just copy the entire thumbs folder (recommend), especially if you are doing the same process with MovingPictures etc.
   * Open Mediaportal and you should have a working MP-TVSeries. When a show is watched on 1 HTPC it will be replicated to the others when it next syncs with Trakt.tv
 
 > ### Advantages ###
@@ -350,21 +341,20 @@ Its recommeded to have the same version of the MP-TVSeries plugin as your Main H
 MP-TVSeries supports multiple languages, and you are welcome to contribute by updating or adding a new language. There are also an option to select different language for different series.
 
 > ## Configuration for one language ##
-  * Launch the MP-TVSeries Plugin Configuration
-  * Click __General__ Tab
-  * Drop down the Language box, choose your _language_
-  * Close MediaPortal
+  * Launch MP-TVSeries Configuration (close MediaPortal first)
+  * Click the __Online Data__ tab
+  * Drop down the __Language__ box and choose your _language_ (this is the language of the show information; the menus follow MediaPortal's own language)
 
-> ## Configuraiton for different languages for different series ##
-  * Lunch the MP-TVSeries Plugin Configuration
-  * Click __General__ tab
-  * Enable the __Override Language for Series__ checkbox
+> ## Configuration for different languages for different series ##
+  * Launch MP-TVSeries Configuration
+  * Click the __Online Data__ tab
+  * Tick __Override language per series__
   * Click __Details__ tab
   * Select a Series and change the Laguage combobox to you're prefered _language_
   * Right click on the Series name and choose _update_
 
 > ## Update Language ##
-If you find a language has incorrect spelling, or missing some translation fields, you can update the appropriate .xml file in the [Language Folder](#Language.XML_(Files)). Please submit the updated file on the [forum](https://forum.team-mediaportal.com/forums/my-tvseries.162/)
+If you find a language has incorrect spelling, or missing some translation fields, you can update the appropriate .xml file in the [Language Folder](#languagexml-files). Please submit the updated file on the [forum](https://forum.team-mediaportal.com/forums/my-tvseries.162/)
 
 > ## Add New Language ##
   * Download the latest English XML [here](https://github.com/hounddog59/mptvseries/blob/4.8/MP-TVSeries/Resources/Languages/en-US.xml)
@@ -375,7 +365,7 @@ If you find a language has incorrect spelling, or missing some translation field
 
 # Edit Database #
 
-If you need to edit the MP-TVSeries database directly,you can download a SQLite tool, such as [sqlitebrowser](https://sqlitebrowser.org) and open the [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3) file.
+If you need to edit the MP-TVSeries database directly,you can download a SQLite tool, such as [sqlitebrowser](https://sqlitebrowser.org) and open the [TVSeriesDatabase4.db3](#tvseriesdatabase4db3) file.
 ---
 
 # Database Corruption #
@@ -398,33 +388,33 @@ There are 2 options, restore from a backup file, start a new database.
 __Note:__ Artwork that has already been downloaded will be automatically re-used and not re-downloaded.
 
 > ### Option 1 - Restore from Backup File ###
-If you installed MP-TVSeries from the installer, it would have made a backup database in the below directory location. You could take the backup file from this location and overwrite the corrupt [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3). If the backups are extremely old, it may be wiser to use Option 2
+If you installed MP-TVSeries from the installer, it would have made a backup database in the below directory location. You could take the backup file from this location and overwrite the corrupt [TVSeriesDatabase4.db3](#tvseriesdatabase4db3). If the backups are extremely old, it may be wiser to use Option 2
 
-| XP | C:\Documents and Settings\All Users\Application Data\Team MediaPortal\MediaPortal\database\TVSeries\_Backup\ |
-|:---|:-------------------------------------------------------------------------------------------------------------|
-| Vista, Win7 & Win10 | C:\ProgramData\Team MediaPortal\MediaPortal\database\TVSeries\_Backup\                                       |
+| Windows | C:\ProgramData\Team MediaPortal\MediaPortal\database\MP-TVSeries\_Backup\ |
+|:---|:---|
 
 > ### Option 2 - New Database ###
 
-  * (Optional) To retain your watch flags, and your NOT currently synced with [trakt.tv](#Trakt.tv), _Export Watched Flags.._ from the MP-TVSeries plugin configuration, General Tab
+  * (Optional) To retain your watch flags, and your NOT currently synced with [trakt.tv](#trakttv), _Export Watched Flags.._ from the MP-TVSeries plugin configuration, General Tab
   <img src="https://cloud.githubusercontent.com/assets/16772925/20230428/37fbc286-a85c-11e6-842b-1a4047fefc99.jpg" with="150" height="100"> 
-  * Delete your database file [TVSeriesDatabase4.db3](#TVSeriesDatabase4.db3)
+  * Delete your database file [TVSeriesDatabase4.db3](#tvseriesdatabase4db3)
   * TVSeriesDatabase4.db3 will be re-created next time mediportal or the MP-TVSeries plugin configuration executes
   * Reimport your shows
-  * (Optional) _Import Watched Flags_ after import is complete, or resetup your [trakt.tv](#Trakt.tv) account.
+  * (Optional) _Import Watched Flags_ after import is complete, or resetup your [trakt.tv](#trakttv) account.
 ---
 
 # Tips And Tricks #
 
 > ## Delete From Disk, Database, Disk & Database ##
 This lets you delete files or just entries from the database so the can be rescanned
- * Enable _Allow user to delete files from context menu_ in the general tab, in MP-TVSeries Plugin Configuration
+ * Enable _Allow user to delete files from the GUI context menu_ on the General tab of MP-TVSeries Configuration
  * Select a Series Season or Episode, press 0 on remote or keyboard and select the option
+ * To delete many at once, use the _Details_ tab of MP-TVSeries Configuration: **Tick several**, then **Delete ticked...**
 
 
 > ## Show Date In Regional Format ##
 MP-TVSeries by default shows episode dates in YYYY-MM-DD format. To change this to use your regional settings
- * Enable _Use regional settings to display dates_ in the general tab, in MP-TVSeries Plugin Configuration
+ * Enable _Use Regional Settings to Display Dates_ on the General tab of MP-TVSeries Configuration
  * You can further tweak this by changing the Short Date syntax settings in Control Panel, Regional settings.
 
 
@@ -440,7 +430,7 @@ You might have made a typo in the filenames, are using cryptic/acronym based fil
   * Press F9 on Keyboard, INFO on remote to Delete a FanArt
 
 > ## Modify 'Recently Added' 'Latest Aired' Views To Exclude Watched Episodes ##
-To change these views so it only shows episodes currently unwatched, you can [edit](#Edit_Database) the database, and modify the query to below (Views table)
+To change these views so it only shows episodes currently unwatched, you can [edit](#edit-database) the database, and modify the query to below (Views table)
 
   * Latest Aired Unwatched
 ```
@@ -459,10 +449,6 @@ If you have a large collection and notice it takes a while for the import proces
   * Click on the _Details_ Tab
   * Right Click an Old Series
   * Select _Ignore on Scan_
-
-
-> ## Speed Up Import - Upgrade to MP-TVSeries 2.9+ ##
-MP-TVSeries 2.9+ has significantly faster import times compared to MP-TVSeries 2.8 and below due to a new [Caching](#Series_Cache_%28Files%29) feature. If you have a large collection, this is highly recommended.
 
 
 > ## Speed Up Series Browsing - Change Layout ##

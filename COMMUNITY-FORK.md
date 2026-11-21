@@ -1,4 +1,4 @@
-# MP-TVSeries 4.7 – community version: free show information, or TheTVDB with your PIN
+# MP-TVSeries 4.8 – community version: free show information, or TheTVDB with your PIN
 
 This is a community version of MP-TVSeries for MediaPortal 1. It is **not** the official release from the
 MediaPortal Plugin Team. Installing it is entirely your choice, and it changes nothing for anyone who doesn't.
@@ -46,18 +46,34 @@ skin updates).
   Trakt allowance, so ratings can download slowly when many people are busy. "Authorize with Trakt.tv" (free
   Trakt account) gives you your own allowance. MP-TVSeries only reads ratings with it.
 
-## New in 4.7.0.6
+## New in 4.8
 
-- **Recently Added lists series.** The Recently Added view now shows the series that have had episodes added
-  in the last 7 days, instead of one long list of episodes. Pick a series to see just its new episodes.
-  Existing databases are switched over automatically; if you'd changed the view yourself, it's left alone.
-- The old flat list is still available: add the **Recently Added Episodes** view from the view templates on the
-  **Views** tab of MP-TVSeries Configuration.
-- **Torrent Search is near the top of the Info menu** (it was about 15th), when the MyTorrents plugin is
-  installed and enabled.
-- Choosing a series' fanart in MediaPortal no longer gives an error.
+- **Rename your files** from MP-TVSeries Configuration: right-click a show or season on the **Details** tab >
+  **Rename files...**. Show folder, season folders and episode files, with titles from the online data;
+  subtitles, `.nfo` files and thumbnails go with their episode, the database follows (no rescan), and there's
+  **Undo the last rename**.
+- **Renamed or moved files keep their details** – after a big rename, the next import doesn't read every file
+  with MediaInfo again.
+- **"Needs your help"** – shows a scan can't match are collected in one list (Pick / Search / Skip) instead of a
+  pop-up for each. Scans in MediaPortal save them for Configuration instead of popping up on the TV.
+- **Awkward episode numbers** – E66 in a Season 01 folder, or shows whose seasons are years on TheTVDB
+  (MythBusters, Looney Tunes), are worked out. Guesses are marked "[best guess – please check]" and never taken
+  on their own.
+- **Import folders** – unticked folders are skipped and keep their episodes; right-click a folder to scan just
+  that one; unticking "Scan remote shares every … minutes" really stops it.
+- **Continue Watching** and a better **Recently Added** (see below), and MediaPortal reopens the show and season
+  you were in.
+- **Delete several** – on the Details tab, **Tick several** and **Delete ticked...**; unmatched shows with no
+  files left are removed automatically.
+- **Configuration window** – Save / Save and close on every tab, it fits smaller screens, and it opens on the tab
+  you used last.
+- **Update notices** – from 4.8.2.6, MediaPortal's extension manager tells you when a newer version is out.
+- Recently Added lists the series with new episodes (pick one to see just its new episodes); the old flat list is
+  still there as the **Recently Added Episodes** view template. **Torrent Search** is at the top of the Info menu
+  when MyTorrents is installed.
 
-See the **[User Guide](docs/User-Guide.md)** for where to find everything.
+The full list of changes, version by version, is on the [Releases](https://github.com/hounddog59/mptvseries/releases)
+page. See the **[User Guide](docs/User-Guide.md)** for where to find everything.
 
 ## Improvements
 
@@ -193,7 +209,7 @@ Configuration (Parsing Expressions), and there's an option there to take the sho
 
 ## Installing
 
-1. Close MediaPortal and MP-TVSeries Configuration.
+1. You need MediaPortal 1.32 or later (it is tested on 1.39). Close MediaPortal and MP-TVSeries Configuration.
 2. Back up `C:\ProgramData\Team MediaPortal\MediaPortal\Database\TVSeriesDatabase4.db3`.
 3. Download the `.mpe1` file from the [Releases](https://github.com/hounddog59/mptvseries/releases) page.
    If Windows blocked it: right-click it > Properties > tick **Unblock** > OK.
@@ -210,8 +226,7 @@ official team releases an update later, uninstall this version first to install 
 
 ## Planned
 
-- **A guide to every feature** (wiki pages) and hover pop-ups explaining each setting in MP-TVSeries
-  Configuration.
+- More testing of the TVmaze backup.
 
 ## Credits
 
